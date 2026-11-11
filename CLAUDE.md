@@ -35,6 +35,14 @@ src/server/seal/         Merkle, lots, ancrage RFC 3161
 src/server/system/       jobs, boîte de réception, cron
 packages/verify/         outil de vérification open source
 
+## Base de données (conventions établies par PL-102)
+- Deux connexions : `DATABASE_URL` (rôle applicatif `prooflayer_app`, pooler en mode transaction, port 6543) pour l'exécution ;
+  `DIRECT_DATABASE_URL` (rôle de migration `postgres`, connexion directe, port 5432) pour les migrations et les données de démonstration.
+- Chaque dossier de `prisma/migrations/` contient `migration.sql` et son retour arrière `down.sql`. Ne jamais modifier une migration appliquée.
+- Le client Prisma est généré dans `src/generated/prisma` (non versionné) : `pnpm db:generate` avant typecheck et build.
+- `pnpm db:check` rejoue application, retour arrière et rejeu sur une base jetable (`DB_CHECK_CONFIRM=jetable`).
+- Projet Supabase : `prooflayer`, région eu-central-1 (Francfort).
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**
