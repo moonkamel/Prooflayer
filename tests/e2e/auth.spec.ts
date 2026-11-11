@@ -17,7 +17,8 @@ import { E2E_PASSWORD } from "./helpers/env";
 import { waitForEmailLink } from "./helpers/outbox";
 
 // Parcours en série : chacun ouvre plusieurs sessions et les limites de débit de Better Auth s'appliquent par IP.
-test.describe.configure({ mode: "serial" });
+// Délai allongé : un parcours avec 2FA peut attendre jusqu'à 30 s une nouvelle fenêtre TOTP avant de se reconnecter.
+test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 test("inscription, vérification de l'email, connexion et déconnexion", async ({ page }) => {
   const email = uniqueEmail("signup");
