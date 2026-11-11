@@ -83,7 +83,17 @@ jobs:
       - run: pnpm db:migrate
       - name: Mot de passe du rôle applicatif (base jetable)
         run: psql "$DIRECT_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE prooflayer_app PASSWORD 'ci-only'"
-      - run: pnpm exec playwright install --with-deps chromium
+      # Navigateur sans dépendre des dépôts apt d'Ubuntu (résolution DNS défaillante sur les runners, nov. 2026) :
+      # Google Chrome préinstallé sur l'image GitHub, sinon Chromium de Playwright, sans paquets système.
+      - name: Navigateur pour Playwright
+        timeout-minutes: 5
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            pnpm exec playwright install chromium
+          fi
       - run: pnpm build
       - run: pnpm test:e2e
 
