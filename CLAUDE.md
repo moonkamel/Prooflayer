@@ -120,6 +120,15 @@ packages/verify/         outil de vérification open source
 - Écrans : `/systems` (registre) et `/systems/[id]` (écran B : Vue, Changements, Historique). Un onglet ajouté plus tard
   (Contrôles, Preuves, Sources, Packs) se déclare dans `src/app/(app)/systems/[id]/layout.tsx`.
 
+## Moteur de classification (conventions établies par PL-202)
+- `src/server/classify/` : `answers.ts` (schéma Zod des réponses), `engine.ts` (`classify(answers, ruleset)`, fonction
+  pure, version `CURRENT_RULESET`), `cases.ts` (cas nommés et résultats attendus, relus par l'avocat partenaire).
+- Ordre des règles R1 à R9 et rôle (Art. 3(3), 25(1)(a) à (c), sinon déployeur) : prompt-type de PL-202 au §9.4.
+  Chaque règle évaluée est tracée (`ruleId`, `answerKey`, `articleRef`, `outcome`, « CONTINUE » si elle ne conclut pas).
+- Toute évolution des règles crée une nouvelle version : l'ancienne reste disponible pour les classifications signées.
+  Un cas ajouté ou corrigé se fait d'abord dans `cases.ts`.
+- `pnpm test:classify` (job CI `checks`) exige 100 % de couverture des branches de `src/server/classify/`.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**
