@@ -1,0 +1,99 @@
+{
+  "common": {
+    "appName": "ProofLayer",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "submit": "Valider",
+    "loading": "Un instant…",
+    "genericError": "Une erreur est survenue. Réessayez.",
+    "backToSignIn": "Retour à la connexion"
+  },
+  "signUp": {
+    "title": "Créer mon espace",
+    "name": "Nom complet",
+    "passwordHint": "12 caractères au minimum.",
+    "submit": "Créer mon espace",
+    "withGoogle": "Continuer avec Google",
+    "haveAccount": "Déjà un compte ?",
+    "signIn": "Se connecter",
+    "checkEmail": "Un email de vérification vient d'être envoyé à {email}. Ouvrez le lien qu'il contient pour activer votre compte."
+  },
+  "signIn": {
+    "title": "Connexion",
+    "submit": "Se connecter",
+    "withGoogle": "Continuer avec Google",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "signUp": "Créer mon espace",
+    "invalidCredentials": "Adresse email ou mot de passe incorrect.",
+    "emailNotVerified": "Votre adresse email n'est pas encore vérifiée. Un nouveau lien vient de vous être envoyé."
+  },
+  "verifyEmail": {
+    "title": "Adresse email vérifiée",
+    "done": "Votre adresse email est vérifiée. Vous pouvez continuer.",
+    "invalid": "Ce lien de vérification est invalide ou expiré. Connectez-vous pour en recevoir un nouveau.",
+    "continue": "Continuer"
+  },
+  "forgotPassword": {
+    "title": "Mot de passe oublié",
+    "intro": "Indiquez votre adresse email : si un compte existe, vous recevrez un lien de réinitialisation.",
+    "submit": "Envoyer le lien",
+    "sent": "Si un compte correspond à cette adresse, un lien de réinitialisation vient d'être envoyé."
+  },
+  "resetPassword": {
+    "title": "Nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "submit": "Enregistrer",
+    "done": "Votre mot de passe est modifié. Vos autres sessions ont été fermées.",
+    "invalid": "Ce lien de réinitialisation est invalide ou expiré."
+  },
+  "twoFactorChallenge": {
+    "title": "Double authentification",
+    "intro": "Saisissez le code à 6 chiffres affiché par votre application d'authentification.",
+    "code": "Code",
+    "submit": "Vérifier",
+    "useBackupCode": "Utiliser un code de secours",
+    "useTotp": "Utiliser l'application d'authentification",
+    "backupCode": "Code de secours",
+    "invalidCode": "Code incorrect."
+  },
+  "twoFactorSetup": {
+    "title": "Activer la double authentification",
+    "required": "La double authentification est obligatoire pour les rôles owner et admin. Activez-la pour continuer.",
+    "optional": "Protégez votre compte par un second facteur.",
+    "confirmPassword": "Confirmez votre mot de passe pour commencer.",
+    "start": "Commencer",
+    "scan": "Scannez ce QR code avec votre application d'authentification, ou saisissez la clé ci-dessous.",
+    "secretLabel": "Clé de configuration",
+    "enterCode": "Saisissez le code à 6 chiffres affiché par l'application.",
+    "verify": "Activer",
+    "backupTitle": "Codes de secours",
+    "backupIntro": "Conservez ces codes en lieu sûr. Chacun permet une seule connexion si vous perdez l'accès à votre application. Ils ne seront plus affichés.",
+    "backupDone": "J'ai conservé mes codes",
+    "enabled": "La double authentification est active."
+  },
+  "account": {
+    "title": "Mon profil",
+    "twoFactorTitle": "Double authentification",
+    "twoFactorOn": "Active",
+    "twoFactorOff": "Inactive",
+    "enableTwoFactor": "Activer",
+    "sessionsTitle": "Sessions ouvertes",
+    "sessionCurrent": "Cette session",
+    "sessionCreated": "Ouverte le {date}",
+    "sessionUnknownDevice": "Appareil inconnu",
+    "revoke": "Fermer",
+    "revokeOthers": "Fermer toutes les autres sessions",
+    "signOut": "Se déconnecter"
+  },
+  "emails": {
+    "verify": {
+      "subject": "Vérifiez votre adresse email",
+      "body": "Bonjour {name},\n\nPour activer votre compte ProofLayer, ouvrez ce lien :\n{url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet email."
+    },
+    "resetPassword": {
+      "subject": "Réinitialisation de votre mot de passe",
+      "body": "Bonjour {name},\n\nPour choisir un nouveau mot de passe, ouvrez ce lien, valable une heure :\n{url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé."
+    }
+  }
+}

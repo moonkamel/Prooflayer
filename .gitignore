@@ -25,3 +25,6 @@ blob-report/
 .DS_Store
 *.log
 .vercel/
+
+# Boîte d'envoi locale des emails (transport outbox)
+.outbox/

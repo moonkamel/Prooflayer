@@ -1,4 +1,6 @@
 allowBuilds:
+  "@parcel/watcher": false
   "@prisma/engines": false
+  "@swc/core": false
   esbuild: false
   prisma: false
