@@ -1,0 +1,27 @@
+# Dépendances
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Client Prisma généré
+src/generated/
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Environnement : jamais de secret dans le dépôt
+.env
+.env.*
+!.env.example
+
+# Divers
+.DS_Store
+*.log
+.vercel/

@@ -1,0 +1,13 @@
+.next/
+node_modules/
+coverage/
+playwright-report/
+test-results/
+src/generated/
+pnpm-lock.yaml
+next-env.d.ts
+# Spécification de référence : copie conforme, jamais reformatée.
+docs/cahier-des-charges.md
+# Recopié tel quel depuis le §4.3.2 ; formaté par `prisma format` le cas échéant, pas par Prettier.
+prisma/schema.prisma
+CLAUDE.md

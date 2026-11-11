@@ -1,0 +1,650 @@
+// schema.prisma — ProofLayer, modèle de données MVP
+// Convention : toute table métier porte orgId (isolation RLS, voir §4.3.3).
+
+// Prisma 7+ : les URL de connexion vivent dans prisma.config.ts (migrations)
+// et dans l'adaptateur passé à PrismaClient (exécution), plus dans ce fichier.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────── Identité et organisation (tables gérées par Better Auth) ─────────────
+
+model User {
+  id               String    @id
+  email            String    @unique
+  name             String
+  emailVerified    Boolean   @default(false)
+  twoFactorEnabled Boolean   @default(false)
+  locale           String    @default("fr")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  members          Member[]
+}
+
+model Session {
+  id                   String   @id
+  userId               String
+  token                String   @unique
+  expiresAt            DateTime
+  activeOrganizationId String?
+  ipAddress            String?
+  userAgent            String?
+  createdAt            DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id          String   @id
+  userId      String
+  providerId  String // "credential", "google", "microsoft"
+  accountId   String
+  password    String? // hachage, jamais en clair
+  accessToken String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Organization {
+  id                String              @id
+  name              String
+  slug              String              @unique
+  country           String              @default("FR")
+  employeeBand      String? // "50-249", "250-749" : détermine le statut PME / SMC
+  createdAt         DateTime            @default(now())
+  members           Member[]
+  invitations       Invitation[]
+  systems           AiSystem[]
+  integrations      Integration[]
+  evidenceItems     EvidenceItem[]
+  sealBatches       SealBatch[]
+  auditPacks        AuditPack[]
+  apiKeys           ApiKey[]
+  subscription      Subscription?
+  encryptionKey     OrgEncryptionKey?
+}
+
+enum OrgRole {
+  owner
+  admin
+  contributor
+  auditor
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  userId         String
+  role           OrgRole
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  email          String
+  role           OrgRole
+  status         String       @default("pending")
+  expiresAt      DateTime
+  inviterId      String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+}
+
+// ───────────── Registre et classification ─────────────
+
+enum AiActRole {
+  PROVIDER
+  DEPLOYER
+  IMPORTER
+  DISTRIBUTOR
+}
+
+enum RiskTier {
+  UNCLASSIFIED
+  NOT_AI_SYSTEM
+  OUT_OF_SCOPE
+  PROHIBITED
+  HIGH_RISK
+  HIGH_RISK_EXEMPT_ART6_3
+  LIMITED_TRANSPARENCY
+  MINIMAL
+}
+
+enum SystemStatus {
+  DESIGN
+  DEVELOPMENT
+  PRODUCTION
+  RETIRED
+}
+
+model AiSystem {
+  id                   String               @id @default(cuid())
+  orgId                String
+  name                 String
+  slug                 String
+  intendedPurpose      String // finalité prévue, Art. 3(12)
+  description          String?
+  role                 AiActRole            @default(PROVIDER)
+  status               SystemStatus         @default(DEVELOPMENT)
+  riskTier             RiskTier             @default(UNCLASSIFIED) // dénormalisé depuis la classification courante
+  annexIIIPoints       String[] // ex. ["4(a)"]
+  placedOnMarketAt     DateTime? // base de l'analyse Art. 111(2)
+  ownerUserId          String
+  oversightOwnerUserId String? // responsable du contrôle humain, Art. 14
+  vendorName           String? // rôle déployeur : fournisseur tiers
+  models               Json // [{ name, provider, version, isGpai }]
+  dataCategories       String[]
+  monitored            Boolean              @default(false) // compte dans la limite du plan
+  classificationStale  Boolean              @default(false)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  archivedAt           DateTime?
+  org                  Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  classifications      Classification[]
+  designChanges        DesignChange[]
+  controlInstances     ControlInstance[]
+  resourceLinks        SystemResourceLink[]
+  auditPacks           AuditPack[]
+
+  @@unique([orgId, slug])
+  @@index([orgId, riskTier])
+}
+
+enum ClassificationStatus {
+  DRAFT
+  SIGNED
+  SUPERSEDED
+}
+
+model Classification {
+  id                 String               @id @default(cuid())
+  orgId              String
+  systemId           String
+  rulesetVersion     String // ex. "2026.11.0"
+  answers            Json // réponses brutes au questionnaire
+  tier               RiskTier
+  role               AiActRole
+  annexIIIPoints     String[]
+  art63Conditions    String[] // sous-ensemble de ["a","b","c","d"]
+  involvesProfiling  Boolean              @default(false)
+  reasoning          Json // trace : [{ ruleId, answerKey, articleRef, outcome }]
+  status             ClassificationStatus @default(DRAFT)
+  signedByUserId     String?
+  signedByTitle      String?
+  signedAt           DateTime?
+  signatureStatement String?
+  createdAt          DateTime             @default(now())
+  system             AiSystem             @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, systemId, createdAt(sort: Desc)])
+}
+
+model DesignChange {
+  id            String   @id @default(cuid())
+  orgId         String
+  systemId      String
+  occurredAt    DateTime
+  summary       String
+  isSignificant Boolean? // appréciation Art. 111(2) et Art. 3(23), null = à qualifier
+  evidenceId    String? // release ou PR à l'origine
+  qualifiedBy   String?
+  createdAt     DateTime @default(now())
+  system        AiSystem @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, systemId, occurredAt(sort: Desc)])
+}
+
+// ───────────── Bibliothèque de contrôles (globale, sans orgId) ─────────────
+
+enum AutomationLevel {
+  AUTOMATED
+  SEMI_AUTOMATED
+  MANUAL
+}
+
+model ControlDefinition {
+  id             String            @id @default(cuid())
+  key            String // "AIA-15-02"
+  libraryVersion String // "2026.11.0"
+  articleRef     String // "Art. 15(1)"
+  pack           String // "A", "B", "C", "D"
+  title          Json // { fr, en }
+  statement      Json // énoncé testable { fr, en }
+  appliesToRoles AiActRole[]
+  appliesToTiers RiskTier[]
+  automation     AutomationLevel
+  evidenceKinds  String[] // types de preuves acceptés
+  freshnessDays  Int? // durée de validité d'une preuve, null = sans péremption
+  evaluatorKey   String // clé de la fonction d'évaluation
+  params         Json // seuils : { minApprovals: 1, windowDays: 90 }
+  deprecatedAt   DateTime?
+  instances      ControlInstance[]
+
+  @@unique([key, libraryVersion])
+  @@index([libraryVersion, pack])
+}
+
+enum ControlStatus {
+  PASS
+  FAIL
+  PARTIAL
+  STALE
+  MISSING
+  NOT_APPLICABLE
+}
+
+model ControlInstance {
+  id              String              @id @default(cuid())
+  orgId           String
+  systemId        String
+  definitionId    String
+  status          ControlStatus       @default(MISSING)
+  ownerUserId     String?
+  notApplicable   Boolean             @default(false)
+  naJustification String?
+  lastEvaluatedAt DateTime?
+  createdAt       DateTime            @default(now())
+  system          AiSystem            @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  definition      ControlDefinition   @relation(fields: [definitionId], references: [id])
+  evaluations     ControlEvaluation[]
+  evidenceLinks   EvidenceLink[]
+
+  @@unique([systemId, definitionId])
+  @@index([orgId, systemId, status])
+}
+
+model ControlEvaluation {
+  id                String          @id @default(cuid())
+  orgId             String
+  controlInstanceId String
+  status            ControlStatus
+  reasons           Json // [{ code, message: { fr, en }, evidenceIds }]
+  evidenceIds       String[]
+  evaluatorVersion  String
+  evaluatedAt       DateTime        @default(now())
+  controlInstance   ControlInstance @relation(fields: [controlInstanceId], references: [id], onDelete: Cascade)
+
+  @@index([controlInstanceId, evaluatedAt(sort: Desc)])
+  @@index([orgId, evaluatedAt])
+}
+
+// ───────────── Intégrations ─────────────
+
+enum IntegrationProvider {
+  GITHUB
+  JIRA
+  GITLAB
+  NOTION
+  API
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  ERROR
+  SUSPENDED
+  REVOKED
+}
+
+model Integration {
+  id                    String                @id @default(cuid())
+  orgId                 String
+  provider              IntegrationProvider
+  externalAccountId     String // installation_id GitHub, cloudId Jira
+  externalAccountName   String
+  status                IntegrationStatus     @default(ACTIVE)
+  credentialsCiphertext Bytes? // AES-256-GCM sous la clé de l'organisation ; null pour GitHub
+  scopes                String[]
+  lastEventAt           DateTime?
+  lastSyncAt            DateTime?
+  lastError             String?
+  createdByUserId       String
+  createdAt             DateTime              @default(now())
+  org                   Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  resources             IntegrationResource[]
+
+  @@unique([provider, externalAccountId]) // un compte externe ne se lie qu'à une organisation
+  @@index([orgId])
+}
+
+model IntegrationResource {
+  id            String               @id @default(cuid())
+  orgId         String
+  integrationId String
+  kind          String // "github_repo", "jira_query"
+  externalId    String
+  name          String
+  config        Json // { defaultBranch, trackedPaths } ou { jql, purpose }
+  syncCursor    String?
+  lastSnapshotAt DateTime?
+  integration   Integration          @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  systemLinks   SystemResourceLink[]
+  evidenceItems EvidenceItem[]
+
+  @@unique([integrationId, kind, externalId])
+  @@index([orgId])
+}
+
+model SystemResourceLink {
+  systemId   String
+  resourceId String
+  orgId      String
+  pathGlobs  String[]
+  system     AiSystem            @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  resource   IntegrationResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([systemId, resourceId])
+  @@index([resourceId])
+}
+
+enum DeliveryStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+// Boîte de réception des webhooks. Table système : pas d'orgId à l'insertion, pas de RLS.
+model WebhookDelivery {
+  id                String              @id @default(cuid())
+  provider          IntegrationProvider
+  deliveryId        String // X-GitHub-Delivery, X-Atlassian-Webhook-Identifier
+  eventType         String
+  externalAccountId String
+  payload           Json
+  payloadSha256     String
+  status            DeliveryStatus      @default(PENDING)
+  attempts          Int                 @default(0)
+  nextAttemptAt     DateTime            @default(now())
+  lastError         String?
+  receivedAt        DateTime            @default(now())
+  processedAt       DateTime?
+
+  @@unique([provider, deliveryId]) // idempotence
+  @@index([status, nextAttemptAt])
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  type        String // "github.backfill", "control.evaluate", "seal.org", "pack.build"
+  orgId       String?
+  payload     Json
+  dedupeKey   String?   @unique
+  status      JobStatus @default(QUEUED)
+  runAt       DateTime  @default(now())
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(8)
+  lockedAt    DateTime?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  finishedAt  DateTime?
+
+  @@index([status, runAt])
+}
+
+// ───────────── Preuves et scellement ─────────────
+
+enum EvidenceSource {
+  GITHUB
+  JIRA
+  GITLAB
+  NOTION
+  MANUAL
+  API
+  SYSTEM
+}
+
+enum CaptureMethod {
+  WEBHOOK
+  BACKFILL
+  SNAPSHOT
+  UPLOAD
+  ATTESTATION
+  API
+}
+
+// Table en ajout seul. Seules colonnes modifiables : sealBatchId, leafIndex,
+// et à l'effacement payload, salt, actor, redactedAt (trigger §4.3.3).
+model EvidenceItem {
+  id               String               @id @default(cuid())
+  orgId            String
+  kind             String // "github.pull_request.merged", "jira.issue.transitioned"
+  schemaVersion    Int                  @default(1)
+  source           EvidenceSource
+  capturedVia      CaptureMethod
+  resourceId       String?
+  sourceRef        String // identifiant stable côté source
+  sourceUrl        String?
+  dedupeKey        String // ex. "gh:pr:{repoId}:{number}:merged"
+  occurredAt       DateTime // horodatage de la source
+  capturedAt       DateTime             @default(now()) // horodatage ProofLayer
+  summary          String
+  actor            Json? // { login, displayName } : donnée personnelle, effaçable
+  payload          Json? // charge normalisée et minimisée ; null après effacement
+  contentSha256    Bytes // SHA-256 du JSON canonique (RFC 8785) de payload
+  salt             Bytes? // 32 octets aléatoires ; null après effacement
+  leafHash         Bytes // SHA-256(0x00 || salt || enveloppe canonique)
+  rawObjectKey     String? // charge brute chiffrée en stockage objet
+  attachmentKey    String?
+  attachmentSha256 Bytes?
+  attachmentMime   String?
+  declarative      Boolean              @default(false) // preuve manuelle ou attestation
+  validUntil       DateTime?
+  createdByUserId  String?
+  sealBatchId      String?
+  leafIndex        Int?
+  redactedAt       DateTime?
+  org              Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  resource         IntegrationResource? @relation(fields: [resourceId], references: [id])
+  sealBatch        SealBatch?           @relation(fields: [sealBatchId], references: [id])
+  links            EvidenceLink[]
+
+  @@unique([orgId, dedupeKey])
+  @@index([orgId, kind, occurredAt(sort: Desc)])
+  @@index([orgId, resourceId, occurredAt(sort: Desc)])
+  @@index([orgId, sealBatchId])
+  @@index([orgId, validUntil])
+}
+
+model EvidenceLink {
+  evidenceId        String
+  controlInstanceId String
+  orgId             String
+  linkedBy          String          @default("rule") // "rule" ou identifiant d'utilisateur
+  createdAt         DateTime        @default(now())
+  evidence          EvidenceItem    @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  controlInstance   ControlInstance @relation(fields: [controlInstanceId], references: [id], onDelete: Cascade)
+
+  @@id([evidenceId, controlInstanceId])
+  @@index([controlInstanceId])
+}
+
+model SealBatch {
+  id              String         @id @default(cuid())
+  orgId           String
+  seq             Int // numérotation continue par organisation
+  leafCount       Int
+  merkleRoot      Bytes
+  prevBatchHash   Bytes // 32 octets nuls pour seq = 1
+  batchHash       Bytes // SHA-256 de l'en-tête canonique du lot
+  sealedAt        DateTime       @default(now())
+  anchorId        String?
+  anchorLeafIndex Int?
+  org             Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  anchor          Anchor?        @relation(fields: [anchorId], references: [id])
+  evidenceItems   EvidenceItem[]
+
+  @@unique([orgId, seq])
+  @@index([anchorId])
+}
+
+// Ancre globale, commune à toutes les organisations. Publique par construction.
+model Anchor {
+  id             String      @id @default(cuid())
+  seq            Int         @unique
+  batchCount     Int
+  merkleRoot     Bytes // racine sur les batchHash des lots de la fenêtre
+  prevAnchorHash Bytes
+  anchorHash     Bytes // empreinte soumise au prestataire d'horodatage
+  tsaName        String
+  tsaPolicyOid   String
+  tsaToken       Bytes // TimeStampToken DER, RFC 3161
+  tsaGenTime     DateTime
+  createdAt      DateTime    @default(now())
+  batches        SealBatch[]
+}
+
+model SigningKey {
+  kid       String    @id // "pl-2026-11"
+  algorithm String    @default("Ed25519")
+  publicKey Bytes
+  createdAt DateTime  @default(now())
+  retiredAt DateTime?
+}
+
+enum PackStatus {
+  QUEUED
+  BUILDING
+  READY
+  FAILED
+}
+
+model AuditPack {
+  id                String       @id @default(cuid())
+  orgId             String
+  systemId          String
+  requestedByUserId String
+  periodStart       DateTime
+  periodEnd         DateTime
+  language          String       @default("fr")
+  status            PackStatus   @default(QUEUED)
+  objectKey         String?
+  manifestSha256    Bytes?
+  signature         Bytes?
+  signingKid        String?
+  evidenceCount     Int          @default(0)
+  lastAnchorSeq     Int?
+  shareTokenHash    String?      @unique // lien de confiance, V1
+  createdAt         DateTime     @default(now())
+  org               Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  system            AiSystem     @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, systemId, createdAt(sort: Desc)])
+}
+
+// ───────────── Transverse ─────────────
+
+// Journal d'audit applicatif, en ajout seul.
+model AuditLog {
+  id          String   @id @default(cuid())
+  orgId       String
+  actorType   String // "user", "system", "api_key"
+  actorId     String?
+  action      String // "classification.sign", "integration.connect", "evidence.redact"
+  targetType  String
+  targetId    String
+  metadata    Json
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([orgId, createdAt(sort: Desc)])
+  @@index([orgId, targetType, targetId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  orgId     String
+  userId    String
+  type      String // "control.failed", "evidence.expiring", "integration.error", "regulatory.update"
+  payload   Json
+  readAt    DateTime?
+  emailedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([orgId, userId, readAt])
+}
+
+model RegulatoryUpdate {
+  id                 String   @id @default(cuid())
+  publishedAt        DateTime @default(now())
+  effectiveDate      DateTime?
+  title              Json // { fr, en }
+  summary            Json
+  sourceUrl          String
+  impactedControlKeys String[]
+  severity           String // "info", "action_required"
+  libraryVersion     String? // version de bibliothèque qui intègre le changement
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  GROWTH
+  SCALE
+}
+
+model Subscription {
+  id                    String       @id @default(cuid())
+  orgId                 String       @unique
+  plan                  Plan         @default(TRIAL)
+  status                String       @default("trialing") // miroir du statut Stripe
+  stripeCustomerId      String?      @unique
+  stripeSubscriptionId  String?      @unique
+  monitoredSystemsLimit Int          @default(1)
+  trialEndsAt           DateTime?
+  currentPeriodEnd      DateTime?
+  org                   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id              String       @id @default(cuid())
+  orgId           String
+  name            String
+  prefix          String // "pl_live_a1b2" : affiché, non secret
+  hashedKey       String       @unique // SHA-256 de la clé complète
+  scopes          String[] // ["evidence:write"]
+  createdByUserId String
+  lastUsedAt      DateTime?
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime     @default(now())
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+}
+
+// Clé de chiffrement de données par organisation, enveloppée par la clé maîtresse.
+// Sa destruction rend illisibles les jetons et les charges brutes de l'organisation.
+model OrgEncryptionKey {
+  orgId      String       @id
+  wrappedDek Bytes
+  kekId      String
+  createdAt  DateTime     @default(now())
+  rotatedAt  DateTime?
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}

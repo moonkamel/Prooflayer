@@ -1,0 +1,28 @@
+# Propriétaires du code (AIA-17-02 : gestion des changements outillée).
+# Une ligne plus bas l'emporte sur une ligne plus haut. Tant que le projet n'a qu'un seul mainteneur,
+# toutes les lignes désignent le même compte ; les lignes explicites marquent les zones sensibles
+# et resteront en place quand d'autres relecteurs arriveront.
+
+*                       @moonkamel
+
+# Spécification de référence et conventions pour Claude Code
+/docs/                  @moonkamel
+/CLAUDE.md              @moonkamel
+
+# CI, gabarits et propriétaires
+/.github/               @moonkamel
+
+# Modèle de données et migrations
+/prisma/                @moonkamel
+/prisma.config.ts       @moonkamel
+
+# Zones critiques : isolation, règles, classification, cryptographie, ingestion
+/src/server/db.ts       @moonkamel
+/src/server/rules/      @moonkamel
+/src/server/classify/   @moonkamel
+/src/server/seal/       @moonkamel
+/src/server/system/     @moonkamel
+/src/server/connectors/ @moonkamel
+
+# Outil de vérification open source
+/packages/verify/       @moonkamel
