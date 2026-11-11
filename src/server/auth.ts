@@ -6,6 +6,7 @@ import { nextCookies } from "better-auth/next-js";
 import { organization, twoFactor } from "better-auth/plugins";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/config";
 import { ac, roles } from "./auth-roles";
+import { audit } from "./services/audit";
 import { renderInvitationEmail, sendAuthEmail } from "./email/auth-emails";
 import { createEmailTransport } from "./email/transport";
 import { authDatabase } from "./system/auth-database";
@@ -102,6 +103,25 @@ export const auth = betterAuth({
       invitationExpiresIn: 7 * 24 * 60 * 60, // 7 jours (§3.2 E10)
       cancelPendingInvitationsOnReInvite: true,
       requireEmailVerificationOnInvitation: true,
+      // Journal d'audit (PL-106) des écritures faites directement auprès de Better Auth, sans service intermédiaire.
+      organizationHooks: {
+        afterCreateOrganization: async ({ organization, user }) => {
+          await audit(
+            { orgId: organization.id, actor: { type: "user", id: user.id } },
+            "organization.create",
+            { type: "organization", id: organization.id },
+            { name: organization.name },
+          );
+        },
+        afterAcceptInvitation: async ({ invitation, member, user, organization }) => {
+          await audit(
+            { orgId: organization.id, actor: { type: "user", id: user.id } },
+            "invitation.accept",
+            { type: "invitation", id: invitation.id },
+            { memberId: member.id, role: member.role },
+          );
+        },
+      },
       sendInvitationEmail: async ({ id, email, organization, inviter, role }) => {
         const base = process.env.BETTER_AUTH_URL ?? "";
         await transport().send(

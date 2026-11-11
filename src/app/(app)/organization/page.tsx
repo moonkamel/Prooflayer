@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { serverCaller } from "@/server/caller";
 import { ADMIN_ROLES, ORG_ROLES } from "@/server/services/role-policy";
@@ -19,6 +20,7 @@ export default async function OrganizationPage() {
   const invitations = isAdmin ? await api.org.members.invitations() : [];
   const t = await getTranslations("organization");
   const tr = await getTranslations("roles");
+  const ta = await getTranslations("audit");
   const format = await getFormatter();
   // Un admin n'attribue pas le rôle owner (§3.2 E10) : seul un owner le peut.
   const assignable = ORG_ROLES.filter((r) => org.role === "owner" || r !== "owner");
@@ -28,6 +30,11 @@ export default async function OrganizationPage() {
     <main>
       <h1>{t("title")}</h1>
       {isAdmin ? <RenameForm name={org.name} /> : <p data-testid="org-name">{org.name}</p>}
+      {isAdmin && (
+        <p>
+          <Link href="/audit">{ta("nav")}</Link>
+        </p>
+      )}
 
       <section aria-labelledby="members-title">
         <h2 id="members-title">{t("membersTitle")}</h2>

@@ -78,6 +78,15 @@ packages/verify/         outil de vérification open source
 - Les tests d'intégration tournent sous le rôle applicatif ; la préparation hors organisation et le nettoyage passent
   par `DIRECT_DATABASE_URL`.
 
+## Journal d'audit (conventions établies par PL-106)
+- Toute écriture appelle `audit(ctx, action, cible, métadonnées)` (`src/server/services/audit.ts`) après son succès.
+  Une nouvelle action s'ajoute à `AUDIT_ACTIONS` et à `auditActions` dans `messages/{fr,en}.json` (test de parité).
+- Écritures faites directement auprès de Better Auth (création d'organisation, acceptation d'invitation) :
+  journalisées par ses crochets `organizationHooks` dans `src/server/auth.ts`.
+- `AuditLog` est en ajout seul : rôle applicatif sans UPDATE ni DELETE, trigger `audit_log_guard` pour le propriétaire.
+  Seule la purge d'une organisation (`app.purge_org` positionné dans la transaction) supprime ses entrées.
+- Métadonnées : jamais de secret, de jeton ni de charge brute. Export CSV : cellules protégées contre l'injection de formules.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

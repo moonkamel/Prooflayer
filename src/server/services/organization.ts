@@ -3,8 +3,10 @@
 // Member et Invitation sont des tables d'identité gérées par Better Auth, sans colonne orgId : elles sont lues par
 // src/server/system/identity.ts, filtrées explicitement sur l'organisation active.
 import { auth } from "@/server/auth";
+import type { forOrg } from "@/server/db";
 import * as identity from "@/server/system/identity";
 import type { OrgRole } from "@/generated/prisma/enums";
+import { audit, clientIp, type AuditAction, type AuditTarget } from "./audit";
 import { ServiceError } from "./errors";
 import { canAssignRole, leavesAnOwner } from "./role-policy";
 
@@ -13,6 +15,28 @@ export interface OrgContext {
   userId: string;
   orgId: string;
   role: OrgRole;
+  /** Connexion de l'organisation (forOrg), fournie par orgProcedure. */
+  db?: ReturnType<typeof forOrg>;
+}
+
+/** Inscription au journal d'audit d'une écriture faite par l'utilisateur courant (PL-106). */
+function record(
+  ctx: OrgContext,
+  action: AuditAction,
+  target: AuditTarget,
+  metadata: Record<string, unknown> = {},
+) {
+  return audit(
+    {
+      orgId: ctx.orgId,
+      actor: { type: "user", id: ctx.userId },
+      ipAddress: clientIp(ctx.headers),
+      db: ctx.db,
+    },
+    action,
+    target,
+    metadata,
+  );
 }
 
 export async function getOrganization(ctx: OrgContext) {
@@ -26,6 +50,12 @@ export async function updateOrganization(ctx: OrgContext, input: { name: string 
     headers: ctx.headers,
     body: { organizationId: ctx.orgId, data: { name: input.name } },
   });
+  await record(
+    ctx,
+    "organization.update",
+    { type: "organization", id: ctx.orgId },
+    { name: input.name },
+  );
 }
 
 export async function listMembers(ctx: OrgContext) {
@@ -52,6 +82,12 @@ export async function inviteMember(ctx: OrgContext, input: { email: string; role
     headers: ctx.headers,
     body: { email: input.email, role: input.role, organizationId: ctx.orgId },
   });
+  await record(
+    ctx,
+    "member.invite",
+    { type: "invitation", id: input.email },
+    { email: input.email, role: input.role },
+  );
 }
 
 export async function setMemberRole(ctx: OrgContext, input: { memberId: string; role: OrgRole }) {
@@ -66,6 +102,12 @@ export async function setMemberRole(ctx: OrgContext, input: { memberId: string; 
     headers: ctx.headers,
     body: { memberId: target.id, role: input.role, organizationId: ctx.orgId },
   });
+  await record(
+    ctx,
+    "member.setRole",
+    { type: "member", id: target.id },
+    { from: target.role, to: input.role },
+  );
 }
 
 export async function removeMember(ctx: OrgContext, input: { memberId: string }) {
@@ -79,6 +121,7 @@ export async function removeMember(ctx: OrgContext, input: { memberId: string })
     headers: ctx.headers,
     body: { memberIdOrEmail: target.id, organizationId: ctx.orgId },
   });
+  await record(ctx, "member.remove", { type: "member", id: target.id }, { role: target.role });
 }
 
 export async function listPendingInvitations(ctx: OrgContext) {
@@ -90,6 +133,7 @@ export async function revokeInvitation(ctx: OrgContext, input: { invitationId: s
   const invitation = await identity.invitationInOrganization(ctx.orgId, input.invitationId);
   if (!invitation) throw new ServiceError("NOT_FOUND", "invitation.notFound");
   await auth.api.cancelInvitation({ headers: ctx.headers, body: { invitationId: invitation.id } });
+  await record(ctx, "invitation.revoke", { type: "invitation", id: invitation.id });
 }
 
 /** Identifiant d'URL lisible et unique, dérivé du nom (« Talvio SAS » → « talvio-sas », puis « talvio-sas-2 »…). */

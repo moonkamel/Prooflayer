@@ -51,3 +51,12 @@ describe("resolveLocale", () => {
     expect(resolveLocale(undefined, "de,it")).toBe("fr");
   });
 });
+
+describe("actions du journal d'audit", () => {
+  it("chaque action a un libellé en français et en anglais", async () => {
+    const { AUDIT_ACTIONS } = await import("@/server/services/audit");
+    const keys = AUDIT_ACTIONS.map((a) => a.replace(".", "_")).sort();
+    expect(Object.keys(fr.auditActions).sort()).toEqual(keys);
+    expect(Object.keys(en.auditActions).sort()).toEqual(keys);
+  });
+});

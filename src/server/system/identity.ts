@@ -88,3 +88,13 @@ export function invitationById(invitationId: string) {
     select: { email: true, status: true, expiresAt: true },
   });
 }
+
+/** Nom et adresse des acteurs d'un journal, membres ou anciens membres de l'organisation. */
+export async function usersByIds(ids: readonly string[]) {
+  if (ids.length === 0) return new Map<string, { name: string; email: string }>();
+  const users = await prisma.user.findMany({
+    where: { id: { in: [...new Set(ids)] } },
+    select: { id: true, name: true, email: true },
+  });
+  return new Map(users.map((u) => [u.id, { name: u.name, email: u.email }]));
+}

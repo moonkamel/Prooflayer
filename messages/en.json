@@ -146,5 +146,37 @@
     "accept": "Accept the invitation",
     "invalid": "This invitation is invalid, expired, revoked or addressed to another email address.",
     "wrongAccount": "Signed in as {email}. This invitation must be accepted with the address it was sent to."
+  },
+  "audit": {
+    "title": "Audit log",
+    "nav": "Audit log",
+    "intro": "Every write action in the organization: who, what, on what, when.",
+    "filterAction": "Action",
+    "allActions": "All actions",
+    "from": "From",
+    "to": "To",
+    "apply": "Filter",
+    "reset": "Reset",
+    "export": "Export as CSV",
+    "exportTruncated": "Export limited to the 50,000 most recent entries: narrow the period.",
+    "date": "Date",
+    "actor": "Actor",
+    "action": "Action",
+    "target": "Target",
+    "details": "Details",
+    "system": "System",
+    "unknownActor": "Deleted user",
+    "empty": "No entries for these filters.",
+    "older": "Older entries",
+    "forbidden": "The audit log is reserved for the owner and administrator roles."
+  },
+  "auditActions": {
+    "organization_create": "Organization created",
+    "organization_update": "Organization updated",
+    "member_invite": "Member invited",
+    "member_setRole": "Role changed",
+    "member_remove": "Member removed",
+    "invitation_revoke": "Invitation revoked",
+    "invitation_accept": "Invitation accepted"
   }
 }
