@@ -129,6 +129,16 @@ packages/verify/         outil de vérification open source
   Un cas ajouté ou corrigé se fait d'abord dans `cases.ts`.
 - `pnpm test:classify` (job CI `checks`) exige 100 % de couverture des branches de `src/server/classify/`.
 
+## Questionnaire de classification (conventions établies par PL-203)
+- `src/server/classify/questionnaire.ts` (pur) : 10 questions, 9 au plus sur un chemin ; branchements dans l'ordre des
+  règles R1 à R9 (dès qu'une règle conclurait, on passe au rôle) ; `toAnswers` donne la valeur neutre aux questions
+  hors chemin. Test croisé : chaque cas de `cases.ts` donne le même résultat par le questionnaire.
+- Textes : `messages/{fr,en}.json`, `questionnaire.questions.<id>` (`title`, `why`, `example1`, `example2`, `options`).
+- Routeur `classification` (`src/server/services/classification.ts`) : `draft` (un brouillon DRAFT par système, créé
+  ou repris), `saveAnswers` (une question, réponse journalisée, branche abandonnée retirée, résultat effacé),
+  `compute` (questionnaire complet, version de règles du brouillon). `Classification.answers = { responses }`.
+- Écran : `/systems/[id]/classification` ; « Qualifier ce système » et « Revoir la classification » sur la fiche.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

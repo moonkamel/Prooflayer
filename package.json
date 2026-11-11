@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --passWithNoTests",
-    "test:classify": "vitest run tests/unit/classify.test.ts --coverage.enabled --coverage.provider=v8 --coverage.include='src/server/classify/**' --coverage.thresholds.100 --coverage.reporter=text",
+    "test:classify": "vitest run tests/unit/classify.test.ts tests/unit/questionnaire.test.ts --coverage.enabled --coverage.provider=v8 --coverage.include='src/server/classify/**' --coverage.thresholds.100 --coverage.reporter=text",
     "test:e2e": "playwright test",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate",

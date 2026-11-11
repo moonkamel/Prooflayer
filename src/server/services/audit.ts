@@ -19,6 +19,9 @@ export const AUDIT_ACTIONS = [
   "system.archive",
   "designChange.create",
   "designChange.qualify",
+  "classification.draft",
+  "classification.saveAnswers",
+  "classification.compute",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

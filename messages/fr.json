@@ -186,7 +186,10 @@
     "system_update": "Modification d'une fiche système",
     "system_archive": "Archivage d'un système d'IA",
     "designChange_create": "Enregistrement d'une modification de conception",
-    "designChange_qualify": "Qualification d'une modification de conception"
+    "designChange_qualify": "Qualification d'une modification de conception",
+    "classification_draft": "Ouverture d'un questionnaire de classification",
+    "classification_saveAnswers": "Réponse au questionnaire de classification",
+    "classification_compute": "Calcul d'une classification"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -296,7 +299,9 @@
     "removeModel": "Retirer ce modèle",
     "categoriesHint": "Une catégorie par ligne.",
     "noModels": "Aucun modèle renseigné.",
-    "noCategories": "Aucune catégorie renseignée."
+    "noCategories": "Aucune catégorie renseignée.",
+    "qualify": "Qualifier ce système",
+    "review": "Revoir la classification"
   },
   "designChanges": {
     "title": "Modifications de conception",
@@ -332,5 +337,152 @@
     "archived": "Archivage de la fiche",
     "unknownActor": "Utilisateur supprimé",
     "emptyValue": "(vide)"
+  },
+  "questionnaire": {
+    "title": "Qualifier le système",
+    "intro": "Une question par écran. Chaque réponse est enregistrée aussitôt : vous pouvez vous arrêter et reprendre plus tard.",
+    "progress": "Question {current} sur {total} environ",
+    "progressLabel": "Progression du questionnaire",
+    "why": "Pourquoi cette question ?",
+    "examples": "Exemples",
+    "yes": "Oui",
+    "no": "Non",
+    "none": "Aucun de ces cas",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "saved": "Réponse enregistrée.",
+    "compute": "Voir le résultat",
+    "chooseOne": "Choisissez une réponse pour continuer.",
+    "forbidden": "Seuls un owner ou un admin peuvent qualifier un système.",
+    "archived": "Cette fiche est archivée : elle ne peut plus être qualifiée.",
+    "resultTitle": "Résultat",
+    "resultTier": "Catégorie",
+    "resultAnnex": "Point de l'Annexe III",
+    "resultRole": "Rôle",
+    "resultRuleset": "Règles {version}",
+    "resultNext": "La signature de la classification se fait depuis cet écran dans une prochaine version.",
+    "backToSystem": "Retour à la fiche",
+    "restart": "Modifier mes réponses",
+    "questions": {
+      "aiSystem": {
+        "title": "Le système infère-t-il, à partir des données qu'il reçoit, des prédictions, contenus, recommandations ou décisions, avec une part d'autonomie ?",
+        "why": "Seuls les systèmes d'IA au sens de l'Art. 3(1) relèvent du règlement. Un logiciel qui n'applique que des règles définies par des personnes n'en est pas un (considérant 12).",
+        "example1": "Oui : un modèle entraîné qui note des candidatures.",
+        "example2": "Non : un barème de calcul écrit à la main dans un tableur."
+      },
+      "scope": {
+        "title": "Le système relève-t-il d'une exclusion du règlement ?",
+        "why": "L'Art. 2 exclut certains usages du champ du règlement. Une seule exclusion suffit.",
+        "example1": "Un modèle développé et utilisé pour la seule recherche scientifique.",
+        "example2": "Un outil utilisé à titre purement personnel, hors activité professionnelle.",
+        "options": {
+          "military": "Usage exclusivement militaire, de défense ou de sécurité nationale (Art. 2(3))",
+          "research": "Développé et mis en service pour la seule recherche scientifique (Art. 2(6))",
+          "testing": "Recherche, essais ou développement avant toute mise sur le marché (Art. 2(8))",
+          "personal": "Usage purement personnel et non professionnel (Art. 2(10))",
+          "thirdCountry": "Utilisé par une autorité d'un pays tiers dans un cadre de coopération internationale (Art. 2(4))"
+        }
+      },
+      "prohibited": {
+        "title": "Le système met-il en œuvre l'une de ces pratiques ?",
+        "why": "L'Art. 5 interdit certaines pratiques, quel que soit le secteur. Elles ne peuvent pas être mises en conformité : elles doivent cesser.",
+        "example1": "Déduire les émotions des salariés pendant un entretien d'évaluation.",
+        "example2": "Attribuer une note sociale qui conduit à un traitement défavorable sans rapport avec le contexte.",
+        "options": {
+          "a": "Techniques subliminales ou manipulatrices altérant le comportement (a)",
+          "b": "Exploitation des vulnérabilités liées à l'âge, au handicap ou à la situation sociale (b)",
+          "c": "Notation sociale conduisant à un traitement défavorable (c)",
+          "d": "Prédiction d'infraction fondée sur le seul profilage (d)",
+          "e": "Moissonnage non ciblé d'images faciales (e)",
+          "f": "Reconnaissance des émotions au travail ou dans l'enseignement (f)",
+          "g": "Catégorisation biométrique selon des attributs sensibles (g)",
+          "h": "Identification biométrique à distance en temps réel par les forces de l'ordre dans l'espace public (h)"
+        }
+      },
+      "annexI": {
+        "title": "Le système est-il un composant de sécurité d'un produit de l'Annexe I soumis à une évaluation par un tiers ?",
+        "why": "L'Art. 6(1) classe à haut risque les composants de sécurité des produits régis par la législation d'harmonisation de l'Annexe I (dispositifs médicaux, machines, jouets…).",
+        "example1": "Oui : le module d'IA qui détecte une anomalie dans un dispositif médical.",
+        "example2": "Non : un logiciel de gestion RH, qui n'est pas un produit de l'Annexe I."
+      },
+      "annexIII": {
+        "title": "Le système est-il utilisé pour l'un de ces cas d'usage ?",
+        "why": "L'Annexe III liste les cas d'usage à haut risque (Art. 6(2)). Cochez tous ceux qui s'appliquent ; aucun ne s'applique dans la plupart des cas.",
+        "example1": "Trier ou filtrer des candidatures : point 4(a).",
+        "example2": "Évaluer la solvabilité d'une personne pour un crédit : point 5(b) (la détection de fraude en est exclue).",
+        "options": {
+          "1(a)": "1(a) Identification biométrique à distance",
+          "1(b)": "1(b) Catégorisation biométrique selon des attributs sensibles",
+          "1(c)": "1(c) Reconnaissance des émotions",
+          "2": "2 Composant de sécurité d'une infrastructure critique",
+          "3(a)": "3(a) Admission et affectation dans l'enseignement",
+          "3(b)": "3(b) Évaluation des acquis d'apprentissage",
+          "3(c)": "3(c) Évaluation du niveau d'enseignement accessible",
+          "3(d)": "3(d) Surveillance des examens",
+          "4(a)": "4(a) Recrutement et sélection : ciblage d'offres, tri, évaluation de candidats",
+          "4(b)": "4(b) Gestion des travailleurs : promotion, licenciement, affectation selon des traits personnels, suivi des performances",
+          "5(a)": "5(a) Éligibilité aux prestations et services publics",
+          "5(b)": "5(b) Solvabilité et score de crédit (hors détection de fraude)",
+          "5(c)": "5(c) Évaluation des risques et tarification en assurance vie et santé",
+          "5(d)": "5(d) Tri des appels d'urgence et des patients",
+          "6(a)": "6(a) Répression : risque de victimisation",
+          "6(b)": "6(b) Répression : polygraphes et outils similaires",
+          "6(c)": "6(c) Répression : fiabilité des preuves",
+          "6(d)": "6(d) Répression : risque d'infraction ou de récidive",
+          "6(e)": "6(e) Répression : profilage lors d'enquêtes",
+          "7(a)": "7(a) Migration : polygraphes et outils similaires",
+          "7(b)": "7(b) Migration : évaluation des risques",
+          "7(c)": "7(c) Migration : examen des demandes d'asile, de visa, de titre de séjour",
+          "7(d)": "7(d) Migration : détection et identification de personnes",
+          "8(a)": "8(a) Assistance aux autorités judiciaires",
+          "8(b)": "8(b) Influence sur une élection ou un vote"
+        }
+      },
+      "profiling": {
+        "title": "Le système établit-il un profil de personnes physiques ?",
+        "why": "Le profilage (évaluation automatisée d'aspects personnels : rendement au travail, situation économique, comportement…) rend le système à haut risque, même si une condition de l'Art. 6(3) est remplie (Art. 6(3), dernier alinéa).",
+        "example1": "Oui : classer des candidats selon un score de pertinence pour le poste.",
+        "example2": "Non : extraire le nom et l'expérience d'un CV sans les noter."
+      },
+      "art63": {
+        "title": "Le système se limite-t-il à l'une de ces tâches ?",
+        "why": "L'Art. 6(3) écarte le haut risque quand le système n'influence pas substantiellement la décision. Ce choix se documente avant la mise sur le marché (Art. 6(4)).",
+        "example1": "Une tâche procédurale étroite : extraire les champs d'un CV, proposer des créneaux d'entretien.",
+        "example2": "Une tâche préparatoire : traduire les pièces d'un dossier avant son examen par une personne.",
+        "options": {
+          "a": "Tâche procédurale étroite (a)",
+          "b": "Amélioration du résultat d'une activité humaine déjà achevée (b)",
+          "c": "Détection de schémas de décision ou d'écarts, sans remplacer l'évaluation humaine (c)",
+          "d": "Tâche préparatoire à une évaluation (d)"
+        }
+      },
+      "transparency": {
+        "title": "Le système interagit-il avec des personnes ou génère-t-il du contenu ?",
+        "why": "L'Art. 50 impose d'informer les personnes qui dialoguent avec un système d'IA et de marquer les contenus synthétiques. Ces obligations s'appliquent depuis le 2 août 2026.",
+        "example1": "Un agent conversationnel de service client.",
+        "example2": "Un générateur d'images ou de voix de synthèse.",
+        "options": {
+          "interactsWithPersons": "Il dialogue directement avec des personnes",
+          "generatesSyntheticContent": "Il génère du texte, des images, du son ou de la vidéo de synthèse"
+        }
+      },
+      "developer": {
+        "title": "Votre entreprise a-t-elle développé ce système, ou l'a-t-elle fait développer pour le mettre sur le marché sous son nom ?",
+        "why": "Le fournisseur (Art. 3(3)) porte l'essentiel des obligations ; le déployeur (Art. 3(4)) utilise un système sous sa propre autorité.",
+        "example1": "Oui : votre équipe a entraîné le modèle de score intégré à votre produit.",
+        "example2": "Non : vous utilisez un ATS acheté à un éditeur."
+      },
+      "art25": {
+        "title": "Avez-vous fait l'une de ces opérations sur le système d'un tiers ?",
+        "why": "L'Art. 25(1) fait de vous le fournisseur d'un système à haut risque si vous y apposez votre marque, le modifiez substantiellement ou en changez la finalité.",
+        "example1": "Revendre sous votre marque un outil de score acheté à un éditeur.",
+        "example2": "Réaffecter un agent conversationnel généraliste au tri de candidatures.",
+        "options": {
+          "ownBrand": "Apposer votre nom ou votre marque (Art. 25(1)(a))",
+          "substantialModification": "Le modifier substantiellement, par exemple le réentraîner (Art. 25(1)(b))",
+          "changedPurpose": "Changer sa finalité prévue (Art. 25(1)(c))"
+        }
+      }
+    }
   }
 }

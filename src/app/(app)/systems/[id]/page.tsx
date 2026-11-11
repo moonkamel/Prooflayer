@@ -5,7 +5,9 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
 import { AI_ACT_ROLES, SYSTEM_STATUSES, type SystemField } from "@/server/services/system-registry";
 import { ArchiveSystemButton, EditableField } from "../system-controls";
+import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { loadSystem } from "./load";
 
 type Params = { params: Promise<{ id: string }> };
@@ -40,7 +42,16 @@ export default async function SystemOverviewPage({ params }: Params) {
   return (
     <>
       {system.archivedAt && <Alert>{t("archivedNotice", { date: day(system.archivedAt) })}</Alert>}
-      {system.riskTier === "UNCLASSIFIED" && <Alert>{t("unclassified")}</Alert>}
+      {system.riskTier === "UNCLASSIFIED" && (
+        <div className="space-y-2">
+          <Alert>{t("unclassified")}</Alert>
+          {editable && (
+            <Button asChild>
+              <Link href={`/systems/${system.id}/classification`}>{t("qualify")}</Link>
+            </Button>
+          )}
+        </div>
+      )}
       {system.classificationStale && (
         <Alert data-testid="classification-stale">
           <strong>{t("staleTitle")}</strong>
@@ -52,6 +63,11 @@ export default async function SystemOverviewPage({ params }: Params) {
               })
             : t("staleUnknown")}
         </Alert>
+      )}
+      {system.classificationStale && editable && (
+        <Button asChild variant="outline">
+          <Link href={`/systems/${system.id}/classification`}>{t("review")}</Link>
+        </Button>
       )}
 
       <dl>
