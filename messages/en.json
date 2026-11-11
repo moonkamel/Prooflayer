@@ -186,7 +186,10 @@
     "system_update": "System record edited",
     "system_archive": "AI system archived",
     "designChange_create": "Design change recorded",
-    "designChange_qualify": "Design change qualified"
+    "designChange_qualify": "Design change qualified",
+    "classification_draft": "Classification questionnaire opened",
+    "classification_saveAnswers": "Classification questionnaire answered",
+    "classification_compute": "Classification computed"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -296,7 +299,9 @@
     "removeModel": "Remove this model",
     "categoriesHint": "One category per line.",
     "noModels": "No model listed.",
-    "noCategories": "No category listed."
+    "noCategories": "No category listed.",
+    "qualify": "Qualify this system",
+    "review": "Review the classification"
   },
   "designChanges": {
     "title": "Design changes",
@@ -332,5 +337,152 @@
     "archived": "Record archived",
     "unknownActor": "Deleted user",
     "emptyValue": "(empty)"
+  },
+  "questionnaire": {
+    "title": "Qualify the system",
+    "intro": "One question per screen. Each answer is saved immediately: you can stop and resume later.",
+    "progress": "Question {current} of about {total}",
+    "progressLabel": "Questionnaire progress",
+    "why": "Why this question?",
+    "examples": "Examples",
+    "yes": "Yes",
+    "no": "No",
+    "none": "None of these",
+    "previous": "Previous",
+    "next": "Next",
+    "saved": "Answer saved.",
+    "compute": "See the result",
+    "chooseOne": "Choose an answer to continue.",
+    "forbidden": "Only an owner or an admin can qualify a system.",
+    "archived": "This record is archived and can no longer be qualified.",
+    "resultTitle": "Result",
+    "resultTier": "Category",
+    "resultAnnex": "Annex III point",
+    "resultRole": "Role",
+    "resultRuleset": "Rules {version}",
+    "resultNext": "Signing the classification from this screen comes in an upcoming version.",
+    "backToSystem": "Back to the record",
+    "restart": "Change my answers",
+    "questions": {
+      "aiSystem": {
+        "title": "Does the system infer, from the input it receives, predictions, content, recommendations or decisions, with some level of autonomy?",
+        "why": "Only AI systems within the meaning of Art. 3(1) fall under the Regulation. Software that only applies rules defined by people is not one (recital 12).",
+        "example1": "Yes: a trained model that scores applications.",
+        "example2": "No: a hand-written calculation grid in a spreadsheet."
+      },
+      "scope": {
+        "title": "Does the system fall under an exclusion of the Regulation?",
+        "why": "Art. 2 excludes some uses from the scope of the Regulation. One exclusion is enough.",
+        "example1": "A model developed and used for scientific research only.",
+        "example2": "A tool used for purely personal, non-professional purposes.",
+        "options": {
+          "military": "Exclusively military, defence or national security use (Art. 2(3))",
+          "research": "Developed and put into service for scientific research only (Art. 2(6))",
+          "testing": "Research, testing or development before any placing on the market (Art. 2(8))",
+          "personal": "Purely personal, non-professional use (Art. 2(10))",
+          "thirdCountry": "Used by a third-country authority under international cooperation (Art. 2(4))"
+        }
+      },
+      "prohibited": {
+        "title": "Does the system implement any of these practices?",
+        "why": "Art. 5 prohibits some practices in every sector. They cannot be remedied: they must stop.",
+        "example1": "Inferring employees' emotions during a performance review.",
+        "example2": "Assigning a social score that leads to unrelated detrimental treatment.",
+        "options": {
+          "a": "Subliminal or manipulative techniques distorting behaviour (a)",
+          "b": "Exploiting vulnerabilities due to age, disability or social situation (b)",
+          "c": "Social scoring leading to detrimental treatment (c)",
+          "d": "Predicting offences based solely on profiling (d)",
+          "e": "Untargeted scraping of facial images (e)",
+          "f": "Emotion recognition in the workplace or in education (f)",
+          "g": "Biometric categorisation by sensitive attributes (g)",
+          "h": "Real-time remote biometric identification by law enforcement in public spaces (h)"
+        }
+      },
+      "annexI": {
+        "title": "Is the system a safety component of an Annex I product subject to third-party assessment?",
+        "why": "Art. 6(1) classifies as high risk the safety components of products covered by the Annex I harmonisation legislation (medical devices, machinery, toys…).",
+        "example1": "Yes: the AI module that detects an anomaly in a medical device.",
+        "example2": "No: HR software, which is not an Annex I product."
+      },
+      "annexIII": {
+        "title": "Is the system used for any of these use cases?",
+        "why": "Annex III lists the high-risk use cases (Art. 6(2)). Tick all that apply; in most cases none does.",
+        "example1": "Sorting or filtering job applications: point 4(a).",
+        "example2": "Assessing a person's creditworthiness: point 5(b) (fraud detection is excluded).",
+        "options": {
+          "1(a)": "1(a) Remote biometric identification",
+          "1(b)": "1(b) Biometric categorisation by sensitive attributes",
+          "1(c)": "1(c) Emotion recognition",
+          "2": "2 Safety component of critical infrastructure",
+          "3(a)": "3(a) Admission and assignment in education",
+          "3(b)": "3(b) Evaluation of learning outcomes",
+          "3(c)": "3(c) Assessment of the appropriate level of education",
+          "3(d)": "3(d) Exam proctoring",
+          "4(a)": "4(a) Recruitment and selection: job ad targeting, filtering, candidate evaluation",
+          "4(b)": "4(b) Worker management: promotion, termination, task allocation based on personal traits, performance monitoring",
+          "5(a)": "5(a) Eligibility for public benefits and services",
+          "5(b)": "5(b) Creditworthiness and credit scoring (excluding fraud detection)",
+          "5(c)": "5(c) Risk assessment and pricing in life and health insurance",
+          "5(d)": "5(d) Emergency call and patient triage",
+          "6(a)": "6(a) Law enforcement: risk of victimisation",
+          "6(b)": "6(b) Law enforcement: polygraphs and similar tools",
+          "6(c)": "6(c) Law enforcement: reliability of evidence",
+          "6(d)": "6(d) Law enforcement: risk of offending or reoffending",
+          "6(e)": "6(e) Law enforcement: profiling in investigations",
+          "7(a)": "7(a) Migration: polygraphs and similar tools",
+          "7(b)": "7(b) Migration: risk assessment",
+          "7(c)": "7(c) Migration: examination of asylum, visa and residence applications",
+          "7(d)": "7(d) Migration: detecting and identifying persons",
+          "8(a)": "8(a) Assisting judicial authorities",
+          "8(b)": "8(b) Influencing an election or voting behaviour"
+        }
+      },
+      "profiling": {
+        "title": "Does the system profile natural persons?",
+        "why": "Profiling (automated evaluation of personal aspects: work performance, economic situation, behaviour…) makes the system high risk even if an Art. 6(3) condition is met (Art. 6(3), last subparagraph).",
+        "example1": "Yes: ranking candidates by a relevance score for the job.",
+        "example2": "No: extracting the name and experience from a CV without scoring them."
+      },
+      "art63": {
+        "title": "Is the system limited to one of these tasks?",
+        "why": "Art. 6(3) rules out high risk when the system does not materially influence the decision. This position is documented before placing on the market (Art. 6(4)).",
+        "example1": "A narrow procedural task: extracting CV fields, proposing interview slots.",
+        "example2": "A preparatory task: translating the documents of a file before a person reviews it.",
+        "options": {
+          "a": "Narrow procedural task (a)",
+          "b": "Improving the result of a previously completed human activity (b)",
+          "c": "Detecting decision patterns or deviations, without replacing human assessment (c)",
+          "d": "Preparatory task to an assessment (d)"
+        }
+      },
+      "transparency": {
+        "title": "Does the system interact with people or generate content?",
+        "why": "Art. 50 requires informing people who interact with an AI system and marking synthetic content. These obligations apply since 2 August 2026.",
+        "example1": "A customer service chatbot.",
+        "example2": "An image or synthetic voice generator.",
+        "options": {
+          "interactsWithPersons": "It interacts directly with people",
+          "generatesSyntheticContent": "It generates synthetic text, images, audio or video"
+        }
+      },
+      "developer": {
+        "title": "Did your company develop this system, or have it developed to place it on the market under its own name?",
+        "why": "The provider (Art. 3(3)) bears most obligations; the deployer (Art. 3(4)) uses a system under its own authority.",
+        "example1": "Yes: your team trained the scoring model built into your product.",
+        "example2": "No: you use an ATS bought from a vendor."
+      },
+      "art25": {
+        "title": "Have you done any of the following to a third-party system?",
+        "why": "Art. 25(1) makes you the provider of a high-risk system if you put your brand on it, substantially modify it or change its intended purpose.",
+        "example1": "Reselling under your brand a scoring tool bought from a vendor.",
+        "example2": "Repurposing a general-purpose chatbot to screen applications.",
+        "options": {
+          "ownBrand": "Putting your name or trademark on it (Art. 25(1)(a))",
+          "substantialModification": "Substantially modifying it, for example retraining it (Art. 25(1)(b))",
+          "changedPurpose": "Changing its intended purpose (Art. 25(1)(c))"
+        }
+      }
+    }
   }
 }
