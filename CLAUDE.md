@@ -87,6 +87,15 @@ packages/verify/         outil de vérification open source
   Seule la purge d'une organisation (`app.purge_org` positionné dans la transaction) supprime ses entrées.
 - Métadonnées : jamais de secret, de jeton ni de charge brute. Export CSV : cellules protégées contre l'injection de formules.
 
+## File de jobs (conventions établies par PL-107)
+- `src/server/system/jobs/` : `defineJob({ type, schema, handle })`, enregistré dans `handlers.ts` (`jobRegistry`),
+  puis `enqueue(job, payload, { runAt, dedupeKey, orgId, runNow })`. Drainage : `/api/cron/drain` chaque minute
+  (`vercel.json`, `CRON_SECRET`) ; `runNow` exécute aussitôt par `waitUntil`, le cron restant le filet de sécurité.
+- Toute écriture en base d'un gestionnaire passe par `ctx.tx` : elle est validée avec le passage du job à DONE, ou
+  annulée. Si le job porte un `orgId`, `app.org_id` est positionné dans `ctx.tx` (RLS).
+- Les effets hors base (réseau, email) doivent être idempotents : une tentative interrompue est rejouée.
+- Bail de 5 min (`LEASE_MS`) : aucune tentative ne doit durer plus longtemps (`timeoutMs`, 60 s par défaut).
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**
