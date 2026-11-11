@@ -1,9 +1,9 @@
 // Organisations, membres et invitations (PL-104, §3.2 E10). Les écritures passent par Better Auth, qui applique
 // aussi son contrôle d'accès ; les règles propres à ProofLayer (rôle owner, dernier owner) sont vérifiées ici d'abord.
 // Member et Invitation sont des tables d'identité gérées par Better Auth, sans colonne orgId : elles sont lues par
-// `prisma`, filtrées explicitement sur l'organisation active.
+// src/server/system/identity.ts, filtrées explicitement sur l'organisation active.
 import { auth } from "@/server/auth";
-import { prisma } from "@/server/db";
+import * as identity from "@/server/system/identity";
 import type { OrgRole } from "@/generated/prisma/enums";
 import { ServiceError } from "./errors";
 import { canAssignRole, leavesAnOwner } from "./role-policy";
@@ -16,10 +16,7 @@ export interface OrgContext {
 }
 
 export async function getOrganization(ctx: OrgContext) {
-  const org = await prisma.organization.findUnique({
-    where: { id: ctx.orgId },
-    select: { id: true, name: true, slug: true, country: true, employeeBand: true },
-  });
+  const org = await identity.organizationById(ctx.orgId);
   if (!org) throw new ServiceError("NOT_FOUND", "organization.notFound");
   return { ...org, role: ctx.role };
 }
@@ -32,11 +29,7 @@ export async function updateOrganization(ctx: OrgContext, input: { name: string 
 }
 
 export async function listMembers(ctx: OrgContext) {
-  const members = await prisma.member.findMany({
-    where: { organizationId: ctx.orgId },
-    orderBy: { createdAt: "asc" },
-    select: { id: true, role: true, userId: true, user: { select: { name: true, email: true } } },
-  });
+  const members = await identity.membersOf(ctx.orgId);
   return members.map((m) => ({
     id: m.id,
     role: m.role,
@@ -47,16 +40,10 @@ export async function listMembers(ctx: OrgContext) {
 }
 
 async function findMember(ctx: OrgContext, memberId: string) {
-  const member = await prisma.member.findFirst({
-    where: { id: memberId, organizationId: ctx.orgId },
-    select: { id: true, role: true },
-  });
+  const member = await identity.memberInOrganization(ctx.orgId, memberId);
   if (!member) throw new ServiceError("NOT_FOUND", "member.notFound");
   return member;
 }
-
-const countOwners = (orgId: string) =>
-  prisma.member.count({ where: { organizationId: orgId, role: "owner" } });
 
 export async function inviteMember(ctx: OrgContext, input: { email: string; role: OrgRole }) {
   if (!canAssignRole(ctx.role, null, input.role))
@@ -72,7 +59,7 @@ export async function setMemberRole(ctx: OrgContext, input: { memberId: string; 
   if (!canAssignRole(ctx.role, target.role, input.role)) {
     throw new ServiceError("FORBIDDEN", "role.forbidden");
   }
-  if (!leavesAnOwner(await countOwners(ctx.orgId), target.role, input.role)) {
+  if (!leavesAnOwner(await identity.countOwners(ctx.orgId), target.role, input.role)) {
     throw new ServiceError("CONFLICT", "role.lastOwner");
   }
   await auth.api.updateMemberRole({
@@ -85,7 +72,7 @@ export async function removeMember(ctx: OrgContext, input: { memberId: string })
   const target = await findMember(ctx, input.memberId);
   if (!canAssignRole(ctx.role, target.role, null))
     throw new ServiceError("FORBIDDEN", "role.forbidden");
-  if (!leavesAnOwner(await countOwners(ctx.orgId), target.role, null)) {
+  if (!leavesAnOwner(await identity.countOwners(ctx.orgId), target.role, null)) {
     throw new ServiceError("CONFLICT", "role.lastOwner");
   }
   await auth.api.removeMember({
@@ -95,19 +82,12 @@ export async function removeMember(ctx: OrgContext, input: { memberId: string })
 }
 
 export async function listPendingInvitations(ctx: OrgContext) {
-  const invitations = await prisma.invitation.findMany({
-    where: { organizationId: ctx.orgId, status: "pending", expiresAt: { gt: new Date() } },
-    orderBy: { createdAt: "desc" },
-    select: { id: true, email: true, role: true, expiresAt: true },
-  });
+  const invitations = await identity.pendingInvitationsOf(ctx.orgId, new Date());
   return invitations.map((i) => ({ ...i, expiresAt: i.expiresAt.toISOString() }));
 }
 
 export async function revokeInvitation(ctx: OrgContext, input: { invitationId: string }) {
-  const invitation = await prisma.invitation.findFirst({
-    where: { id: input.invitationId, organizationId: ctx.orgId },
-    select: { id: true },
-  });
+  const invitation = await identity.invitationInOrganization(ctx.orgId, input.invitationId);
   if (!invitation) throw new ServiceError("NOT_FOUND", "invitation.notFound");
   await auth.api.cancelInvitation({ headers: ctx.headers, body: { invitationId: invitation.id } });
 }
@@ -128,8 +108,7 @@ async function availableSlug(name: string): Promise<string> {
   const base = slugify(name);
   for (let n = 1; n < 100; n += 1) {
     const slug = n === 1 ? base : `${base}-${n}`;
-    if (!(await prisma.organization.findUnique({ where: { slug }, select: { id: true } })))
-      return slug;
+    if (!(await identity.isSlugTaken(slug))) return slug;
   }
   return `${base}-${crypto.randomUUID().slice(0, 8)}`;
 }
@@ -146,12 +125,7 @@ export async function createOrganizationForCurrentUser(headers: Headers, input: 
 
 /** Organisations dont l'utilisateur est membre, pour le changement d'organisation active. */
 export async function listOwnMemberships(userId: string) {
-  const members = await prisma.member.findMany({
-    where: { userId },
-    orderBy: { createdAt: "asc" },
-    select: { role: true, organization: { select: { id: true, name: true } } },
-  });
-  return members.map((m) => ({ id: m.organization.id, name: m.organization.name, role: m.role }));
+  return identity.membershipsOfUser(userId);
 }
 
 export type InvitationCheck = "valid" | "invalid" | "wrongAccount";
@@ -161,10 +135,7 @@ export async function checkInvitationFor(
   invitationId: string,
   email: string,
 ): Promise<InvitationCheck> {
-  const invitation = await prisma.invitation.findUnique({
-    where: { id: invitationId },
-    select: { email: true, status: true, expiresAt: true },
-  });
+  const invitation = await identity.invitationById(invitationId);
   if (!invitation || invitation.status !== "pending" || invitation.expiresAt <= new Date()) {
     return "invalid";
   }

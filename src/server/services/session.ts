@@ -2,7 +2,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, type AuthSession } from "@/server/auth";
-import { prisma } from "@/server/db";
+import { rolesOfUser } from "@/server/system/identity";
 import { mustSetUpTwoFactor } from "./two-factor-policy";
 
 export const SIGN_IN_PATH = "/sign-in";
@@ -13,11 +13,7 @@ export async function getCurrentSession(): Promise<AuthSession | null> {
   return auth.api.getSession({ headers: await headers() });
 }
 
-/** Rôles de l'utilisateur dans toutes ses organisations. */
-async function rolesOf(userId: string) {
-  const members = await prisma.member.findMany({ where: { userId }, select: { role: true } });
-  return members.map((m) => m.role);
-}
+const rolesOf = rolesOfUser;
 
 export async function isTwoFactorSetupRequired(session: AuthSession): Promise<boolean> {
   return mustSetUpTwoFactor(await rolesOf(session.user.id), session.user.twoFactorEnabled === true);

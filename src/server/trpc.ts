@@ -5,7 +5,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { APIError } from "better-auth/api";
 import type { OrgRole } from "@/generated/prisma/enums";
 import type { Context } from "./context";
-import { forOrg, prisma } from "./db";
+import { forOrg } from "./db";
+import { findMembership } from "./system/identity";
 import { ServiceError } from "./services/errors";
 
 export interface ProcedureMeta {
@@ -51,9 +52,7 @@ export const orgProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const orgId = ctx.session?.activeOrganizationId;
   if (!ctx.session || !orgId) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-  const member = await prisma.member.findUnique({
-    where: { organizationId_userId: { organizationId: orgId, userId: ctx.session.userId } },
-  });
+  const member = await findMembership(orgId, ctx.session.userId);
   if (!member) throw new TRPCError({ code: "FORBIDDEN" });
 
   return next({
