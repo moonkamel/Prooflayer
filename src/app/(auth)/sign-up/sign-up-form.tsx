@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const ONBOARDING_PATH = "/onboarding";
 
@@ -44,28 +48,28 @@ export function SignUpForm({
     else setSentTo(email);
   }
 
-  if (sentTo) return <p role="status">{t("checkEmail", { email: sentTo })}</p>;
+  if (sentTo) return <Alert>{t("checkEmail", { email: sentTo })}</Alert>;
 
   return (
     <>
-      <form onSubmit={onSubmit} aria-busy={pending}>
-        <label>
+      <form className="max-w-md space-y-3" onSubmit={onSubmit} aria-busy={pending}>
+        <Label>
           {t("name")}
-          <input name="name" autoComplete="name" required />
-        </label>
+          <Input name="name" autoComplete="name" required />
+        </Label>
         {!next && (
-          <label>
+          <Label>
             {t("company")}
-            <input name="company" autoComplete="organization" maxLength={120} required />
-          </label>
+            <Input name="company" autoComplete="organization" maxLength={120} required />
+          </Label>
         )}
-        <label>
+        <Label>
           {tc("email")}
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
+          <Input name="email" type="email" autoComplete="email" required />
+        </Label>
+        <Label>
           {tc("password")}
-          <input
+          <Input
             name="password"
             type="password"
             autoComplete="new-password"
@@ -74,22 +78,23 @@ export function SignUpForm({
             required
             aria-describedby="password-hint"
           />
-        </label>
+        </Label>
         <p id="password-hint">{t("passwordHint")}</p>
-        {error && <p role="alert">{tc("genericError")}</p>}
-        <button type="submit" disabled={pending}>
+        {error && <Alert tone="error">{tc("genericError")}</Alert>}
+        <Button type="submit" disabled={pending}>
           {pending ? tc("loading") : t("submit")}
-        </button>
+        </Button>
       </form>
       {googleEnabled && (
-        <button
+        <Button
+          variant="outline"
           type="button"
           onClick={() =>
             authClient.signIn.social({ provider: "google", callbackURL: next ?? ONBOARDING_PATH })
           }
         >
           {t("withGoogle")}
-        </button>
+        </Button>
       )}
       <p>
         {t("haveAccount")}{" "}

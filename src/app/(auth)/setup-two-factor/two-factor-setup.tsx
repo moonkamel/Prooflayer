@@ -4,6 +4,10 @@ import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import { AFTER_SIGN_IN_PATH, authClient } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Step =
   | { name: "password" }
@@ -51,50 +55,50 @@ export function TwoFactorSetup() {
 
   if (step.name === "password") {
     return (
-      <form onSubmit={start} aria-busy={pending}>
+      <form className="max-w-md space-y-3" onSubmit={start} aria-busy={pending}>
         <p>{t("confirmPassword")}</p>
-        <label>
+        <Label>
           {tc("password")}
-          <input name="password" type="password" autoComplete="current-password" required />
-        </label>
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={pending}>
+          <Input name="password" type="password" autoComplete="current-password" required />
+        </Label>
+        {error && <Alert tone="error">{error}</Alert>}
+        <Button type="submit" disabled={pending}>
           {pending ? tc("loading") : t("start")}
-        </button>
+        </Button>
       </form>
     );
   }
 
   if (step.name === "verify") {
     return (
-      <form onSubmit={verify} aria-busy={pending}>
+      <form className="max-w-md space-y-3" onSubmit={verify} aria-busy={pending}>
         <p>{t("scan")}</p>
         {/* eslint-disable-next-line @next/next/no-img-element -- image générée localement en data: URI */}
         <img src={step.qr} alt="" width={224} height={224} />
         <p>
           {t("secretLabel")} : <code data-testid="totp-secret">{step.secret}</code>
         </p>
-        <label>
+        <Label>
           {t("enterCode")}
-          <input
+          <Input
             name="code"
             autoComplete="one-time-code"
             inputMode="numeric"
             pattern="[0-9]{6}"
             required
           />
-        </label>
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={pending}>
+        </Label>
+        {error && <Alert tone="error">{error}</Alert>}
+        <Button type="submit" disabled={pending}>
           {pending ? tc("loading") : t("verify")}
-        </button>
+        </Button>
       </form>
     );
   }
 
   return (
     <section aria-labelledby="backup-title">
-      <p role="status">{t("enabled")}</p>
+      <Alert>{t("enabled")}</Alert>
       <h2 id="backup-title">{t("backupTitle")}</h2>
       <p>{t("backupIntro")}</p>
       <ul data-testid="backup-codes">
@@ -104,9 +108,13 @@ export function TwoFactorSetup() {
           </li>
         ))}
       </ul>
-      <button type="button" onClick={() => window.location.assign(AFTER_SIGN_IN_PATH)}>
+      <Button
+        variant="outline"
+        type="button"
+        onClick={() => window.location.assign(AFTER_SIGN_IN_PATH)}
+      >
         {t("backupDone")}
-      </button>
+      </Button>
     </section>
   );
 }

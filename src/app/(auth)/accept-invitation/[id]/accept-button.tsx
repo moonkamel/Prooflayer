@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { AFTER_SIGN_IN_PATH, authClient } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 export function AcceptInvitationButton({ invitationId }: { invitationId: string }) {
   const t = useTranslations("acceptInvitation");
@@ -12,7 +14,8 @@ export function AcceptInvitationButton({ invitationId }: { invitationId: string 
   const [failed, setFailed] = useState(false);
   return (
     <>
-      <button
+      <Button
+        variant="outline"
         type="button"
         disabled={pending}
         onClick={async () => {
@@ -29,8 +32,8 @@ export function AcceptInvitationButton({ invitationId }: { invitationId: string 
         }}
       >
         {t("accept")}
-      </button>
-      {failed && <p role="alert">{t("invalid")}</p>}
+      </Button>
+      {failed && <Alert tone="error">{t("invalid")}</Alert>}
     </>
   );
 }

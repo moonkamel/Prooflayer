@@ -1,0 +1,76 @@
+// PL-109 — Audit axe sans erreur sur la coque (§5.2 : WCAG 2.2 niveau AA), langue et navigation au clavier.
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test, type Page } from "@playwright/test";
+import { createWorkspace, signUpAndVerify, uniqueEmail, withFreshClientIp } from "./helpers/auth";
+
+test.describe.configure({ mode: "serial", timeout: 120_000 });
+
+const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+async function expectNoViolations(page: Page, label: string) {
+  const { violations } = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+  const summary = violations.map(
+    (v) => `${v.id} (${v.impact}) : ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
+  );
+  expect(summary, `violations axe sur ${label}`).toEqual([]);
+}
+
+test("écrans publics : aucune violation WCAG 2.2 AA", async ({ page }) => {
+  await withFreshClientIp(page);
+  for (const path of [
+    "/",
+    "/sign-in",
+    "/sign-up",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
+  ]) {
+    await page.goto(path);
+    await expectNoViolations(page, path);
+  }
+});
+
+test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", async ({ page }) => {
+  const email = uniqueEmail("a11y");
+  await signUpAndVerify(page, email, { company: "Accessible" });
+  await expectNoViolations(page, "/verify-email (succès)");
+  await page.getByRole("link", { name: "Continuer" }).click();
+  await expectNoViolations(page, "/onboarding");
+  await page.getByRole("button", { name: "Créer mon espace" }).click();
+  await expect(page).toHaveURL(/\/setup-two-factor/u);
+  await expectNoViolations(page, "/setup-two-factor");
+  await page.goto("/account");
+  await page.context().clearCookies();
+
+  await createWorkspace(page, uniqueEmail("a11y-owner"), "Accessible SAS");
+  for (const path of ["/account", "/organization", "/audit"]) {
+    await page.goto(path);
+    await expectNoViolations(page, path);
+  }
+});
+
+test("clavier : le lien d'évitement est le premier élément focalisable et mène au contenu", async ({
+  page,
+}) => {
+  await page.goto("/sign-in");
+  await page.keyboard.press("Tab");
+  const skip = page.getByRole("link", { name: "Aller au contenu" });
+  await expect(skip).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#contenu$/u);
+});
+
+test("langue : le sélecteur bascule l'interface et l'attribut lang du document", async ({
+  page,
+}) => {
+  await page.goto("/sign-in");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page).toHaveTitle("Connexion · ProofLayer");
+  await page.getByLabel("Langue").selectOption("en");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page).toHaveTitle("Sign in · ProofLayer");
+  await expectNoViolations(page, "/sign-in (en)");
+  await page.getByLabel("Language").selectOption("fr");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Connexion");
+});

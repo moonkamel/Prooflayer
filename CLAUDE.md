@@ -96,6 +96,17 @@ packages/verify/         outil de vérification open source
 - Les effets hors base (réseau, email) doivent être idempotents : une tentative interrompue est rejouée.
 - Bail de 5 min (`LEASE_MS`) : aucune tentative ne doit durer plus longtemps (`timeoutMs`, 60 s par défaut).
 
+## Interface (conventions établies par PL-109)
+- Tailwind v4 (jetons dans `src/app/globals.css`, contrastes AA), composants shadcn/ui dans `src/components/ui/`
+  (Button, Input, Select, Label, Table, Alert, Card), utilitaire `cn` (`src/lib/utils.ts`).
+- Coques : `src/app/(app)/layout.tsx` (espace connecté : navigation, organisation active, langue) et
+  `src/app/(auth)/layout.tsx` (écrans hors session). La coque porte l'unique `<main id="contenu">` ; une page n'en déclare pas.
+- Statuts de contrôle : `<StatusBadge status=… />` uniquement (icône + libellé + couleur, contraste vérifié par test).
+- Règle ESLint `react/jsx-no-literals` : aucun texte en dur dans le JSX, ni dans `aria-label`, `title`, `alt`, `placeholder`.
+- Chaque page exporte `generateMetadata` avec un titre traduit (gabarit « %s · ProofLayer »).
+- Liens soulignés par défaut ; erreurs en `<Alert tone="error">` (role="alert"), informations en `<Alert>` (role="status").
+- Accessibilité : `tests/e2e/a11y.spec.ts` (axe, WCAG 2.2 AA) ; tout nouvel écran y est ajouté.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

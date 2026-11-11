@@ -58,8 +58,13 @@ test("chaque écriture est journalisée, filtrable et exportable ; journal refus
 
     // Consultation : une entrée par écriture, la plus récente en tête, acteur nommé.
     await page.goto("/organization");
-    await page.getByRole("link", { name: "Journal d'audit" }).click();
+    const nav = page.getByRole("navigation", { name: "Navigation principale" });
+    await nav.getByRole("link", { name: "Journal d'audit" }).click();
     await expect(page).toHaveURL(/\/audit/u);
+    await expect(nav.getByRole("link", { name: "Journal d'audit" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     const entries = page.getByTestId("audit-entry");
     const actions = await entries.evaluateAll((rows) =>
       rows.map((r) => r.getAttribute("data-action")),

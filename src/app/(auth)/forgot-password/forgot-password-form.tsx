@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("forgotPassword");
@@ -30,23 +34,23 @@ export function ForgotPasswordForm() {
   if (sent) {
     return (
       <>
-        <p role="status">{t("sent")}</p>
+        <Alert>{t("sent")}</Alert>
         <Link href="/sign-in">{tc("backToSignIn")}</Link>
       </>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} aria-busy={pending}>
+    <form className="max-w-md space-y-3" onSubmit={onSubmit} aria-busy={pending}>
       <p>{t("intro")}</p>
-      <label>
+      <Label>
         {tc("email")}
-        <input name="email" type="email" autoComplete="email" required />
-      </label>
-      {error && <p role="alert">{tc("genericError")}</p>}
-      <button type="submit" disabled={pending}>
+        <Input name="email" type="email" autoComplete="email" required />
+      </Label>
+      {error && <Alert tone="error">{tc("genericError")}</Alert>}
+      <Button type="submit" disabled={pending}>
         {pending ? tc("loading") : t("submit")}
-      </button>
+      </Button>
     </form>
   );
 }

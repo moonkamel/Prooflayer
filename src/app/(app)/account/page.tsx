@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { listOwnMemberships } from "@/server/services/organization";
@@ -8,6 +9,11 @@ import {
   SignOutButton,
   SwitchOrganizationButton,
 } from "./session-controls";
+
+/** Titre du document (WCAG 2.4.2), complété par « · ProofLayer » (gabarit de src/app/layout.tsx). */
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("account"))("title") };
+}
 
 export default async function AccountPage() {
   const session = await requireSession();
@@ -20,7 +26,7 @@ export default async function AccountPage() {
   const format = await getFormatter();
 
   return (
-    <main>
+    <div className="space-y-4">
       <h1>{t("title")}</h1>
       <p>
         {session.user.name} · {session.user.email}
@@ -77,6 +83,6 @@ export default async function AccountPage() {
       </section>
 
       <SignOutButton />
-    </main>
+    </div>
   );
 }
