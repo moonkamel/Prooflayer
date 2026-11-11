@@ -21,11 +21,14 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:check": "tsx scripts/db-check.ts"
+    "db:check": "tsx scripts/db-check.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@trpc/client": "11.26.0",
+    "@trpc/server": "11.26.0",
     "better-auth": "1.7.18",
     "next": "16.4.6",
     "next-intl": "4.14.9",

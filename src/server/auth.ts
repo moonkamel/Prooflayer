@@ -1,12 +1,13 @@
 // Authentification (PL-103, §4.2, §4.7) : Better Auth, sessions en base, mots de passe hachés en scrypt (défaut).
 // Email et mot de passe avec vérification d'adresse, réinitialisation, Google (OIDC) si configuré, 2FA TOTP.
-// Les organisations et les invitations (plugin organization) arrivent avec PL-104.
+// PL-104 : organisations, invitations par email (7 jours, révocables) et les quatre rôles du §3.2 E10.
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import { twoFactor } from "better-auth/plugins";
+import { organization, twoFactor } from "better-auth/plugins";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/config";
-import { sendAuthEmail } from "./email/auth-emails";
+import { ac, roles } from "./auth-roles";
+import { renderInvitationEmail, sendAuthEmail } from "./email/auth-emails";
 import { createEmailTransport } from "./email/transport";
 import { prisma } from "./db";
 
@@ -78,10 +79,47 @@ export const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        // Toute nouvelle session s'ouvre sur une organisation du membre, s'il en a une.
+        before: async (session) => {
+          const s = session as typeof session & { activeOrganizationId?: string | null };
+          if (s.activeOrganizationId) return;
+          const member = await prisma.member.findFirst({
+            where: { userId: session.userId },
+            orderBy: { createdAt: "asc" },
+            select: { organizationId: true },
+          });
+          if (!member) return;
+          return { data: { ...session, activeOrganizationId: member.organizationId } };
+        },
+      },
+    },
   },
 
   plugins: [
     twoFactor({ issuer: "ProofLayer", backupCodeOptions: { amount: 10 } }),
+    organization({
+      ac,
+      roles,
+      creatorRole: "owner",
+      invitationExpiresIn: 7 * 24 * 60 * 60, // 7 jours (§3.2 E10)
+      cancelPendingInvitationsOnReInvite: true,
+      requireEmailVerificationOnInvitation: true,
+      sendInvitationEmail: async ({ id, email, organization, inviter, role }) => {
+        const base = process.env.BETTER_AUTH_URL ?? "";
+        await transport().send(
+          await renderInvitationEmail({
+            to: email,
+            organization: organization.name,
+            inviter: inviter.user.name,
+            role,
+            url: `${base}/accept-invitation/${encodeURIComponent(id)}`,
+            locale: (inviter.user as { locale?: unknown }).locale,
+          }),
+        );
+      },
+    }),
     // Doit rester le dernier plugin : pose les cookies de session depuis les actions serveur.
     nextCookies(),
   ],

@@ -16,7 +16,8 @@
     "withGoogle": "Continue with Google",
     "haveAccount": "Already have an account?",
     "signIn": "Sign in",
-    "checkEmail": "A verification email has been sent to {email}. Open the link it contains to activate your account."
+    "checkEmail": "A verification email has been sent to {email}. Open the link it contains to activate your account.",
+    "company": "Company name"
   },
   "signIn": {
     "title": "Sign in",
@@ -84,7 +85,10 @@
     "sessionUnknownDevice": "Unknown device",
     "revoke": "Sign out",
     "revokeOthers": "Sign out all other sessions",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "organizationsTitle": "Organizations",
+    "active": "Active",
+    "switchTo": "Switch"
   },
   "emails": {
     "verify": {
@@ -94,6 +98,53 @@
     "resetPassword": {
       "subject": "Reset your password",
       "body": "Hello {name},\n\nTo choose a new password, open this link, valid for one hour:\n{url}\n\nIf you did not make this request, ignore this email: your password stays unchanged."
+    },
+    "invitation": {
+      "subject": "Invitation to join {organization} on ProofLayer",
+      "body": "Hello,\n\n{inviter} invites you to join {organization} on ProofLayer, with the role \"{role}\".\n\nTo accept, open this link, valid for 7 days:\n{url}\n\nIf you do not know this person, ignore this email."
     }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Administrator",
+    "contributor": "Contributor",
+    "auditor": "Auditor"
+  },
+  "onboarding": {
+    "title": "Create your organization",
+    "intro": "Your organization holds your AI systems, your evidence and your team.",
+    "name": "Company name",
+    "submit": "Create my workspace"
+  },
+  "organization": {
+    "title": "Organization",
+    "nav": "Manage the organization",
+    "name": "Name",
+    "rename": "Rename",
+    "membersTitle": "Members",
+    "you": "you",
+    "role": "Role",
+    "changeRole": "Change role",
+    "remove": "Remove",
+    "inviteTitle": "Invite a colleague",
+    "inviteEmail": "Email address",
+    "inviteRole": "Role",
+    "inviteSubmit": "Send the invitation",
+    "invited": "Invitation sent to {email}.",
+    "invitationsTitle": "Pending invitations",
+    "invitationExpires": "Expires on {date}",
+    "revoke": "Revoke",
+    "noInvitations": "No pending invitations.",
+    "forbidden": "Your role does not allow this action.",
+    "lastOwner": "The organization must keep at least one owner."
+  },
+  "acceptInvitation": {
+    "title": "Invitation",
+    "intro": "You are invited to join an organization on ProofLayer.",
+    "signIn": "Sign in to accept",
+    "signUp": "Create an account to accept",
+    "accept": "Accept the invitation",
+    "invalid": "This invitation is invalid, expired, revoked or addressed to another email address.",
+    "wrongAccount": "Signed in as {email}. This invitation must be accepted with the address it was sent to."
   }
 }

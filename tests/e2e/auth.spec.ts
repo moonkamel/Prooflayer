@@ -1,10 +1,12 @@
 // PL-103 — Parcours d'authentification de bout en bout, sur une vraie base et le vrai serveur.
 import { randomUUID } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
-import pg from "pg";
+import { expect, test } from "@playwright/test";
 import {
   appAlert,
   appStatus,
+  createWorkspace,
+  enableTwoFactor,
+  nextTotp,
   signIn,
   signOut,
   signUpAndVerify,
@@ -13,46 +15,14 @@ import {
 } from "./helpers/auth";
 import { E2E_PASSWORD } from "./helpers/env";
 import { waitForEmailLink } from "./helpers/outbox";
-import { totp } from "./helpers/totp";
 
 // Parcours en série : chacun ouvre plusieurs sessions et les limites de débit de Better Auth s'appliquent par IP.
 test.describe.configure({ mode: "serial" });
 
-async function enableTwoFactor(page: Page): Promise<{ secret: string; backupCodes: string[] }> {
-  await page.goto("/setup-two-factor");
-  await page.getByLabel("Mot de passe").fill(E2E_PASSWORD);
-  await page.getByRole("button", { name: "Commencer" }).click();
-  const secret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
-  expect(secret).toMatch(/^[A-Z2-7]+=*$/u);
-  await page
-    .getByLabel("Saisissez le code à 6 chiffres affiché par l'application.")
-    .fill(totp(secret));
-  await page.getByRole("button", { name: "Activer" }).click();
-  await expect(appStatus(page)).toHaveText("La double authentification est active.");
-  const backupCodes = (
-    await page.getByTestId("backup-codes").locator("code").allTextContents()
-  ).map((c) => c.trim());
-  await page.getByRole("button", { name: "J'ai conservé mes codes" }).click();
-  await expect(page).toHaveURL(/\/account/u);
-  return { secret, backupCodes };
-}
-
-/** Code TOTP d'une fenêtre de 30 s différente de `previous`, pour ne jamais rejouer un code déjà accepté. */
-async function freshTotp(secret: string, previous: string): Promise<string> {
-  let code = totp(secret);
-  while (code === previous) {
-    await new Promise((r) => setTimeout(r, 1_000));
-    code = totp(secret);
-  }
-  return code;
-}
-
 test("inscription, vérification de l'email, connexion et déconnexion", async ({ page }) => {
   const email = uniqueEmail("signup");
-  await signUpAndVerify(page, email);
+  const { secret } = await createWorkspace(page, email);
 
-  // Connecté automatiquement après la vérification.
-  await page.goto("/account");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mon profil");
   await expect(page.getByText(email)).toBeVisible();
 
@@ -60,7 +30,7 @@ test("inscription, vérification de l'email, connexion et déconnexion", async (
   await page.goto("/account");
   await expect(page).toHaveURL(/\/sign-in/u);
 
-  await signIn(page, email);
+  await signIn(page, email, E2E_PASSWORD, secret);
   await expect(page).toHaveURL(/\/account/u);
 });
 
@@ -69,6 +39,7 @@ test("connexion refusée avec un mauvais mot de passe ou un email non vérifié"
   await withFreshClientIp(page);
   await page.goto("/sign-up");
   await page.getByLabel("Nom complet").fill("Mehdi");
+  await page.getByLabel("Nom de l'entreprise").fill("Paylence");
   await page.getByLabel("Adresse email").fill(email);
   await page.getByLabel("Mot de passe").fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "Créer mon espace" }).click();
@@ -87,7 +58,7 @@ test("connexion refusée avec un mauvais mot de passe ou un email non vérifié"
 test("réinitialisation du mot de passe", async ({ page }) => {
   const email = uniqueEmail("reset");
   await signUpAndVerify(page, email);
-  await signOut(page);
+  await page.context().clearCookies();
 
   const since = new Date();
   await withFreshClientIp(page);
@@ -107,16 +78,15 @@ test("réinitialisation du mot de passe", async ({ page }) => {
   await signIn(page, email);
   await expect(appAlert(page)).toHaveText("Adresse email ou mot de passe incorrect.");
   await signIn(page, email, newPassword);
-  await expect(page).toHaveURL(/\/account/u);
+  // Connecté ; sans organisation, l'espace connecté mène d'abord à sa création.
+  await expect(page).toHaveURL(/\/onboarding/u);
 });
 
 test("double authentification TOTP et codes de secours", async ({ page }) => {
   const email = uniqueEmail("totp");
-  await signUpAndVerify(page, email);
-  const { secret, backupCodes } = await enableTwoFactor(page);
+  const { secret, backupCodes } = await createWorkspace(page, email);
   expect(backupCodes).toHaveLength(10);
   await expect(page.getByTestId("two-factor-status")).toHaveText("Active");
-  const enableCode = totp(secret);
   await signOut(page);
 
   // Le mot de passe seul ne suffit plus.
@@ -128,7 +98,7 @@ test("double authentification TOTP et codes de secours", async ({ page }) => {
   // Code TOTP.
   await signIn(page, email);
   await expect(page).toHaveURL(/\/two-factor/u);
-  await page.getByLabel("Code").fill(await freshTotp(secret, enableCode));
+  await page.getByLabel("Code").fill(await nextTotp(secret));
   await page.getByRole("button", { name: "Vérifier" }).click();
   await expect(page).toHaveURL(/\/account/u);
   await signOut(page);
@@ -151,40 +121,28 @@ test("double authentification TOTP et codes de secours", async ({ page }) => {
 
 test("2FA obligatoire à la première connexion pour un owner", async ({ page }) => {
   const email = uniqueEmail("owner");
-  await signUpAndVerify(page, email);
+  await signUpAndVerify(page, email, { company: "Recrutys" });
+  await page.getByRole("link", { name: "Continuer" }).click();
+  await page.getByRole("button", { name: "Créer mon espace" }).click();
 
-  // Le rôle owner est attribué directement en base : les organisations arrivent avec PL-104.
-  const client = new pg.Client({ connectionString: process.env.DIRECT_DATABASE_URL });
-  await client.connect();
-  try {
-    const orgId = `org_e2e_${randomUUID()}`;
-    await client.query(`INSERT INTO "Organization" (id, name, slug) VALUES ($1, 'E2E', $1)`, [
-      orgId,
-    ]);
-    await client.query(
-      `INSERT INTO "Member" (id, "organizationId", "userId", role)
-       SELECT $1, $2, id, 'owner' FROM "User" WHERE email = $3`,
-      [`mem_${randomUUID()}`, orgId, email],
-    );
-  } finally {
-    await client.end();
-  }
-
-  await page.goto("/account");
+  // Créateur de l'organisation, donc owner : aucun accès avant l'activation de la 2FA.
   await expect(page).toHaveURL(/\/setup-two-factor/u);
   await expect(appAlert(page)).toContainText("obligatoire pour les rôles owner et admin");
+  await page.goto("/account");
+  await expect(page).toHaveURL(/\/setup-two-factor/u);
 
   await enableTwoFactor(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mon profil");
+  await expect(page.getByTestId("organizations")).toContainText("Recrutys · Propriétaire");
 });
 
 test("sessions listées et révocables depuis le profil", async ({ browser }) => {
   const email = uniqueEmail("sessions");
   const a = await browser.newPage();
-  const b = await browser.newPage({ storageState: undefined });
+  const b = await browser.newPage();
   try {
-    await signUpAndVerify(a, email);
-    await signIn(b, email);
+    const { secret } = await createWorkspace(a, email);
+    await signIn(b, email, E2E_PASSWORD, secret);
     await expect(b).toHaveURL(/\/account/u);
 
     await a.goto("/account");

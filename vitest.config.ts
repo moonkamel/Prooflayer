@@ -7,7 +7,8 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
-    exclude: ["tests/e2e/**", "node_modules/**"],
+    // Intégration (base réelle) : vitest.integration.config.ts, lancé par `pnpm test:integration`.
+    exclude: ["tests/e2e/**", "tests/integration/**", "node_modules/**"],
     environment: "node",
   },
 });

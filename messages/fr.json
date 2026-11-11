@@ -16,7 +16,8 @@
     "withGoogle": "Continuer avec Google",
     "haveAccount": "Déjà un compte ?",
     "signIn": "Se connecter",
-    "checkEmail": "Un email de vérification vient d'être envoyé à {email}. Ouvrez le lien qu'il contient pour activer votre compte."
+    "checkEmail": "Un email de vérification vient d'être envoyé à {email}. Ouvrez le lien qu'il contient pour activer votre compte.",
+    "company": "Nom de l'entreprise"
   },
   "signIn": {
     "title": "Connexion",
@@ -84,7 +85,10 @@
     "sessionUnknownDevice": "Appareil inconnu",
     "revoke": "Fermer",
     "revokeOthers": "Fermer toutes les autres sessions",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "organizationsTitle": "Organisations",
+    "active": "Active",
+    "switchTo": "Basculer"
   },
   "emails": {
     "verify": {
@@ -94,6 +98,53 @@
     "resetPassword": {
       "subject": "Réinitialisation de votre mot de passe",
       "body": "Bonjour {name},\n\nPour choisir un nouveau mot de passe, ouvrez ce lien, valable une heure :\n{url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé."
+    },
+    "invitation": {
+      "subject": "Invitation à rejoindre {organization} sur ProofLayer",
+      "body": "Bonjour,\n\n{inviter} vous invite à rejoindre {organization} sur ProofLayer, avec le rôle « {role} ».\n\nPour accepter, ouvrez ce lien, valable 7 jours :\n{url}\n\nSi vous ne connaissez pas cette personne, ignorez cet email."
     }
+  },
+  "roles": {
+    "owner": "Propriétaire",
+    "admin": "Administrateur",
+    "contributor": "Contributeur",
+    "auditor": "Auditeur"
+  },
+  "onboarding": {
+    "title": "Créer votre organisation",
+    "intro": "Votre organisation regroupe vos systèmes d'IA, vos preuves et votre équipe.",
+    "name": "Nom de l'entreprise",
+    "submit": "Créer mon espace"
+  },
+  "organization": {
+    "title": "Organisation",
+    "nav": "Gérer l'organisation",
+    "name": "Nom",
+    "rename": "Renommer",
+    "membersTitle": "Membres",
+    "you": "vous",
+    "role": "Rôle",
+    "changeRole": "Modifier le rôle",
+    "remove": "Retirer",
+    "inviteTitle": "Inviter un collègue",
+    "inviteEmail": "Adresse email",
+    "inviteRole": "Rôle",
+    "inviteSubmit": "Envoyer l'invitation",
+    "invited": "Invitation envoyée à {email}.",
+    "invitationsTitle": "Invitations en attente",
+    "invitationExpires": "Expire le {date}",
+    "revoke": "Révoquer",
+    "noInvitations": "Aucune invitation en attente.",
+    "forbidden": "Votre rôle ne permet pas cette action.",
+    "lastOwner": "L'organisation doit garder au moins un propriétaire."
+  },
+  "acceptInvitation": {
+    "title": "Invitation",
+    "intro": "Vous êtes invité à rejoindre une organisation sur ProofLayer.",
+    "signIn": "Se connecter pour accepter",
+    "signUp": "Créer un compte pour accepter",
+    "accept": "Accepter l'invitation",
+    "invalid": "Cette invitation est invalide, expirée, révoquée ou adressée à une autre adresse email.",
+    "wrongAccount": "Connecté en tant que {email}. Cette invitation doit être acceptée avec l'adresse à laquelle elle a été envoyée."
   }
 }

@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { listOwnSessions, requireSession } from "@/server/services/session";
-import { RevokeOtherSessionsButton, RevokeSessionButton, SignOutButton } from "./session-controls";
+import { listOwnMemberships } from "@/server/services/organization";
+import { activeOrganizationIdOf, listOwnSessions, requireSession } from "@/server/services/session";
+import {
+  RevokeOtherSessionsButton,
+  RevokeSessionButton,
+  SignOutButton,
+  SwitchOrganizationButton,
+} from "./session-controls";
 
 export default async function AccountPage() {
   const session = await requireSession();
   const sessions = await listOwnSessions();
+  const memberships = await listOwnMemberships(session.user.id);
+  const activeOrgId = activeOrganizationIdOf(session);
   const t = await getTranslations("account");
+  const tr = await getTranslations("roles");
+  const to = await getTranslations("organization");
   const format = await getFormatter();
 
   return (
@@ -15,6 +25,23 @@ export default async function AccountPage() {
       <p>
         {session.user.name} · {session.user.email}
       </p>
+
+      <section aria-labelledby="organizations-title">
+        <h2 id="organizations-title">{t("organizationsTitle")}</h2>
+        <ul data-testid="organizations">
+          {memberships.map((m) => (
+            <li key={m.id} data-active={m.id === activeOrgId}>
+              {m.name} · <span data-testid="membership-role">{tr(m.role)}</span>{" "}
+              {m.id === activeOrgId ? (
+                <strong>{t("active")}</strong>
+              ) : (
+                <SwitchOrganizationButton organizationId={m.id} />
+              )}
+            </li>
+          ))}
+        </ul>
+        <Link href="/organization">{to("nav")}</Link>
+      </section>
 
       <section aria-labelledby="two-factor-title">
         <h2 id="two-factor-title">{t("twoFactorTitle")}</h2>
