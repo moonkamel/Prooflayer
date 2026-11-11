@@ -68,6 +68,16 @@ packages/verify/         outil de vérification open source
 - Retour après connexion : paramètre `?next=` filtré par `safePath()` (chemins internes uniquement).
 - `pnpm test:integration` : tests sur base réelle (`DATABASE_URL`, rôle applicatif), lancés dans le job CI `db`.
 
+## Isolation entre organisations (conventions établies par PL-105)
+- RLS activé et forcé, politique `tenant_isolation` sur `"orgId" = current_setting('app.org_id', true)`, pour toute
+  table portant `orgId` (exception : `Job`, table système). Une nouvelle table avec `orgId` reçoit sa politique dans
+  la même migration, sinon `tests/integration/isolation.test.ts` échoue (vérification du catalogue Postgres).
+- `prisma` n'est importé que par `src/server/db.ts` et `src/server/system/` (règle ESLint `no-restricted-imports`).
+  Données métier : `forOrg(orgId)`, ou `ctx.db` dans une procédure. Tables d'identité : `src/server/system/identity.ts`.
+- Une table ajoutée avec `orgId` doit aussi recevoir une donnée de test dans `isolation.test.ts` (test « couverture »).
+- Les tests d'intégration tournent sous le rôle applicatif ; la préparation hors organisation et le nettoyage passent
+  par `DIRECT_DATABASE_URL`.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

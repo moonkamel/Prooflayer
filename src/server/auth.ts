@@ -2,14 +2,14 @@
 // Email et mot de passe avec vérification d'adresse, réinitialisation, Google (OIDC) si configuré, 2FA TOTP.
 // PL-104 : organisations, invitations par email (7 jours, révocables) et les quatre rôles du §3.2 E10.
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { organization, twoFactor } from "better-auth/plugins";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/config";
 import { ac, roles } from "./auth-roles";
 import { renderInvitationEmail, sendAuthEmail } from "./email/auth-emails";
 import { createEmailTransport } from "./email/transport";
-import { prisma } from "./db";
+import { authDatabase } from "./system/auth-database";
+import { firstOrganizationIdOf } from "./system/identity";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -31,7 +31,7 @@ export const auth = betterAuth({
   appName: "ProofLayer",
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
-  database: prismaAdapter(prisma, { provider: "postgresql" }),
+  database: authDatabase,
 
   user: {
     additionalFields: {
@@ -85,13 +85,9 @@ export const auth = betterAuth({
         before: async (session) => {
           const s = session as typeof session & { activeOrganizationId?: string | null };
           if (s.activeOrganizationId) return;
-          const member = await prisma.member.findFirst({
-            where: { userId: session.userId },
-            orderBy: { createdAt: "asc" },
-            select: { organizationId: true },
-          });
-          if (!member) return;
-          return { data: { ...session, activeOrganizationId: member.organizationId } };
+          const organizationId = await firstOrganizationIdOf(session.userId);
+          if (!organizationId) return;
+          return { data: { ...session, activeOrganizationId: organizationId } };
         },
       },
     },

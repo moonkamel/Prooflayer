@@ -56,56 +56,60 @@ async function main(): Promise<void> {
     create: { id: MEMBER_ID, organizationId: org.id, userId: user.id, role: "owner" },
   });
 
-  // Essai de 14 jours, 1 système surveillé (§3.2 E11).
-  await prisma.subscription.upsert({
-    where: { orgId: org.id },
-    update: {},
-    create: { orgId: org.id, plan: "TRIAL", status: "trialing", monitoredSystemsLimit: 1 },
-  });
+  // Données métier de l'organisation : RLS forcé (PL-105), donc app.org_id positionné dans la même transaction.
+  const systems = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT set_config('app.org_id', ${org.id}, TRUE)`;
+    // Essai de 14 jours, 1 système surveillé (§3.2 E11).
+    await tx.subscription.upsert({
+      where: { orgId: org.id },
+      update: {},
+      create: { orgId: org.id, plan: "TRIAL", status: "trialing", monitoredSystemsLimit: 1 },
+    });
 
-  // Système 1 : celui du cas d'usage CU1 (§2.2) et de l'écran B (§5.3).
-  await prisma.aiSystem.upsert({
-    where: { orgId_slug: { orgId: org.id, slug: "score-adequation-candidat" } },
-    update: {},
-    create: {
-      orgId: org.id,
-      name: "Score d'adéquation candidat",
-      slug: "score-adequation-candidat",
-      intendedPurpose:
-        "Classe les candidatures par adéquation au poste pour les recruteurs de nos clients",
-      role: "PROVIDER",
-      status: "PRODUCTION",
-      placedOnMarketAt: new Date("2025-03-14T00:00:00Z"),
-      ownerUserId: user.id,
-      models: [
-        { name: "gradient boosting", provider: "interne", version: "2.14", isGpai: false },
-        { name: "claude-sonnet", provider: "Anthropic", version: null, isGpai: true },
-      ],
-      dataCategories: ["CV", "offres", "décisions passées des clients"],
-      monitored: true,
-    },
-  });
+    // Système 1 : celui du cas d'usage CU1 (§2.2) et de l'écran B (§5.3).
+    await tx.aiSystem.upsert({
+      where: { orgId_slug: { orgId: org.id, slug: "score-adequation-candidat" } },
+      update: {},
+      create: {
+        orgId: org.id,
+        name: "Score d'adéquation candidat",
+        slug: "score-adequation-candidat",
+        intendedPurpose:
+          "Classe les candidatures par adéquation au poste pour les recruteurs de nos clients",
+        role: "PROVIDER",
+        status: "PRODUCTION",
+        placedOnMarketAt: new Date("2025-03-14T00:00:00Z"),
+        ownerUserId: user.id,
+        models: [
+          { name: "gradient boosting", provider: "interne", version: "2.14", isGpai: false },
+          { name: "claude-sonnet", provider: "Anthropic", version: null, isGpai: true },
+        ],
+        dataCategories: ["CV", "offres", "décisions passées des clients"],
+        monitored: true,
+      },
+    });
 
-  // Système 2 : non nommé par le cahier des charges ; brique d'extraction de CV, en développement, non surveillée.
-  await prisma.aiSystem.upsert({
-    where: { orgId_slug: { orgId: org.id, slug: "analyse-de-cv" } },
-    update: {},
-    create: {
-      orgId: org.id,
-      name: "Analyse de CV",
-      slug: "analyse-de-cv",
-      intendedPurpose:
-        "Extrait les champs structurés d'un CV (identité, expériences, compétences) pour préremplir la fiche candidat",
-      role: "PROVIDER",
-      status: "DEVELOPMENT",
-      ownerUserId: user.id,
-      models: [],
-      dataCategories: ["CV"],
-      monitored: false,
-    },
-  });
+    // Système 2 : non nommé par le cahier des charges ; brique d'extraction de CV, en développement, non surveillée.
+    await tx.aiSystem.upsert({
+      where: { orgId_slug: { orgId: org.id, slug: "analyse-de-cv" } },
+      update: {},
+      create: {
+        orgId: org.id,
+        name: "Analyse de CV",
+        slug: "analyse-de-cv",
+        intendedPurpose:
+          "Extrait les champs structurés d'un CV (identité, expériences, compétences) pour préremplir la fiche candidat",
+        role: "PROVIDER",
+        status: "DEVELOPMENT",
+        ownerUserId: user.id,
+        models: [],
+        dataCategories: ["CV"],
+        monitored: false,
+      },
+    });
 
-  const systems = await prisma.aiSystem.count({ where: { orgId: org.id } });
+    return tx.aiSystem.count({ where: { orgId: org.id } });
+  });
   console.log(`Données de démonstration chargées : organisation ${org.slug}, ${systems} systèmes.`);
 }
 
