@@ -83,11 +83,22 @@ jobs:
       - run: pnpm db:migrate
       - name: Mot de passe du rôle applicatif (base jetable)
         run: psql "$DIRECT_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE prooflayer_app PASSWORD 'ci-only'"
-      - run: pnpm exec playwright install --with-deps chromium
+      # Navigateur sans dépendre des dépôts apt d'Ubuntu (résolution DNS défaillante sur les runners, nov. 2026) :
+      # Google Chrome préinstallé sur l'image GitHub, sinon Chromium de Playwright, sans paquets système.
+      - name: Navigateur pour Playwright
+        timeout-minutes: 5
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            pnpm exec playwright install chromium
+          fi
       - run: pnpm build
       - run: pnpm test:e2e
 
   # PL-102 : migrations appliquées, rôle applicatif vérifié, retour arrière et rejeu, sur une base jetable.
+  # PL-104 : tests d'intégration sur la même base.
   db:
     name: db
     runs-on: ubuntu-latest
@@ -110,6 +121,8 @@ jobs:
     env:
       DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/prooflayer
       DB_CHECK_CONFIRM: jetable
+      # Tests d'intégration : rôle applicatif, comme en production. Mot de passe propre à cette base jetable.
+      DATABASE_URL: postgresql://prooflayer_app:ci-only@localhost:5432/prooflayer
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -122,3 +135,7 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm db:generate
       - run: pnpm db:check
+      # PL-104 : refus de chaque procédure tRPC pour chaque rôle insuffisant, sur la base migrée par db:check.
+      - name: Mot de passe du rôle applicatif (base jetable)
+        run: psql "$DIRECT_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE prooflayer_app PASSWORD 'ci-only'"
+      - run: pnpm test:integration

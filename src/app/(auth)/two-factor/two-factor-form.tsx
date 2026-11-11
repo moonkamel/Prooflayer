@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { AFTER_SIGN_IN_PATH, authClient } from "@/lib/auth-client";
 
-export function TwoFactorForm() {
+export function TwoFactorForm({ next }: { next: string | null }) {
   const t = useTranslations("twoFactorChallenge");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -27,7 +27,7 @@ export function TwoFactorForm() {
       setError(true);
       return;
     }
-    router.push(AFTER_SIGN_IN_PATH);
+    router.push(next ?? AFTER_SIGN_IN_PATH);
     router.refresh();
   }
 

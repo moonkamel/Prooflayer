@@ -1,4 +1,4 @@
-// Session courante et garde d'accès de l'espace connecté (PL-103).
+// Session courante et garde d'accès de l'espace connecté (PL-103, PL-104).
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, type AuthSession } from "@/server/auth";
@@ -7,6 +7,7 @@ import { mustSetUpTwoFactor } from "./two-factor-policy";
 
 export const SIGN_IN_PATH = "/sign-in";
 export const TWO_FACTOR_SETUP_PATH = "/setup-two-factor";
+export const ONBOARDING_PATH = "/onboarding";
 
 export async function getCurrentSession(): Promise<AuthSession | null> {
   return auth.api.getSession({ headers: await headers() });
@@ -68,6 +69,15 @@ export async function revokeOwnOtherSessions(): Promise<void> {
 export async function requireSession(): Promise<AuthSession> {
   const session = await getCurrentSession();
   if (!session) redirect(SIGN_IN_PATH);
-  if (await isTwoFactorSetupRequired(session)) redirect(TWO_FACTOR_SETUP_PATH);
+  const roles = await rolesOf(session.user.id);
+  // Sans organisation, l'espace connecté n'a pas de sens : création de l'organisation d'abord (§5.1).
+  if (roles.length === 0) redirect(ONBOARDING_PATH);
+  if (mustSetUpTwoFactor(roles, session.user.twoFactorEnabled === true))
+    redirect(TWO_FACTOR_SETUP_PATH);
   return session;
+}
+
+/** Organisation active de la session : identifiant, ou null si aucune. */
+export function activeOrganizationIdOf(session: AuthSession): string | null {
+  return (session.session as { activeOrganizationId?: string | null }).activeOrganizationId ?? null;
 }

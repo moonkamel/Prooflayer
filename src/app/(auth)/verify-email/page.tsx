@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AFTER_SIGN_IN_PATH } from "@/lib/auth-client";
+import { safePath } from "@/lib/safe-path";
 
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
   const t = await getTranslations("verifyEmail");
   const tc = await getTranslations("common");
   return (
@@ -23,7 +24,7 @@ export default async function VerifyEmailPage({
       ) : (
         <>
           <p role="status">{t("done")}</p>
-          <Link href={AFTER_SIGN_IN_PATH}>{t("continue")}</Link>
+          <Link href={safePath(next, AFTER_SIGN_IN_PATH)}>{t("continue")}</Link>
         </>
       )}
     </main>

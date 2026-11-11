@@ -8,7 +8,13 @@ import { AFTER_SIGN_IN_PATH, authClient, TWO_FACTOR_CHALLENGE_PATH } from "@/lib
 
 type SignInError = "invalidCredentials" | "emailNotVerified" | "generic";
 
-export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function SignInForm({
+  googleEnabled,
+  next,
+}: {
+  googleEnabled: boolean;
+  next: string | null;
+}) {
   const t = useTranslations("signIn");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -23,7 +29,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
     const { data, error } = await authClient.signIn.email({
       email: String(form.get("email")),
       password: String(form.get("password")),
-      callbackURL: AFTER_SIGN_IN_PATH,
+      callbackURL: next ?? AFTER_SIGN_IN_PATH,
     });
     setPending(false);
     if (error) {
@@ -38,7 +44,11 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
     }
     // 2FA active : la connexion se poursuit sur l'écran du second facteur.
     const twoFactor = Boolean(data && "twoFactorRedirect" in data && data.twoFactorRedirect);
-    router.push(twoFactor ? TWO_FACTOR_CHALLENGE_PATH : AFTER_SIGN_IN_PATH);
+    router.push(
+      twoFactor
+        ? `${TWO_FACTOR_CHALLENGE_PATH}${next ? `?next=${encodeURIComponent(next)}` : ""}`
+        : (next ?? AFTER_SIGN_IN_PATH),
+    );
     router.refresh();
   }
 
@@ -62,7 +72,10 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         <button
           type="button"
           onClick={() =>
-            authClient.signIn.social({ provider: "google", callbackURL: AFTER_SIGN_IN_PATH })
+            authClient.signIn.social({
+              provider: "google",
+              callbackURL: next ?? AFTER_SIGN_IN_PATH,
+            })
           }
         >
           {t("withGoogle")}
@@ -72,7 +85,10 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         <Link href="/forgot-password">{t("forgotPassword")}</Link>
       </p>
       <p>
-        {t("noAccount")} <Link href="/sign-up">{t("signUp")}</Link>
+        {t("noAccount")}{" "}
+        <Link href={next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up"}>
+          {t("signUp")}
+        </Link>
       </p>
     </>
   );

@@ -18,3 +18,25 @@ function createPrismaClient(): PrismaClient {
 // Une seule instance par processus, y compris sous le rechargement à chaud de `next dev`.
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+/**
+ * Client restreint à une organisation (§4.3.3). Chaque requête s'exécute dans une transaction
+ * qui positionne app.org_id, lu par les politiques RLS. Tout code métier passe par
+ * forOrg() ; l'usage direct de `prisma` est réservé aux tables système et interdit par lint ailleurs.
+ * Repris tel quel du §4.3.3 pour orgProcedure (PL-104) ; les politiques RLS et la règle de lint arrivent avec PL-105.
+ */
+export function forOrg(orgId: string) {
+  return prisma.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ args, query }) {
+          const [, result] = await prisma.$transaction([
+            prisma.$executeRaw`SELECT set_config('app.org_id', ${orgId}, TRUE)`,
+            query(args),
+          ]);
+          return result;
+        },
+      },
+    },
+  });
+}

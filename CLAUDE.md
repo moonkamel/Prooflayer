@@ -57,6 +57,17 @@ packages/verify/         outil de vérification open source
 - Dépendances : pnpm refuse les versions publiées depuis moins de 24 h. Ne pas ajouter d'exception
   `minimumReleaseAgeExclude` ; choisir la version précédente.
 
+## API, organisations et rôles (conventions établies par PL-104)
+- tRPC : `src/server/trpc.ts` (`orgProcedure`, `withRole`, `adminProcedure`, `writeProcedure`), routeurs dans
+  `src/server/routers/`, logique dans `src/server/services/`. Composants serveur : `serverCaller()` ; interface : `trpc`.
+- Toute mutation passe par `withRole(...)` : les rôles sont lus en métadonnées par `tests/integration/rbac.test.ts`,
+  qui vérifie FORBIDDEN pour chaque procédure et chaque rôle insuffisant. Une nouvelle procédure est couverte d'office.
+- Rôles : owner, admin, contributor, auditor (`src/server/auth-roles.ts`, `src/server/services/role-policy.ts`).
+  Seul un owner donne ou retire le rôle owner ; l'organisation garde toujours un owner.
+- Espace connecté : sans organisation → `/onboarding` ; owner ou admin sans 2FA → `/setup-two-factor`.
+- Retour après connexion : paramètre `?next=` filtré par `safePath()` (chemins internes uniquement).
+- `pnpm test:integration` : tests sur base réelle (`DATABASE_URL`, rôle applicatif), lancés dans le job CI `db`.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

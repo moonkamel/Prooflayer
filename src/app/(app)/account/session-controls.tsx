@@ -46,3 +46,23 @@ export function SignOutButton() {
     </button>
   );
 }
+
+export function SwitchOrganizationButton({ organizationId }: { organizationId: string }) {
+  const t = useTranslations("account");
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() =>
+        start(async () => {
+          await authClient.organization.setActive({ organizationId });
+          router.refresh();
+        })
+      }
+    >
+      {t("switchTo")}
+    </button>
+  );
+}
