@@ -2,14 +2,13 @@
 // Questionnaire : une question par écran, barre de progression, « Pourquoi cette question ? » avec l'article et
 // deux exemples, enregistrement automatique de chaque réponse, retour arrière (§5.1 étape 3, PL-203).
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { QUESTIONS, type QuestionId, type Response } from "@/server/classify/questionnaire";
-import type { RiskTier, AiActRole } from "@/generated/prisma/enums";
 import { trpc } from "@/lib/trpc";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ClassificationResult } from "./result";
 
 type Draft = Awaited<ReturnType<typeof trpc.classification.draft.mutate>>;
 
@@ -21,16 +20,16 @@ export function Questionnaire({
   systemId,
   initial,
   locale,
+  defaultName,
 }: {
   systemId: string;
   initial: Draft;
   locale: string;
+  defaultName: string;
 }) {
   const t = useTranslations("questionnaire");
   const tq = useTranslations("questionnaire.questions");
   const tc = useTranslations("common");
-  const tk = useTranslations("riskTier");
-  const tr = useTranslations("aiActRole");
   const [draft, setDraft] = useState(initial);
   const [viewing, setViewing] = useState<QuestionId | null>(
     initial.result ? null : (initial.current ?? initial.answered.at(-1) ?? "aiSystem"),
@@ -51,40 +50,15 @@ export function Questionnaire({
     });
 
   if (viewing === null && draft.result) {
-    const r = draft.result;
     return (
-      <section aria-labelledby="result-title" className="space-y-4">
-        <h2 id="result-title">{t("resultTitle")}</h2>
-        <dl
-          className="grid max-w-xl gap-2 sm:grid-cols-[12rem_1fr]"
-          data-testid="classification-result"
-        >
-          <dt className="font-medium">{t("resultTier")}</dt>
-          <dd data-testid="result-tier">{tk(r.tier as RiskTier)}</dd>
-          {r.annexIIIPoints.length > 0 && (
-            <>
-              <dt className="font-medium">{t("resultAnnex")}</dt>
-              <dd>{r.annexIIIPoints.join(", ")}</dd>
-            </>
-          )}
-          <dt className="font-medium">{t("resultRole")}</dt>
-          <dd data-testid="result-role">{tr(r.role as AiActRole)}</dd>
-        </dl>
-        <p className="text-sm text-muted-foreground">
-          {t("resultRuleset", { version: draft.rulesetVersion })}
-        </p>
-        <Alert>{t("resultNext")}</Alert>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => setViewing(draft.answered[0] ?? "aiSystem")}
-          >
-            {t("restart")}
-          </Button>
-          <Link href={`/systems/${systemId}`}>{t("backToSystem")}</Link>
-        </div>
-      </section>
+      <ClassificationResult
+        systemId={systemId}
+        classification={draft}
+        locale={locale}
+        canSign
+        defaultName={defaultName}
+        onEdit={() => setViewing(draft.answered[0] ?? "aiSystem")}
+      />
     );
   }
 

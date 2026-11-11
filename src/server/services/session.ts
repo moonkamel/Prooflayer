@@ -77,3 +77,15 @@ export async function requireSession(): Promise<AuthSession> {
 export function activeOrganizationIdOf(session: AuthSession): string | null {
   return (session.session as { activeOrganizationId?: string | null }).activeOrganizationId ?? null;
 }
+
+/**
+ * Confirmation par mot de passe d'une action sensible (PL-204, signature d'une classification) : Better Auth
+ * vérifie le mot de passe de l'utilisateur de la session portée par ces en-têtes. Aucun mot de passe journalisé.
+ */
+export function passwordVerifier(requestHeaders: Headers) {
+  return (password: string) =>
+    auth.api.verifyPassword({ headers: requestHeaders, body: { password } }).then(
+      (result) => result.status === true,
+      () => false,
+    );
+}

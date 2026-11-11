@@ -1,6 +1,11 @@
 // Classification d'un système (PL-203, §3.2 E1, §4.4.2 routeur `classification`). Un brouillon par système :
 // réponses enregistrées à chaque question (enregistrement automatique), reprise là où l'utilisateur s'est arrêté,
-// calcul par le moteur pur (src/server/classify/engine.ts). La signature arrive avec PL-204.
+// calcul par le moteur pur (src/server/classify/engine.ts), signature (PL-204) : une classification signée est
+// immuable (trigger classification_guard) ; une nouvelle signature remplace la précédente (SUPERSEDED).
+import en from "../../../messages/en.json";
+import fr from "../../../messages/fr.json";
+import { withOrgTransaction } from "@/server/db";
+import { usersByIds } from "@/server/system/identity";
 import { CURRENT_RULESET, classify } from "@/server/classify/engine";
 import {
   isValidResponse,
@@ -10,6 +15,7 @@ import {
   type QuestionId,
   type Responses,
 } from "@/server/classify/questionnaire";
+import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { ServiceError } from "./errors";
 import type { OrgContext } from "./organization";
@@ -59,6 +65,7 @@ function view(row: DraftRow) {
     id: row.id,
     systemId: row.systemId,
     rulesetVersion: row.rulesetVersion,
+    status: row.status,
     responses,
     answered: path.answered,
     current: path.current,
@@ -70,9 +77,18 @@ function view(row: DraftRow) {
           annexIIIPoints: row.annexIIIPoints,
           art63Conditions: row.art63Conditions,
           involvesProfiling: row.involvesProfiling,
-          reasoning: row.reasoning,
+          reasoning: row.reasoning as unknown as ReasoningStep[],
         }
       : null,
+    signature:
+      row.status === "DRAFT"
+        ? null
+        : {
+            name: row.signedByName,
+            title: row.signedByTitle,
+            at: row.signedAt?.toISOString() ?? null,
+            statement: row.signatureStatement,
+          },
   };
 }
 
@@ -186,4 +202,160 @@ export async function computeDraft(ctx: OrgContext, input: { systemId: string })
     annexIIIPoints: result.annexIIIPoints,
   });
   return view({ ...draft, ...data });
+}
+
+/** Brouillon en cours et dernière classification signée du système, sans rien créer (lecture : tout membre). */
+export async function currentClassification(ctx: OrgContext, input: { systemId: string }) {
+  const db = dbOf(ctx);
+  const system = await db.aiSystem.findFirst({ where: { id: input.systemId, orgId: ctx.orgId } });
+  if (!system) throw new ServiceError("NOT_FOUND", "system.notFound");
+  const [draft, signed] = await Promise.all([
+    findDraft(ctx, system.id),
+    db.classification.findFirst({
+      where: { systemId: system.id, orgId: ctx.orgId, status: "SIGNED" },
+      orderBy: { signedAt: "desc" },
+    }),
+  ]);
+  return { draft: draft ? view(draft) : null, signed: signed ? view(signed) : null };
+}
+
+/** Déclaration signée (§5.3 écran A), dans la langue du signataire. */
+export function signatureStatement(locale: string): string {
+  return (locale === "en" ? en : fr).classificationResult.statement;
+}
+
+export interface SignDependencies {
+  /** Vérifie le mot de passe de l'utilisateur courant (Better Auth, verifyPassword). */
+  verifyPassword: (password: string) => Promise<boolean>;
+}
+
+/**
+ * Signature (§3.2 E1, §5.3 écran A) : nom, fonction, déclaration, confirmation par mot de passe. Dans une même
+ * transaction : la classification signée précédente passe à SUPERSEDED, le brouillon devient SIGNED, la fiche
+ * reprend la catégorie, les points de l'Annexe III et le rôle, et n'est plus « à revoir ». Une pratique interdite
+ * ne se signe pas : elle doit cesser (§5.3, variante PROHIBITED).
+ */
+export async function signClassification(
+  ctx: OrgContext,
+  input: { systemId: string; name: string; title: string; password: string; locale: string },
+  deps: SignDependencies,
+) {
+  const draft = await requireDraft(ctx, input.systemId);
+  if (draft.tier === "UNCLASSIFIED")
+    throw new ServiceError("BAD_REQUEST", "classification.notComputed");
+  if (draft.tier === "PROHIBITED")
+    throw new ServiceError("BAD_REQUEST", "classification.prohibited");
+  if (!(await deps.verifyPassword(input.password))) {
+    throw new ServiceError("FORBIDDEN", "classification.invalidPassword");
+  }
+  const statement = signatureStatement(input.locale);
+  const signedAt = new Date();
+  const { superseded, roleBefore } = await withOrgTransaction(ctx.orgId, async (tx) => {
+    const previous = await tx.classification.findMany({
+      where: { systemId: draft.systemId, status: "SIGNED" },
+      select: { id: true },
+    });
+    await tx.classification.updateMany({
+      where: { systemId: draft.systemId, status: "SIGNED" },
+      data: { status: "SUPERSEDED" },
+    });
+    const { count } = await tx.classification.updateMany({
+      where: { id: draft.id, status: "DRAFT", tier: draft.tier },
+      data: {
+        status: "SIGNED",
+        signedByUserId: ctx.userId,
+        signedByName: input.name,
+        signedByTitle: input.title,
+        signedAt,
+        signatureStatement: statement,
+      },
+    });
+    if (count === 0) throw new ServiceError("CONFLICT", "classification.notDraft");
+    const system = await tx.aiSystem.findUniqueOrThrow({ where: { id: draft.systemId } });
+    await tx.aiSystem.update({
+      where: { id: draft.systemId },
+      data: {
+        riskTier: draft.tier,
+        annexIIIPoints: draft.annexIIIPoints,
+        role: draft.role,
+        classificationStale: false,
+      },
+    });
+    return { superseded: previous.map((p) => p.id), roleBefore: system.role };
+  });
+
+  await record(ctx, "classification.sign", draft.id, {
+    systemId: draft.systemId,
+    rulesetVersion: draft.rulesetVersion,
+    tier: draft.tier,
+    role: draft.role,
+    annexIIIPoints: draft.annexIIIPoints,
+    signedByName: input.name,
+    signedByTitle: input.title,
+    supersedes: superseded,
+  });
+  // Le rôle de la fiche est un champ historisé (PL-201) : son changement par la signature figure à l'historique.
+  if (roleBefore !== draft.role) {
+    await audit(
+      {
+        orgId: ctx.orgId,
+        actor: { type: "user", id: ctx.userId },
+        ipAddress: clientIp(ctx.headers),
+        db: ctx.db,
+      },
+      "system.update",
+      { type: "ai_system", id: draft.systemId },
+      {
+        changes: [{ field: "role", before: roleBefore, after: draft.role }],
+        source: "classification.sign",
+      },
+    );
+  }
+  return { id: draft.id, signedAt: signedAt.toISOString() };
+}
+
+/** Versions signées et remplacées du système, de la plus récente à la plus ancienne (§4.4.2 `history`). */
+export async function classificationHistory(ctx: OrgContext, input: { systemId: string }) {
+  const db = dbOf(ctx);
+  const system = await db.aiSystem.findFirst({ where: { id: input.systemId, orgId: ctx.orgId } });
+  if (!system) throw new ServiceError("NOT_FOUND", "system.notFound");
+  const rows = await db.classification.findMany({
+    where: { systemId: system.id, status: { in: ["SIGNED", "SUPERSEDED"] } },
+    orderBy: [{ signedAt: "desc" }, { id: "desc" }],
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    status: r.status,
+    tier: r.tier,
+    role: r.role,
+    annexIIIPoints: r.annexIIIPoints,
+    rulesetVersion: r.rulesetVersion,
+    signedByName: r.signedByName,
+    signedByTitle: r.signedByTitle,
+    signedAt: r.signedAt?.toISOString() ?? null,
+  }));
+}
+
+/** Données de la note de classification (PDF) : une version précise, brouillon calculé compris. */
+export async function classificationNote(
+  ctx: OrgContext,
+  input: { systemId: string; classificationId: string },
+) {
+  const db = dbOf(ctx);
+  const row = await db.classification.findFirst({
+    where: { id: input.classificationId, systemId: input.systemId, orgId: ctx.orgId },
+  });
+  if (!row) throw new ServiceError("NOT_FOUND", "classification.notFound");
+  if (row.tier === "UNCLASSIFIED")
+    throw new ServiceError("BAD_REQUEST", "classification.notComputed");
+  const system = await db.aiSystem.findUniqueOrThrow({ where: { id: row.systemId } });
+  const users = await usersByIds([system.ownerUserId]);
+  return {
+    system: {
+      name: system.name,
+      intendedPurpose: system.intendedPurpose,
+      owner: users.get(system.ownerUserId)?.name ?? null,
+    },
+    classification: view(row),
+  };
 }

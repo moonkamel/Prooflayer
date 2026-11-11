@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --passWithNoTests",
-    "test:classify": "vitest run tests/unit/classify.test.ts tests/unit/questionnaire.test.ts --coverage.enabled --coverage.provider=v8 --coverage.include='src/server/classify/**' --coverage.thresholds.100 --coverage.reporter=text",
+    "test:classify": "vitest run tests/unit/classify.test.ts tests/unit/questionnaire.test.ts tests/unit/explain.test.ts --coverage.enabled --coverage.provider=v8 --coverage.include='src/server/classify/**' --coverage.thresholds.100 --coverage.reporter=text",
     "test:e2e": "playwright test",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@react-pdf/renderer": "4.9.0",
     "@tailwindcss/postcss": "4.3.5",
     "@trpc/client": "11.26.0",
     "@trpc/server": "11.26.0",
