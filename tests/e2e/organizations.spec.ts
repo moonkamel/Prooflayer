@@ -46,7 +46,8 @@ async function joinFromInvitation(page: Page, link: string, email: string) {
   await page.getByRole("link", { name: "Continuer" }).click();
   await expect(page).toHaveURL(new RegExp(path, "u"));
   await page.getByRole("button", { name: "Accepter l'invitation" }).click();
-  await expect(page).toHaveURL(/\/account/u);
+  // Contributeur ou auditeur : profil. Admin : activation de la 2FA d'abord (garde de l'espace connecté).
+  await expect(page).toHaveURL(/\/(account|setup-two-factor)/u);
 }
 
 test("création de l'organisation à l'inscription, invitation d'un contributeur et rôles appliqués", async ({
