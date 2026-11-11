@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc";
 import type { AuditAction } from "@/server/services/audit";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 type Filters = { action?: AuditAction; from?: string; to?: string };
 
@@ -15,7 +17,8 @@ export function ExportAuditButton({ filters }: { filters: Filters }) {
   const [message, setMessage] = useState<string | null>(null);
   return (
     <p>
-      <button
+      <Button
+        variant="outline"
         type="button"
         disabled={pending}
         onClick={async () => {
@@ -38,8 +41,8 @@ export function ExportAuditButton({ filters }: { filters: Filters }) {
         }}
       >
         {t("export")}
-      </button>
-      {message && <span role="status">{message}</span>}
+      </Button>
+      {message && <Alert>{message}</Alert>}
     </p>
   );
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { serverCaller } from "@/server/caller";
 import { ADMIN_ROLES, ORG_ROLES } from "@/server/services/role-policy";
@@ -10,6 +10,12 @@ import {
   RenameForm,
   RevokeInvitationButton,
 } from "./organization-controls";
+import { Table, TableCell } from "@/components/ui/table";
+
+/** Titre du document (WCAG 2.4.2), complété par « · ProofLayer » (gabarit de src/app/layout.tsx). */
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("organization"))("title") };
+}
 
 export default async function OrganizationPage() {
   await requireSession();
@@ -20,48 +26,42 @@ export default async function OrganizationPage() {
   const invitations = isAdmin ? await api.org.members.invitations() : [];
   const t = await getTranslations("organization");
   const tr = await getTranslations("roles");
-  const ta = await getTranslations("audit");
   const format = await getFormatter();
   // Un admin n'attribue pas le rôle owner (§3.2 E10) : seul un owner le peut.
   const assignable = ORG_ROLES.filter((r) => org.role === "owner" || r !== "owner");
   const roleOptions = assignable.map((value) => ({ value, label: tr(value) }));
 
   return (
-    <main>
+    <div className="space-y-4">
       <h1>{t("title")}</h1>
       {isAdmin ? <RenameForm name={org.name} /> : <p data-testid="org-name">{org.name}</p>}
-      {isAdmin && (
-        <p>
-          <Link href="/audit">{ta("nav")}</Link>
-        </p>
-      )}
 
       <section aria-labelledby="members-title">
         <h2 id="members-title">{t("membersTitle")}</h2>
-        <table>
+        <Table>
           <tbody>
             {members.map((m) => (
               <tr key={m.id} data-testid="member" data-email={m.email}>
-                <td>
+                <TableCell>
                   {m.name} {m.isCurrentUser && `(${t("you")})`}
-                </td>
-                <td>{m.email}</td>
-                <td data-testid="member-role">
+                </TableCell>
+                <TableCell>{m.email}</TableCell>
+                <TableCell data-testid="member-role">
                   {isAdmin && !m.isCurrentUser && (org.role === "owner" || m.role !== "owner") ? (
                     <MemberRoleSelect memberId={m.id} role={m.role} options={roleOptions} />
                   ) : (
                     tr(m.role)
                   )}
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   {isAdmin && !m.isCurrentUser && (org.role === "owner" || m.role !== "owner") && (
                     <RemoveMemberButton memberId={m.id} />
                   )}
-                </td>
+                </TableCell>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </section>
 
       {isAdmin && (
@@ -90,6 +90,6 @@ export default async function OrganizationPage() {
           </section>
         </>
       )}
-    </main>
+    </div>
   );
 }

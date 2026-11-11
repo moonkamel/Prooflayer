@@ -6,7 +6,11 @@
     "submit": "Submit",
     "loading": "One moment…",
     "genericError": "Something went wrong. Please try again.",
-    "backToSignIn": "Back to sign in"
+    "backToSignIn": "Back to sign in",
+    "languageNames": {
+      "fr": "Français",
+      "en": "English"
+    }
   },
   "signUp": {
     "title": "Create my workspace",
@@ -178,5 +182,29 @@
     "member_remove": "Member removed",
     "invitation_revoke": "Invitation revoked",
     "invitation_accept": "Invitation accepted"
+  },
+  "controlStatus": {
+    "PASS": "OK",
+    "FAIL": "Failing",
+    "PARTIAL": "Partial",
+    "STALE": "Stale",
+    "MISSING": "No evidence",
+    "NOT_APPLICABLE": "Not applicable"
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "mainNav": "Main navigation",
+    "account": "My profile",
+    "organization": "Organization",
+    "audit": "Audit log",
+    "language": "Language",
+    "activeOrganization": "Active organization: <strong>{name}</strong>",
+    "brand": "ProofLayer"
+  },
+  "home": {
+    "title": "ProofLayer",
+    "tagline": "The evidence the AI Act requires, captured where the work happens, timestamped and verifiable without us.",
+    "signUp": "Create my workspace",
+    "signIn": "Sign in"
   }
 }

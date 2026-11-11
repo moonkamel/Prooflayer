@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { AFTER_SIGN_IN_PATH, authClient, TWO_FACTOR_CHALLENGE_PATH } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type SignInError = "invalidCredentials" | "emailNotVerified" | "generic";
 
@@ -54,22 +58,23 @@ export function SignInForm({
 
   return (
     <>
-      <form onSubmit={onSubmit} aria-busy={pending}>
-        <label>
+      <form className="max-w-md space-y-3" onSubmit={onSubmit} aria-busy={pending}>
+        <Label>
           {tc("email")}
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
+          <Input name="email" type="email" autoComplete="email" required />
+        </Label>
+        <Label>
           {tc("password")}
-          <input name="password" type="password" autoComplete="current-password" required />
-        </label>
-        {error && <p role="alert">{error === "generic" ? tc("genericError") : t(error)}</p>}
-        <button type="submit" disabled={pending}>
+          <Input name="password" type="password" autoComplete="current-password" required />
+        </Label>
+        {error && <Alert tone="error">{error === "generic" ? tc("genericError") : t(error)}</Alert>}
+        <Button type="submit" disabled={pending}>
           {pending ? tc("loading") : t("submit")}
-        </button>
+        </Button>
       </form>
       {googleEnabled && (
-        <button
+        <Button
+          variant="outline"
           type="button"
           onClick={() =>
             authClient.signIn.social({
@@ -79,7 +84,7 @@ export function SignInForm({
           }
         >
           {t("withGoogle")}
-        </button>
+        </Button>
       )}
       <p>
         <Link href="/forgot-password">{t("forgotPassword")}</Link>

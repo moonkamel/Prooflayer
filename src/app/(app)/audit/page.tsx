@@ -1,4 +1,5 @@
 // Journal d'audit (PL-106, §3.2 E10) : consultable et exportable par owner et admin.
+import type { Metadata } from "next";
 import Link from "next/link";
 import { TRPCError } from "@trpc/server";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -6,6 +7,11 @@ import { serverCaller } from "@/server/caller";
 import { AUDIT_ACTIONS, type AuditAction } from "@/server/services/audit";
 import { requireSession } from "@/server/services/session";
 import { ExportAuditButton } from "./export-button";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input, Select } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableCell, TableHead } from "@/components/ui/table";
 
 type Search = { action?: string; from?: string; to?: string; cursor?: string };
 
@@ -13,6 +19,11 @@ const isAction = (v: unknown): v is AuditAction =>
   typeof v === "string" && (AUDIT_ACTIONS as readonly string[]).includes(v);
 const isDay = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/u.test(v);
 const actionKey = (a: AuditAction) => a.replace(".", "_") as `${string}_${string}`;
+
+/** Titre du document (WCAG 2.4.2), complété par « · ProofLayer » (gabarit de src/app/layout.tsx). */
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("audit"))("title") };
+}
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<Search> }) {
   await requireSession();
@@ -34,10 +45,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   } catch (error) {
     if (error instanceof TRPCError && error.code === "FORBIDDEN") {
       return (
-        <main>
+        <div className="space-y-4">
           <h1>{t("title")}</h1>
-          <p role="alert">{t("forbidden")}</p>
-        </main>
+          <Alert tone="error">{t("forbidden")}</Alert>
+        </div>
       );
     }
     throw error;
@@ -50,31 +61,31 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     ).toString();
 
   return (
-    <main>
+    <div className="space-y-4">
       <h1>{t("title")}</h1>
       <p>{t("intro")}</p>
 
-      <form method="get" aria-label={t("apply")}>
-        <label>
+      <form className="flex flex-wrap items-end gap-3" method="get" aria-label={t("apply")}>
+        <Label>
           {t("filterAction")}
-          <select name="action" defaultValue={filters.action ?? ""}>
+          <Select name="action" defaultValue={filters.action ?? ""}>
             <option value="">{t("allActions")}</option>
             {AUDIT_ACTIONS.map((a) => (
               <option key={a} value={a}>
                 {ta(actionKey(a) as never)}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
+          </Select>
+        </Label>
+        <Label>
           {t("from")}
-          <input type="date" name="from" defaultValue={filters.from ?? ""} />
-        </label>
-        <label>
+          <Input type="date" name="from" defaultValue={filters.from ?? ""} />
+        </Label>
+        <Label>
           {t("to")}
-          <input type="date" name="to" defaultValue={filters.to ?? ""} />
-        </label>
-        <button type="submit">{t("apply")}</button> <Link href="/audit">{t("reset")}</Link>
+          <Input type="date" name="to" defaultValue={filters.to ?? ""} />
+        </Label>
+        <Button type="submit">{t("apply")}</Button> <Link href="/audit">{t("reset")}</Link>
       </form>
 
       <ExportAuditButton filters={filters} />
@@ -82,50 +93,52 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
       {page.entries.length === 0 ? (
         <p>{t("empty")}</p>
       ) : (
-        <table data-testid="audit-log">
+        <Table data-testid="audit-log">
           <thead>
             <tr>
-              <th scope="col">{t("date")}</th>
-              <th scope="col">{t("actor")}</th>
-              <th scope="col">{t("action")}</th>
-              <th scope="col">{t("target")}</th>
-              <th scope="col">{t("details")}</th>
+              <TableHead scope="col">{t("date")}</TableHead>
+              <TableHead scope="col">{t("actor")}</TableHead>
+              <TableHead scope="col">{t("action")}</TableHead>
+              <TableHead scope="col">{t("target")}</TableHead>
+              <TableHead scope="col">{t("details")}</TableHead>
             </tr>
           </thead>
           <tbody>
             {page.entries.map((e) => (
               <tr key={e.id} data-testid="audit-entry" data-action={e.action}>
-                <td>
+                <TableCell>
                   <time dateTime={e.createdAt}>
                     {format.dateTime(new Date(e.createdAt), {
                       dateStyle: "long",
                       timeStyle: "medium",
                     })}
                   </time>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   {e.actorType !== "user"
                     ? t("system")
                     : e.actor
                       ? `${e.actor.name} (${e.actor.email})`
                       : t("unknownActor")}
-                </td>
-                <td>{isAction(e.action) ? ta(actionKey(e.action) as never) : e.action}</td>
-                <td>
+                </TableCell>
+                <TableCell>
+                  {isAction(e.action) ? ta(actionKey(e.action) as never) : e.action}
+                </TableCell>
+                <TableCell>
                   {e.targetType} · <code>{e.targetId}</code>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <code>{JSON.stringify(e.metadata)}</code>
-                </td>
+                </TableCell>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       )}
 
       {page.nextCursor && (
         <Link href={`/audit${query({ cursor: page.nextCursor })}`}>{t("older")}</Link>
       )}
-    </main>
+    </div>
   );
 }

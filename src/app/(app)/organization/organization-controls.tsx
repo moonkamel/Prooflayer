@@ -6,6 +6,10 @@ import { useTranslations } from "next-intl";
 import { TRPCClientError } from "@trpc/client";
 import type { OrgRole } from "@/generated/prisma/enums";
 import { trpc } from "@/lib/trpc";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input, Select } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type RoleOption = { value: OrgRole; label: string };
 
@@ -46,20 +50,21 @@ export function RenameForm({ name }: { name: string }) {
   const { pending, error, run } = useMutation();
   return (
     <form
+      className="max-w-md space-y-3"
       onSubmit={(e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const value = String(new FormData(e.currentTarget).get("name"));
         run(() => trpc.org.update.mutate({ name: value }));
       }}
     >
-      <label>
+      <Label>
         {t("name")}
-        <input name="name" defaultValue={name} maxLength={120} required />
-      </label>
-      <button type="submit" disabled={pending}>
+        <Input name="name" defaultValue={name} maxLength={120} required />
+      </Label>
+      <Button type="submit" disabled={pending}>
         {t("rename")}
-      </button>
-      {error && <p role="alert">{error}</p>}
+      </Button>
+      {error && <Alert tone="error">{error}</Alert>}
     </form>
   );
 }
@@ -77,7 +82,7 @@ export function MemberRoleSelect({
   const { pending, error, run } = useMutation();
   return (
     <>
-      <select
+      <Select
         aria-label={t("changeRole")}
         defaultValue={role}
         disabled={pending}
@@ -90,8 +95,8 @@ export function MemberRoleSelect({
             {o.label}
           </option>
         ))}
-      </select>
-      {error && <span role="alert">{error}</span>}
+      </Select>
+      {error && <Alert tone="error">{error}</Alert>}
     </>
   );
 }
@@ -101,14 +106,15 @@ export function RemoveMemberButton({ memberId }: { memberId: string }) {
   const { pending, error, run } = useMutation();
   return (
     <>
-      <button
+      <Button
+        variant="outline"
         type="button"
         disabled={pending}
         onClick={() => run(() => trpc.org.members.remove.mutate({ memberId }))}
       >
         {t("remove")}
-      </button>
-      {error && <span role="alert">{error}</span>}
+      </Button>
+      {error && <Alert tone="error">{error}</Alert>}
     </>
   );
 }
@@ -119,6 +125,7 @@ export function InviteForm({ options }: { options: RoleOption[] }) {
   const [sentTo, setSentTo] = useState<string | null>(null);
   return (
     <form
+      className="max-w-md space-y-3"
       onSubmit={(e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form = e.currentTarget;
@@ -135,25 +142,25 @@ export function InviteForm({ options }: { options: RoleOption[] }) {
         );
       }}
     >
-      <label>
+      <Label>
         {t("inviteEmail")}
-        <input name="email" type="email" autoComplete="off" required />
-      </label>
-      <label>
+        <Input name="email" type="email" autoComplete="off" required />
+      </Label>
+      <Label>
         {t("inviteRole")}
-        <select name="role" defaultValue="contributor">
+        <Select name="role" defaultValue="contributor">
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
-        </select>
-      </label>
-      <button type="submit" disabled={pending}>
+        </Select>
+      </Label>
+      <Button type="submit" disabled={pending}>
         {t("inviteSubmit")}
-      </button>
-      {sentTo && <p role="status">{t("invited", { email: sentTo })}</p>}
-      {error && <p role="alert">{error}</p>}
+      </Button>
+      {sentTo && <Alert>{t("invited", { email: sentTo })}</Alert>}
+      {error && <Alert tone="error">{error}</Alert>}
     </form>
   );
 }
@@ -163,14 +170,15 @@ export function RevokeInvitationButton({ invitationId }: { invitationId: string 
   const { pending, error, run } = useMutation();
   return (
     <>
-      <button
+      <Button
+        variant="outline"
         type="button"
         disabled={pending}
         onClick={() => run(() => trpc.org.members.revokeInvitation.mutate({ invitationId }))}
       >
         {t("revoke")}
-      </button>
-      {error && <span role="alert">{error}</span>}
+      </Button>
+      {error && <Alert tone="error">{error}</Alert>}
     </>
   );
 }

@@ -38,6 +38,26 @@ const config = [
       ],
     },
   },
+  {
+    // PL-109 : aucune chaîne visible en dur (règle 6 de CLAUDE.md) ; tout texte passe par messages/{fr,en}.json.
+    // Seules la ponctuation et les espaces neutres sont tolérés dans le JSX ; les attributs (classes, identifiants
+    // techniques) ne sont pas concernés, sauf ceux lus par les technologies d'assistance, vérifiés ci-dessous.
+    files: ["src/**/*.tsx"],
+    rules: {
+      "react/jsx-no-literals": [
+        "error",
+        { noStrings: true, ignoreProps: true, allowedStrings: [" ", "·", "(", ")", ":", "—", "/"] },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder)$/] > Literal[value=/\\p{L}/u]",
+          message: "Texte lu par l'utilisateur : passer par la traduction (messages/{fr,en}.json).",
+        },
+      ],
+    },
+  },
 ];
 
 export default config;

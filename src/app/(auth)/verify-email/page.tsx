@@ -1,9 +1,16 @@
 // Point d'arrivée du lien de vérification : Better Auth valide le jeton puis redirige ici,
 // avec ?error=… si le jeton est invalide ou expiré. En cas de succès, l'utilisateur est connecté.
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AFTER_SIGN_IN_PATH } from "@/lib/auth-client";
 import { safePath } from "@/lib/safe-path";
+import { Alert } from "@/components/ui/alert";
+
+/** Titre du document (WCAG 2.4.2), complété par « · ProofLayer » (gabarit de src/app/layout.tsx). */
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("verifyEmail"))("title") };
+}
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -14,19 +21,19 @@ export default async function VerifyEmailPage({
   const t = await getTranslations("verifyEmail");
   const tc = await getTranslations("common");
   return (
-    <main>
+    <div className="space-y-4">
       <h1>{t("title")}</h1>
       {error ? (
         <>
-          <p role="alert">{t("invalid")}</p>
+          <Alert tone="error">{t("invalid")}</Alert>
           <Link href="/sign-in">{tc("backToSignIn")}</Link>
         </>
       ) : (
         <>
-          <p role="status">{t("done")}</p>
+          <Alert>{t("done")}</Alert>
           <Link href={safePath(next, AFTER_SIGN_IN_PATH)}>{t("continue")}</Link>
         </>
       )}
-    </main>
+    </div>
   );
 }

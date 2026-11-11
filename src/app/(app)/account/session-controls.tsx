@@ -5,14 +5,20 @@ import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth-client";
 import { revokeOtherSessionsAction, revokeSessionAction } from "./actions";
+import { Button } from "@/components/ui/button";
 
 export function RevokeSessionButton({ id }: { id: string }) {
   const t = useTranslations("account");
   const [pending, start] = useTransition();
   return (
-    <button type="button" disabled={pending} onClick={() => start(() => revokeSessionAction(id))}>
+    <Button
+      variant="outline"
+      type="button"
+      disabled={pending}
+      onClick={() => start(() => revokeSessionAction(id))}
+    >
       {t("revoke")}
-    </button>
+    </Button>
   );
 }
 
@@ -20,13 +26,14 @@ export function RevokeOtherSessionsButton() {
   const t = useTranslations("account");
   const [pending, start] = useTransition();
   return (
-    <button
+    <Button
+      variant="outline"
       type="button"
       disabled={pending}
       onClick={() => start(() => revokeOtherSessionsAction())}
     >
       {t("revokeOthers")}
-    </button>
+    </Button>
   );
 }
 
@@ -34,7 +41,8 @@ export function SignOutButton() {
   const t = useTranslations("account");
   const router = useRouter();
   return (
-    <button
+    <Button
+      variant="outline"
       type="button"
       onClick={async () => {
         await authClient.signOut();
@@ -43,7 +51,7 @@ export function SignOutButton() {
       }}
     >
       {t("signOut")}
-    </button>
+    </Button>
   );
 }
 
@@ -52,7 +60,8 @@ export function SwitchOrganizationButton({ organizationId }: { organizationId: s
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <button
+    <Button
+      variant="outline"
       type="button"
       disabled={pending}
       onClick={() =>
@@ -63,6 +72,6 @@ export function SwitchOrganizationButton({ organizationId }: { organizationId: s
       }
     >
       {t("switchTo")}
-    </button>
+    </Button>
   );
 }

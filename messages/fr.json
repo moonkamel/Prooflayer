@@ -6,7 +6,11 @@
     "submit": "Valider",
     "loading": "Un instant…",
     "genericError": "Une erreur est survenue. Réessayez.",
-    "backToSignIn": "Retour à la connexion"
+    "backToSignIn": "Retour à la connexion",
+    "languageNames": {
+      "fr": "Français",
+      "en": "English"
+    }
   },
   "signUp": {
     "title": "Créer mon espace",
@@ -178,5 +182,29 @@
     "member_remove": "Retrait d'un membre",
     "invitation_revoke": "Révocation d'une invitation",
     "invitation_accept": "Acceptation d'une invitation"
+  },
+  "controlStatus": {
+    "PASS": "OK",
+    "FAIL": "En échec",
+    "PARTIAL": "Partiel",
+    "STALE": "Périmé",
+    "MISSING": "Sans preuve",
+    "NOT_APPLICABLE": "Non applicable"
+  },
+  "shell": {
+    "skipToContent": "Aller au contenu",
+    "mainNav": "Navigation principale",
+    "account": "Mon profil",
+    "organization": "Organisation",
+    "audit": "Journal d'audit",
+    "language": "Langue",
+    "activeOrganization": "Organisation active : <strong>{name}</strong>",
+    "brand": "ProofLayer"
+  },
+  "home": {
+    "title": "ProofLayer",
+    "tagline": "Les preuves exigées par l'AI Act, capturées là où le travail se fait, horodatées et vérifiables sans nous.",
+    "signUp": "Créer mon espace",
+    "signIn": "Se connecter"
   }
 }

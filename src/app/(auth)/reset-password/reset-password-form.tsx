@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth-client";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const t = useTranslations("resetPassword");
@@ -26,17 +30,17 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (status === "done") {
     return (
       <>
-        <p role="status">{t("done")}</p>
+        <Alert>{t("done")}</Alert>
         <Link href="/sign-in">{tc("backToSignIn")}</Link>
       </>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} aria-busy={pending}>
-      <label>
+    <form className="max-w-md space-y-3" onSubmit={onSubmit} aria-busy={pending}>
+      <Label>
         {t("newPassword")}
-        <input
+        <Input
           name="password"
           type="password"
           autoComplete="new-password"
@@ -44,11 +48,11 @@ export function ResetPasswordForm({ token }: { token: string }) {
           maxLength={128}
           required
         />
-      </label>
-      {status === "invalid" && <p role="alert">{t("invalid")}</p>}
-      <button type="submit" disabled={pending}>
+      </Label>
+      {status === "invalid" && <Alert tone="error">{t("invalid")}</Alert>}
+      <Button type="submit" disabled={pending}>
         {pending ? tc("loading") : t("submit")}
-      </button>
+      </Button>
     </form>
   );
 }

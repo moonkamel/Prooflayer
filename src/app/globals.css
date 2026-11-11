@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * Jetons de la coque (PL-109, §5.2). Contrastes vérifiés au niveau WCAG 2.2 AA (texte ≥ 4,5:1) :
+ * foreground / background 17,9:1 ; muted-foreground / background 7,6:1 ; primary-foreground / primary 15,4:1.
+ * Référence visuelle : Linear, GitHub — dense, sobre, aucune carte décorative.
+ */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #475569;
+  --color-border: #cbd5e1;
+  --color-input: #94a3b8;
+  --color-primary: #0f172a;
+  --color-primary-foreground: #f8fafc;
+  --color-destructive: #b91c1c;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #2563eb;
+  --color-link: #1d4ed8;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background text-foreground font-sans text-sm antialiased;
+  }
+  /* Liens soulignés : jamais distingués du texte par la seule couleur (WCAG 1.4.1, §5.2). */
+  a {
+    @apply text-link underline underline-offset-2 hover:decoration-2;
+  }
+  /* Focus toujours visible (§5.2). */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  h1 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply text-base font-semibold;
+  }
+  code {
+    @apply font-mono text-xs;
+  }
+}
+
+/* Respect de prefers-reduced-motion (§5.2). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
