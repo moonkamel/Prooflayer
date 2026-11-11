@@ -14,6 +14,11 @@ export const AUDIT_ACTIONS = [
   "member.remove",
   "invitation.revoke",
   "invitation.accept",
+  "system.create",
+  "system.update",
+  "system.archive",
+  "designChange.create",
+  "designChange.qualify",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

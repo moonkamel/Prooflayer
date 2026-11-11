@@ -245,16 +245,18 @@ model Classification {
 }
 
 model DesignChange {
-  id            String   @id @default(cuid())
-  orgId         String
-  systemId      String
-  occurredAt    DateTime
-  summary       String
-  isSignificant Boolean? // appréciation Art. 111(2) et Art. 3(23), null = à qualifier
-  evidenceId    String? // release ou PR à l'origine
-  qualifiedBy   String?
-  createdAt     DateTime @default(now())
-  system        AiSystem @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(cuid())
+  orgId               String
+  systemId            String
+  occurredAt          DateTime
+  summary             String
+  isSignificant       Boolean? // appréciation Art. 111(2) et Art. 3(23), null = à qualifier
+  evidenceId          String? // release ou PR à l'origine
+  qualifiedBy         String?
+  qualifiedAt         DateTime? // PL-201 : date de la qualification
+  qualificationReason String? // PL-201 : motif de la qualification (§5.3, écran B)
+  createdAt           DateTime  @default(now())
+  system              AiSystem  @relation(fields: [systemId], references: [id], onDelete: Cascade)
 
   @@index([orgId, systemId, occurredAt(sort: Desc)])
 }

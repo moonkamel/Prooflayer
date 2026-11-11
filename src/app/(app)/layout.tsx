@@ -22,6 +22,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-2">
           <span className="font-semibold">{t("brand")}</span>
           <nav aria-label={t("mainNav")} className="flex flex-1 flex-wrap items-center gap-1">
+            <NavLink href="/systems">{t("systems")}</NavLink>
             <NavLink href="/organization">{t("organization")}</NavLink>
             {active && ADMIN_ROLES.includes(active.role) && (
               <NavLink href="/audit">{t("audit")}</NavLink>

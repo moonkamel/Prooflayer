@@ -6,9 +6,18 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** Lien de navigation : la page courante est signalée par aria-current, pas seulement par le style. */
-export function NavLink({ href, children }: { href: string; children: ReactNode }) {
+export function NavLink({
+  href,
+  children,
+  exact = false,
+}: {
+  href: string;
+  children: ReactNode;
+  /** Courant seulement sur ce chemin exact, pas sur ses sous-pages. */
+  exact?: boolean;
+}) {
   const pathname = usePathname();
-  const current = pathname === href || pathname.startsWith(`${href}/`);
+  const current = pathname === href || (!exact && pathname.startsWith(`${href}/`));
   return (
     <Link
       href={href}
