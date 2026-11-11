@@ -43,9 +43,24 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
   await page.context().clearCookies();
 
   await createWorkspace(page, uniqueEmail("a11y-owner"), "Accessible SAS");
-  for (const path of ["/account", "/organization", "/audit"]) {
+  for (const path of ["/account", "/organization", "/audit", "/systems"]) {
     await page.goto(path);
     await expectNoViolations(page, path);
+  }
+
+  // Registre (PL-201) : fiche système et ses onglets, champ en cours d'édition compris.
+  await page.getByLabel("Nom", { exact: true }).fill("Système accessible");
+  await page.getByLabel("Finalité prévue").fill("Vérifier l'accessibilité de la fiche");
+  await page.getByRole("button", { name: "Ajouter au registre" }).click();
+  await expect(page).toHaveURL(/\/systems\/[^/]+$/u);
+  await expectNoViolations(page, "/systems/[id]");
+  await page.getByRole("button", { name: "Modifier : Modèles sous-jacents" }).click();
+  await page.getByRole("button", { name: "Ajouter un modèle" }).click();
+  await expectNoViolations(page, "/systems/[id] (édition)");
+  const fiche = new URL(page.url()).pathname;
+  for (const tab of ["changes", "history"]) {
+    await page.goto(`${fiche}/${tab}`);
+    await expectNoViolations(page, `/systems/[id]/${tab}`);
   }
 });
 

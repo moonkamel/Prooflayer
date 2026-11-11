@@ -107,6 +107,19 @@ packages/verify/         outil de vérification open source
 - Liens soulignés par défaut ; erreurs en `<Alert tone="error">` (role="alert"), informations en `<Alert>` (role="status").
 - Accessibilité : `tests/e2e/a11y.spec.ts` (axe, WCAG 2.2 AA) ; tout nouvel écran y est ajouté.
 
+## Registre des systèmes d'IA (conventions établies par PL-201)
+- Routeur `system` (`src/server/routers/system.ts`), logique dans `src/server/services/systems.ts`, fonctions pures
+  (diff, champs de classification, slug, export) dans `src/server/services/system-registry.ts`.
+- Historique d'une fiche = journal d'audit (`targetType` `ai_system`, métadonnées `changes: [{ field, before, after }]`).
+  Un champ inchangé n'est pas historisé ; écriture conditionnée à `updatedAt` (CONFLICT `system.conflict`).
+- `CLASSIFICATION_FIELDS` : finalité prévue, rôle, fournisseur tiers, modèles, catégories de données. Leur modification
+  passe `classificationStale` à vrai si une classification non remplacée existe. Le moteur (PL-202) s'y conforme.
+- Fiche archivée : lecture et export seulement ; elle sort de la surveillance.
+- Modifications de conception : saisie manuelle (`designChanges.create`) en attendant les releases GitHub ; qualification
+  significative ou non avec motif obligatoire (`qualifiedAt`, `qualificationReason`), requalification journalisée.
+- Écrans : `/systems` (registre) et `/systems/[id]` (écran B : Vue, Changements, Historique). Un onglet ajouté plus tard
+  (Contrôles, Preuves, Sources, Packs) se déclare dans `src/app/(app)/systems/[id]/layout.tsx`.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

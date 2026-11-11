@@ -62,6 +62,7 @@ export async function listMembers(ctx: OrgContext) {
   const members = await identity.membersOf(ctx.orgId);
   return members.map((m) => ({
     id: m.id,
+    userId: m.userId,
     role: m.role,
     name: m.user.name,
     email: m.user.email,
