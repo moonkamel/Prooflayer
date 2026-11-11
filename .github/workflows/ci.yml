@@ -41,6 +41,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test
+      - run: pnpm test:classify
       - run: pnpm db:validate
 
   # Parcours Playwright sur le vrai serveur et une vraie base (PL-103 : authentification de bout en bout).
