@@ -189,7 +189,8 @@
     "designChange_qualify": "Qualification d'une modification de conception",
     "classification_draft": "Ouverture d'un questionnaire de classification",
     "classification_saveAnswers": "Réponse au questionnaire de classification",
-    "classification_compute": "Calcul d'une classification"
+    "classification_compute": "Calcul d'une classification",
+    "classification_sign": "Signature d'une classification"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -484,5 +485,124 @@
         }
       }
     }
+  },
+  "classificationResult": {
+    "title": "Classification",
+    "draft": "Brouillon non signé",
+    "rules": "Règles v{version}",
+    "annex": "Annexe III, point {points}",
+    "role": "Rôle : {role}",
+    "why": "Pourquoi ce résultat",
+    "question": "Question : {question}",
+    "answer": "Votre réponse : {answer}",
+    "noAnswer": "Question non posée",
+    "implies": "Ce que cela implique",
+    "application": "Application : {date}",
+    "assessment": {
+      "internalControl": "Évaluation : contrôle interne",
+      "notifiedBodyPossible": "Évaluation : organisme notifié, sauf application intégrale des normes harmonisées",
+      "sectoral": "Évaluation : procédure de la législation de l'Annexe I"
+    },
+    "noObligation": "Aucune obligation au titre du règlement pour cette catégorie.",
+    "exemptTitle": "Exemption à documenter et à enregistrer",
+    "exemptBody": "L'Art. 6(4) impose de documenter cette évaluation avant la mise sur le marché ; l'Art. 49(2) impose d'enregistrer le système dans la base de données de l'UE.",
+    "prohibitedTitle": "Pratique interdite",
+    "prohibitedBody": "Ce système ne peut être ni mis sur le marché ni utilisé dans l'Union (Art. 5). La classification ne se signe pas : arrêtez la pratique et consultez un avocat.",
+    "sign": "Signer la classification",
+    "edit": "Modifier mes réponses",
+    "pdf": "Note en PDF",
+    "signTitle": "Signer la classification",
+    "signIntro": "La signature fige cette classification. Une modification ultérieure créera une nouvelle version.",
+    "name": "Nom",
+    "jobTitle": "Fonction",
+    "statementLabel": "Déclaration",
+    "statement": "J'atteste l'exactitude des réponses fournies.",
+    "password": "Mot de passe",
+    "confirm": "Signer",
+    "cancel": "Annuler",
+    "invalidPassword": "Mot de passe incorrect.",
+    "signedTitle": "Classification signée",
+    "signedBy": "Signée le {date} par {name}, {title}.",
+    "requalify": "Requalifier le système",
+    "versions": "Versions signées",
+    "versionCurrent": "En vigueur",
+    "versionSuperseded": "Remplacée",
+    "trace": {
+      "R1": {
+        "continue": "Système d'IA au sens de l'Art. 3(1)",
+        "concludes": "Pas un système d'IA au sens de l'Art. 3(1)"
+      },
+      "R2": {
+        "continue": "Dans le champ du règlement",
+        "concludes": "Hors du champ du règlement : exclusion de l'Art. 2"
+      },
+      "R3": {
+        "continue": "Aucune pratique interdite par l'Art. 5",
+        "concludes": "Pratique interdite par l'Art. 5"
+      },
+      "R4": {
+        "continue": "Pas un composant de sécurité d'un produit de l'Annexe I",
+        "concludes": "Composant de sécurité d'un produit de l'Annexe I : haut risque"
+      },
+      "noAnnexIII": "Aucun cas d'usage de l'Annexe III",
+      "R5": {
+        "continue": "Pas de profilage de personnes physiques",
+        "concludes": "Profilage de personnes physiques : l'Art. 6(3) ne s'applique pas, haut risque"
+      },
+      "R6": {
+        "continue": "Une condition de l'Art. 6(3) est remplie",
+        "concludes": "Cas d'usage de l'Annexe III sans condition de l'Art. 6(3) : haut risque"
+      },
+      "R7": {
+        "continue": "Aucune condition de l'Art. 6(3)",
+        "concludes": "Condition de l'Art. 6(3) remplie : pas de haut risque, à documenter (Art. 6(4))"
+      },
+      "R8": {
+        "continue": "Aucune obligation de transparence de l'Art. 50",
+        "concludes": "Interaction avec des personnes ou contenu de synthèse : obligations de l'Art. 50"
+      },
+      "R9": {
+        "continue": "Une autre règle s'applique",
+        "concludes": "Aucune autre règle ne s'applique : risque minimal"
+      },
+      "ROLE1": {
+        "continue": "Système non développé par votre entreprise",
+        "concludes": "Développé par votre entreprise : fournisseur (Art. 3(3))"
+      },
+      "ROLE2": {
+        "continue": "Aucune marque propre apposée",
+        "concludes": "Votre marque est apposée : fournisseur (Art. 25(1)(a))"
+      },
+      "ROLE3": {
+        "continue": "Aucune modification substantielle",
+        "concludes": "Modification substantielle : fournisseur (Art. 25(1)(b))"
+      },
+      "ROLE4": {
+        "continue": "Aucun changement de finalité",
+        "concludes": "Changement de finalité : fournisseur (Art. 25(1)(c))"
+      },
+      "ROLE5": {
+        "continue": "Un critère de fournisseur s'applique",
+        "concludes": "Utilisé sous votre autorité : déployeur (Art. 3(4))"
+      }
+    },
+    "note": {
+      "title": "Note de classification",
+      "system": "Système",
+      "purpose": "Finalité prévue",
+      "owner": "Responsable",
+      "result": "Résultat",
+      "conditions": "Conditions de l'Art. 6(3)",
+      "profiling": "Profilage de personnes physiques",
+      "yes": "Oui",
+      "no": "Non",
+      "answers": "Réponses au questionnaire",
+      "signature": "Signature",
+      "unsigned": "Classification non signée : brouillon sans valeur d'engagement.",
+      "method": "Classification établie avec ProofLayer, règles {version}. Les règles sont déterministes et publiques ; le résultat engage le signataire, pas ProofLayer.",
+      "page": "Page {page} sur {pages}",
+      "generatedAt": "Note générée le {date}"
+    },
+    "rulesHeader": "Règles"
   }
 }

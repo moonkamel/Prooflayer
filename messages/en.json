@@ -189,7 +189,8 @@
     "designChange_qualify": "Design change qualified",
     "classification_draft": "Classification questionnaire opened",
     "classification_saveAnswers": "Classification questionnaire answered",
-    "classification_compute": "Classification computed"
+    "classification_compute": "Classification computed",
+    "classification_sign": "Classification signed"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -484,5 +485,124 @@
         }
       }
     }
+  },
+  "classificationResult": {
+    "title": "Classification",
+    "draft": "Unsigned draft",
+    "rules": "Rules v{version}",
+    "annex": "Annex III, point {points}",
+    "role": "Role: {role}",
+    "why": "Why this result",
+    "question": "Question: {question}",
+    "answer": "Your answer: {answer}",
+    "noAnswer": "Question not asked",
+    "implies": "What this implies",
+    "application": "Applies from: {date}",
+    "assessment": {
+      "internalControl": "Assessment: internal control",
+      "notifiedBodyPossible": "Assessment: notified body, unless harmonised standards are applied in full",
+      "sectoral": "Assessment: procedure of the Annex I legislation"
+    },
+    "noObligation": "No obligation under the Regulation for this category.",
+    "exemptTitle": "Exemption to document and register",
+    "exemptBody": "Art. 6(4) requires documenting this assessment before placing on the market; Art. 49(2) requires registering the system in the EU database.",
+    "prohibitedTitle": "Prohibited practice",
+    "prohibitedBody": "This system can be neither placed on the market nor used in the Union (Art. 5). The classification cannot be signed: stop the practice and consult a lawyer.",
+    "sign": "Sign the classification",
+    "edit": "Change my answers",
+    "pdf": "PDF note",
+    "signTitle": "Sign the classification",
+    "signIntro": "Signing freezes this classification. Any later change will create a new version.",
+    "name": "Name",
+    "jobTitle": "Job title",
+    "statementLabel": "Statement",
+    "statement": "I certify that the answers provided are accurate.",
+    "password": "Password",
+    "confirm": "Sign",
+    "cancel": "Cancel",
+    "invalidPassword": "Incorrect password.",
+    "signedTitle": "Signed classification",
+    "signedBy": "Signed on {date} by {name}, {title}.",
+    "requalify": "Requalify the system",
+    "versions": "Signed versions",
+    "versionCurrent": "In force",
+    "versionSuperseded": "Superseded",
+    "trace": {
+      "R1": {
+        "continue": "AI system within the meaning of Art. 3(1)",
+        "concludes": "Not an AI system within the meaning of Art. 3(1)"
+      },
+      "R2": {
+        "continue": "Within the scope of the Regulation",
+        "concludes": "Outside the scope of the Regulation: Art. 2 exclusion"
+      },
+      "R3": {
+        "continue": "No practice prohibited by Art. 5",
+        "concludes": "Practice prohibited by Art. 5"
+      },
+      "R4": {
+        "continue": "Not a safety component of an Annex I product",
+        "concludes": "Safety component of an Annex I product: high risk"
+      },
+      "noAnnexIII": "No Annex III use case",
+      "R5": {
+        "continue": "No profiling of natural persons",
+        "concludes": "Profiling of natural persons: Art. 6(3) does not apply, high risk"
+      },
+      "R6": {
+        "continue": "An Art. 6(3) condition is met",
+        "concludes": "Annex III use case without any Art. 6(3) condition: high risk"
+      },
+      "R7": {
+        "continue": "No Art. 6(3) condition",
+        "concludes": "Art. 6(3) condition met: not high risk, to be documented (Art. 6(4))"
+      },
+      "R8": {
+        "continue": "No Art. 50 transparency obligation",
+        "concludes": "Interaction with people or synthetic content: Art. 50 obligations"
+      },
+      "R9": {
+        "continue": "Another rule applies",
+        "concludes": "No other rule applies: minimal risk"
+      },
+      "ROLE1": {
+        "continue": "System not developed by your company",
+        "concludes": "Developed by your company: provider (Art. 3(3))"
+      },
+      "ROLE2": {
+        "continue": "No own brand applied",
+        "concludes": "Your brand is applied: provider (Art. 25(1)(a))"
+      },
+      "ROLE3": {
+        "continue": "No substantial modification",
+        "concludes": "Substantial modification: provider (Art. 25(1)(b))"
+      },
+      "ROLE4": {
+        "continue": "No change of intended purpose",
+        "concludes": "Change of intended purpose: provider (Art. 25(1)(c))"
+      },
+      "ROLE5": {
+        "continue": "A provider criterion applies",
+        "concludes": "Used under your authority: deployer (Art. 3(4))"
+      }
+    },
+    "note": {
+      "title": "Classification note",
+      "system": "System",
+      "purpose": "Intended purpose",
+      "owner": "Owner",
+      "result": "Result",
+      "conditions": "Art. 6(3) conditions",
+      "profiling": "Profiling of natural persons",
+      "yes": "Yes",
+      "no": "No",
+      "answers": "Questionnaire answers",
+      "signature": "Signature",
+      "unsigned": "Unsigned classification: draft with no binding value.",
+      "method": "Classification produced with ProofLayer, rules {version}. The rules are deterministic and public; the result binds the signatory, not ProofLayer.",
+      "page": "Page {page} of {pages}",
+      "generatedAt": "Note generated on {date}"
+    },
+    "rulesHeader": "Rules"
   }
 }

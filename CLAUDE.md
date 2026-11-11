@@ -139,6 +139,19 @@ packages/verify/         outil de vérification open source
   `compute` (questionnaire complet, version de règles du brouillon). `Classification.answers = { responses }`.
 - Écran : `/systems/[id]/classification` ; « Qualifier ce système » et « Revoir la classification » sur la fiche.
 
+## Résultat, signature et note (conventions établies par PL-204)
+- Écran A : `src/app/(app)/systems/[id]/classification/result.tsx` ; trace et implications pures dans
+  `src/server/classify/explain.ts` (dates du §1.5 : Annexe III 2 décembre 2027, Annexe I 2 août 2028, Art. 50
+  2 août 2026, Art. 5 2 février 2025).
+- Signature (`classification.sign`) : nom, fonction, déclaration (`classificationResult.statement`, langue du signataire),
+  mot de passe vérifié par Better Auth (`passwordVerifier`, injectable). Pratique interdite : jamais signée.
+  Dans `withOrgTransaction` (src/server/db.ts) : l'ancienne version passe à SUPERSEDED, la fiche reprend catégorie,
+  points et rôle, `classificationStale` repasse à faux ; un changement de rôle est historisé sur la fiche.
+- Immuabilité en base : trigger `classification_guard` (seul passage SIGNED → SUPERSEDED autorisé ; suppression
+  d'une version signée seulement sous `app.purge_org`).
+- Note PDF : `@react-pdf/renderer`, `src/server/services/classification-note.tsx`, route
+  `/api/systems/[id]/classifications/[cid]/note?lang=fr|en`. Textes : `classificationResult.note`.
+
 ## Sommaire du cahier des charges
 
 Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sections qu'il cite.**

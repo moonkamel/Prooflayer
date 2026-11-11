@@ -22,6 +22,7 @@ export const AUDIT_ACTIONS = [
   "classification.draft",
   "classification.saveAnswers",
   "classification.compute",
+  "classification.sign",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

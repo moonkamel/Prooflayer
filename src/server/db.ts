@@ -40,3 +40,17 @@ export function forOrg(orgId: string) {
     },
   });
 }
+
+export type OrgTransaction = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
+/**
+ * Transaction interactive restreinte à une organisation (PL-204) : app.org_id est positionné pour toute la
+ * transaction (RLS). Pour les écritures qui doivent réussir ou échouer ensemble, par exemple remplacer la
+ * classification signée précédente et signer la nouvelle.
+ */
+export function withOrgTransaction<T>(orgId: string, fn: (tx: OrgTransaction) => Promise<T>) {
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT set_config('app.org_id', ${orgId}, TRUE)`;
+    return fn(tx);
+  });
+}

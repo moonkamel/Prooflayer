@@ -235,6 +235,7 @@ model Classification {
   reasoning          Json // trace : [{ ruleId, answerKey, articleRef, outcome }]
   status             ClassificationStatus @default(DRAFT)
   signedByUserId     String?
+  signedByName       String? // PL-204 : nom saisi à la signature (§3.2 E1 : « nom, fonction, date, déclaration »)
   signedByTitle      String?
   signedAt           DateTime?
   signatureStatement String?
