@@ -42,6 +42,20 @@ packages/verify/         outil de vérification open source
 - Le client Prisma est généré dans `src/generated/prisma` (non versionné) : `pnpm db:generate` avant typecheck et build.
 - `pnpm db:check` rejoue application, retour arrière et rejeu sur une base jetable (`DB_CHECK_CONFIRM=jetable`).
 - Projet Supabase : `prooflayer`, région eu-central-1 (Francfort).
+- Tables d'identité (User, Session, Account, Verification, TwoFactor, Organization, Member, Invitation) : gérées par
+  Better Auth. Toute évolution passe par `pnpm exec auth generate` puis une fusion manuelle qui garde les ajouts du §4.3.2.
+
+## Authentification et traductions (conventions établies par PL-103)
+- Better Auth : configuration dans `src/server/auth.ts`, client dans `src/lib/auth-client.ts`, garde d'accès dans
+  `src/server/services/session.ts` (`requireSession()` dans toute page de l'espace connecté `src/app/(app)/`).
+- Jamais de jeton de session envoyé au navigateur : les sessions sont désignées par leur identifiant.
+- Emails : `src/server/email/`. Transport `outbox` (fichier local) en développement et en test ; le fournisseur réel arrive à PL-108.
+- Traductions : next-intl sans préfixe d'URL ; langue = cookie `NEXT_LOCALE`, puis `Accept-Language`, puis `fr`.
+  `messages/fr.json` et `messages/en.json` gardent exactement les mêmes clés (test `tests/unit/i18n.test.ts`).
+- Tests e2e : `pnpm test:e2e` exige `DATABASE_URL` (rôle applicatif) et `DIRECT_DATABASE_URL`. La limite de débit de
+  Better Auth reste active ; chaque parcours présente sa propre IP de test (`withFreshClientIp`).
+- Dépendances : pnpm refuse les versions publiées depuis moins de 24 h. Ne pas ajouter d'exception
+  `minimumReleaseAgeExclude` ; choisir la version précédente.
 
 ## Sommaire du cahier des charges
 

@@ -9,7 +9,7 @@
 // Utilise DIRECT_DATABASE_URL (rôle de migration). Destructif : à ne lancer que sur une base jetable.
 //   pnpm db:check
 import { execFileSync } from "node:child_process";
-import { readdirSync, existsSync } from "node:fs";
+import { readdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
 
@@ -23,6 +23,9 @@ if (process.env.DB_CHECK_CONFIRM !== "jetable") {
 
 const APP_ROLE = "prooflayer_app";
 const MIGRATIONS_DIR = "prisma/migrations";
+// Une table par modèle du schéma : le décompte suit le schéma au lieu d'être figé.
+const EXPECTED_TABLES = (readFileSync("prisma/schema.prisma", "utf8").match(/^model /gm) ?? [])
+  .length;
 
 const run = (cmd: string, args: string[]): void => {
   execFileSync(cmd, args, { stdio: "inherit", env: process.env });
@@ -66,7 +69,10 @@ async function deployAndVerify(): Promise<void> {
     "--exit-code",
   );
   check(true, "aucun écart entre la base et prisma/schema.prisma");
-  check((await publicTables()).length === 29, "29 tables créées");
+  check(
+    (await publicTables()).length === EXPECTED_TABLES,
+    `${EXPECTED_TABLES} tables créées, une par modèle du schéma`,
+  );
 }
 
 async function verifyAppRole(): Promise<void> {
@@ -93,6 +99,11 @@ async function verifyAppRole(): Promise<void> {
     return row?.ok === true;
   };
   check(await privilege("AiSystem", "SELECT"), `${APP_ROLE} lit les tables métier`);
+  // Tables créées après la migration du rôle : droits reçus par les privilèges par défaut.
+  check(
+    (await privilege("TwoFactor", "INSERT")) && (await privilege("Verification", "DELETE")),
+    `${APP_ROLE} a ses droits sur les tables créées après lui (TwoFactor, Verification)`,
+  );
   check(await privilege("EvidenceItem", "INSERT"), `${APP_ROLE} insère dans EvidenceItem`);
   check(
     !(await privilege("EvidenceItem", "DELETE")),

@@ -14,19 +14,25 @@ datasource db {
 }
 
 // ───────────── Identité et organisation (tables gérées par Better Auth) ─────────────
+// PL-103 : régénérées avec le CLI de Better Auth 1.7.18 (`auth generate`, plugins twoFactor et organization),
+// comme le prescrit le §4.3.2. Conservés du §4.3.2 : noms de tables, User.locale, Organization.country et
+// employeeBand, unicité (providerId, accountId), énumération OrgRole des quatre rôles du §3.2 E10.
 
 model User {
-  id               String    @id
-  email            String    @unique
+  id               String       @id
+  email            String       @unique
   name             String
-  emailVerified    Boolean   @default(false)
-  twoFactorEnabled Boolean   @default(false)
-  locale           String    @default("fr")
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  emailVerified    Boolean      @default(false)
+  image            String?
+  twoFactorEnabled Boolean      @default(false)
+  locale           String       @default("fr")
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
   sessions         Session[]
   accounts         Account[]
+  twoFactors       TwoFactor[]
   members          Member[]
+  invitations      Invitation[]
 }
 
 model Session {
@@ -38,41 +44,78 @@ model Session {
   ipAddress            String?
   userAgent            String?
   createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Account {
-  id          String   @id
-  userId      String
-  providerId  String // "credential", "google", "microsoft"
-  accountId   String
-  password    String? // hachage, jamais en clair
-  accessToken String?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String    @id
+  userId                String
+  providerId            String // "credential", "google", "microsoft"
+  accountId             String
+  password              String? // hachage, jamais en clair
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+// Jetons de vérification d'email et de réinitialisation de mot de passe.
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// Double authentification TOTP (§3.2 E10, §4.7). Secret et codes de secours chiffrés par Better Auth.
+model TwoFactor {
+  id                      String    @id
+  userId                  String
+  secret                  String
+  backupCodes             String
+  verified                Boolean   @default(true)
+  failedVerificationCount Int       @default(0)
+  lockedUntil             DateTime?
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([secret])
+  @@index([userId])
 }
 
 model Organization {
-  id                String              @id
-  name              String
-  slug              String              @unique
-  country           String              @default("FR")
-  employeeBand      String? // "50-249", "250-749" : détermine le statut PME / SMC
-  createdAt         DateTime            @default(now())
-  members           Member[]
-  invitations       Invitation[]
-  systems           AiSystem[]
-  integrations      Integration[]
-  evidenceItems     EvidenceItem[]
-  sealBatches       SealBatch[]
-  auditPacks        AuditPack[]
-  apiKeys           ApiKey[]
-  subscription      Subscription?
-  encryptionKey     OrgEncryptionKey?
+  id            String            @id
+  name          String
+  slug          String            @unique
+  logo          String?
+  metadata      String?
+  country       String            @default("FR")
+  employeeBand  String? // "50-249", "250-749" : détermine le statut PME / SMC
+  createdAt     DateTime          @default(now())
+  members       Member[]
+  invitations   Invitation[]
+  systems       AiSystem[]
+  integrations  Integration[]
+  evidenceItems EvidenceItem[]
+  sealBatches   SealBatch[]
+  auditPacks    AuditPack[]
+  apiKeys       ApiKey[]
+  subscription  Subscription?
+  encryptionKey OrgEncryptionKey?
 }
 
 enum OrgRole {
@@ -92,6 +135,7 @@ model Member {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, userId])
+  @@index([organizationId])
   @@index([userId])
 }
 
@@ -102,10 +146,13 @@ model Invitation {
   role           OrgRole
   status         String       @default("pending")
   expiresAt      DateTime
+  createdAt      DateTime     @default(now())
   inviterId      String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter        User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, email])
+  @@index([email])
 }
 
 // ───────────── Registre et classification ─────────────

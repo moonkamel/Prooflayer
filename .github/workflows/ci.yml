@@ -43,10 +43,32 @@ jobs:
       - run: pnpm test
       - run: pnpm db:validate
 
+  # Parcours Playwright sur le vrai serveur et une vraie base (PL-103 : authentification de bout en bout).
   e2e:
     name: e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: prooflayer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Migrations et préparation des tests : rôle de migration.
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/prooflayer
+      # Serveur testé : rôle applicatif, comme en production. Mot de passe propre à cette base jetable.
+      DATABASE_URL: postgresql://prooflayer_app:ci-only@localhost:5432/prooflayer
+      # Secret propre à ce job, sans valeur hors de lui ; requis aussi au build par Better Auth.
+      BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -58,6 +80,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm db:generate
+      - run: pnpm db:migrate
+      - name: Mot de passe du rôle applicatif (base jetable)
+        run: psql "$DIRECT_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE prooflayer_app PASSWORD 'ci-only'"
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e

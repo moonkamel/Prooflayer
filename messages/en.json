@@ -1,0 +1,99 @@
+{
+  "common": {
+    "appName": "ProofLayer",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Submit",
+    "loading": "One moment…",
+    "genericError": "Something went wrong. Please try again.",
+    "backToSignIn": "Back to sign in"
+  },
+  "signUp": {
+    "title": "Create my workspace",
+    "name": "Full name",
+    "passwordHint": "At least 12 characters.",
+    "submit": "Create my workspace",
+    "withGoogle": "Continue with Google",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "checkEmail": "A verification email has been sent to {email}. Open the link it contains to activate your account."
+  },
+  "signIn": {
+    "title": "Sign in",
+    "submit": "Sign in",
+    "withGoogle": "Continue with Google",
+    "forgotPassword": "Forgot your password?",
+    "noAccount": "No account yet?",
+    "signUp": "Create my workspace",
+    "invalidCredentials": "Incorrect email address or password.",
+    "emailNotVerified": "Your email address is not verified yet. A new link has just been sent to you."
+  },
+  "verifyEmail": {
+    "title": "Email address verified",
+    "done": "Your email address is verified. You can continue.",
+    "invalid": "This verification link is invalid or has expired. Sign in to receive a new one.",
+    "continue": "Continue"
+  },
+  "forgotPassword": {
+    "title": "Forgot password",
+    "intro": "Enter your email address: if an account exists, you will receive a reset link.",
+    "submit": "Send the link",
+    "sent": "If an account matches this address, a reset link has just been sent."
+  },
+  "resetPassword": {
+    "title": "New password",
+    "newPassword": "New password",
+    "submit": "Save",
+    "done": "Your password has been changed. Your other sessions have been signed out.",
+    "invalid": "This reset link is invalid or has expired."
+  },
+  "twoFactorChallenge": {
+    "title": "Two-factor authentication",
+    "intro": "Enter the 6-digit code shown by your authenticator app.",
+    "code": "Code",
+    "submit": "Verify",
+    "useBackupCode": "Use a backup code",
+    "useTotp": "Use the authenticator app",
+    "backupCode": "Backup code",
+    "invalidCode": "Incorrect code."
+  },
+  "twoFactorSetup": {
+    "title": "Enable two-factor authentication",
+    "required": "Two-factor authentication is mandatory for the owner and admin roles. Enable it to continue.",
+    "optional": "Protect your account with a second factor.",
+    "confirmPassword": "Confirm your password to start.",
+    "start": "Start",
+    "scan": "Scan this QR code with your authenticator app, or enter the key below.",
+    "secretLabel": "Setup key",
+    "enterCode": "Enter the 6-digit code shown by the app.",
+    "verify": "Enable",
+    "backupTitle": "Backup codes",
+    "backupIntro": "Keep these codes somewhere safe. Each one allows a single sign-in if you lose access to your app. They will not be shown again.",
+    "backupDone": "I have saved my codes",
+    "enabled": "Two-factor authentication is active."
+  },
+  "account": {
+    "title": "My profile",
+    "twoFactorTitle": "Two-factor authentication",
+    "twoFactorOn": "Active",
+    "twoFactorOff": "Inactive",
+    "enableTwoFactor": "Enable",
+    "sessionsTitle": "Open sessions",
+    "sessionCurrent": "This session",
+    "sessionCreated": "Opened on {date}",
+    "sessionUnknownDevice": "Unknown device",
+    "revoke": "Sign out",
+    "revokeOthers": "Sign out all other sessions",
+    "signOut": "Sign out"
+  },
+  "emails": {
+    "verify": {
+      "subject": "Verify your email address",
+      "body": "Hello {name},\n\nTo activate your ProofLayer account, open this link:\n{url}\n\nIf you did not make this request, ignore this email."
+    },
+    "resetPassword": {
+      "subject": "Reset your password",
+      "body": "Hello {name},\n\nTo choose a new password, open this link, valid for one hour:\n{url}\n\nIf you did not make this request, ignore this email: your password stays unchanged."
+    }
+  }
+}
