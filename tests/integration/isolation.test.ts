@@ -240,8 +240,26 @@ beforeAll(async () => {
   }
 });
 
+/** AuditLog est en ajout seul (PL-106) : seule la purge d'une organisation, app.purge_org positionné, le vide. */
+async function purgeAuditLog(orgId: string) {
+  const client = new pg.Client({ connectionString: process.env.DIRECT_DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(`SELECT set_config('app.purge_org', $1, true)`, [orgId]);
+    await client.query(`DELETE FROM "AuditLog" WHERE "orgId" = $1`, [orgId]);
+    await client.query("COMMIT");
+  } finally {
+    await client.end();
+  }
+}
+
 afterAll(async () => {
-  const tables = fixtures.map(([, table]) => table).reverse();
+  for (const org of [A, B]) await purgeAuditLog(org);
+  const tables = fixtures
+    .map(([, table]) => table)
+    .filter((table) => table !== "AuditLog")
+    .reverse();
   for (const table of tables) {
     await asMigrationRole(`DELETE FROM "${table}" WHERE "orgId" LIKE $1`, [`org_iso_%_${run}%`]);
   }

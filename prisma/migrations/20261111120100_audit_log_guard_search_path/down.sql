@@ -1,0 +1,7 @@
+-- Retour arrière de 20261111120100_audit_log_guard_search_path (PL-106).
+-- À exécuter avec le rôle de migration :
+--   pnpm exec prisma db execute --file prisma/migrations/20261111120100_audit_log_guard_search_path/down.sql
+ALTER FUNCTION audit_log_guard() RESET search_path;
+
+-- Historique Prisma
+DELETE FROM "_prisma_migrations" WHERE "migration_name" = '20261111120100_audit_log_guard_search_path';

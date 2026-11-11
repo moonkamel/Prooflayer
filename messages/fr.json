@@ -146,5 +146,37 @@
     "accept": "Accepter l'invitation",
     "invalid": "Cette invitation est invalide, expirée, révoquée ou adressée à une autre adresse email.",
     "wrongAccount": "Connecté en tant que {email}. Cette invitation doit être acceptée avec l'adresse à laquelle elle a été envoyée."
+  },
+  "audit": {
+    "title": "Journal d'audit",
+    "nav": "Journal d'audit",
+    "intro": "Toute action d'écriture dans l'organisation : qui, quoi, sur quoi, quand.",
+    "filterAction": "Action",
+    "allActions": "Toutes les actions",
+    "from": "Du",
+    "to": "Au",
+    "apply": "Filtrer",
+    "reset": "Réinitialiser",
+    "export": "Exporter en CSV",
+    "exportTruncated": "Export limité aux 50 000 entrées les plus récentes : affinez la période.",
+    "date": "Date",
+    "actor": "Acteur",
+    "action": "Action",
+    "target": "Cible",
+    "details": "Détails",
+    "system": "Système",
+    "unknownActor": "Utilisateur supprimé",
+    "empty": "Aucune entrée pour ces filtres.",
+    "older": "Entrées plus anciennes",
+    "forbidden": "Le journal d'audit est réservé aux rôles propriétaire et administrateur."
+  },
+  "auditActions": {
+    "organization_create": "Création de l'organisation",
+    "organization_update": "Modification de l'organisation",
+    "member_invite": "Invitation d'un membre",
+    "member_setRole": "Changement de rôle",
+    "member_remove": "Retrait d'un membre",
+    "invitation_revoke": "Révocation d'une invitation",
+    "invitation_accept": "Acceptation d'une invitation"
   }
 }
