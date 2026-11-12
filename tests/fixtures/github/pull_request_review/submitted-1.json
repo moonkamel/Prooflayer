@@ -1,0 +1,77 @@
+{
+  "action": "submitted",
+  "review": {
+    "id": 3100000001,
+    "node_id": "PRR_x",
+    "user": {
+      "login": "lead-bob",
+      "id": 8200000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/lead-bob"
+    },
+    "body": "Voir mon commentaire privé sur les données personnelles de candidats.",
+    "commit_id": "dddddddddddddddddddddddddddddddddddddddd",
+    "submitted_at": "2026-10-28T13:50:00Z",
+    "state": "approved",
+    "html_url": "https://github.com/talvio-demo/scoring-model/pull/214#pullrequestreview-3100000001",
+    "author_association": "MEMBER"
+  },
+  "pull_request": {
+    "number": 214,
+    "title": "x",
+    "user": {
+      "login": "dev-alice",
+      "id": 8300000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-alice"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model/pull/214",
+    "base": {
+      "ref": "main",
+      "repo": {
+        "id": 701234567,
+        "node_id": "R_kgDO701234567",
+        "name": "scoring-model",
+        "full_name": "talvio-demo/scoring-model",
+        "private": true,
+        "owner": {
+          "login": "talvio-demo",
+          "id": 9000001,
+          "type": "Organization"
+        },
+        "html_url": "https://github.com/talvio-demo/scoring-model",
+        "default_branch": "main"
+      }
+    },
+    "head": {
+      "sha": "dddddddddddddddddddddddddddddddddddddddd"
+    }
+  },
+  "repository": {
+    "id": 701234567,
+    "node_id": "R_kgDO701234567",
+    "name": "scoring-model",
+    "full_name": "talvio-demo/scoring-model",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "lead-bob",
+    "id": 8200000,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/lead-bob"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

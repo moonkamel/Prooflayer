@@ -1,0 +1,21 @@
+{
+  "repository": {
+    "id": 701234568,
+    "node_id": "R_kgDO701234568",
+    "name": "scoring-api",
+    "full_name": "talvio-demo/scoring-api",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api",
+    "default_branch": "main"
+  },
+  "takenAt": "2026-11-12T03:00:00Z",
+  "dependabot": [],
+  "codeScanning": [],
+  "secretScanning": [],
+  "secretScanningEnabled": true
+}

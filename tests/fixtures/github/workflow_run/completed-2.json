@@ -1,0 +1,103 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 9100000002,
+    "name": "CI",
+    "node_id": "WFR_x",
+    "head_branch": "feature/log",
+    "head_sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "path": ".github/workflows/ci.yml",
+    "display_title": "Message de commit avec email bob@talvio.example",
+    "run_number": 41,
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "failure",
+    "workflow_id": 550001,
+    "url": "https://api.github.com/x",
+    "html_url": "https://github.com/talvio-demo/scoring-api/actions/runs/9100000002",
+    "created_at": "2026-11-01T10:00:00Z",
+    "updated_at": "2026-11-01T10:06:12Z",
+    "run_attempt": 2,
+    "run_started_at": "2026-11-01T10:00:00Z",
+    "actor": {
+      "login": "dev-carla",
+      "id": 8400001,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-carla"
+    },
+    "triggering_actor": {
+      "login": "dev-carla",
+      "id": 8400001,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-carla"
+    },
+    "head_commit": {
+      "id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "message": "Corrige le seuil",
+      "author": {
+        "name": "Bob",
+        "email": "bob@talvio.example"
+      }
+    },
+    "repository": {
+      "id": 701234568,
+      "node_id": "R_kgDO701234568",
+      "name": "scoring-api",
+      "full_name": "talvio-demo/scoring-api",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/scoring-api",
+      "default_branch": "main"
+    },
+    "head_repository": {
+      "id": 701234568,
+      "node_id": "R_kgDO701234568",
+      "name": "scoring-api",
+      "full_name": "talvio-demo/scoring-api",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/scoring-api",
+      "default_branch": "main"
+    }
+  },
+  "workflow": {
+    "id": 550001,
+    "name": "CI",
+    "path": ".github/workflows/ci.yml"
+  },
+  "repository": {
+    "id": 701234568,
+    "node_id": "R_kgDO701234568",
+    "name": "scoring-api",
+    "full_name": "talvio-demo/scoring-api",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "dev-carla",
+    "id": 8400001,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/dev-carla"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

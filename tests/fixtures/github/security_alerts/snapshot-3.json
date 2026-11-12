@@ -1,0 +1,55 @@
+{
+  "repository": {
+    "id": 701234569,
+    "node_id": "R_kgDO701234569",
+    "name": "ml-pipelines",
+    "full_name": "talvio-demo/ml-pipelines",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/ml-pipelines",
+    "default_branch": "main"
+  },
+  "takenAt": "2026-11-12T03:00:00Z",
+  "dependabot": [
+    {
+      "number": 5,
+      "state": "dismissed",
+      "created_at": "2026-07-01T10:00:00Z",
+      "security_advisory": {
+        "severity": "medium"
+      },
+      "security_vulnerability": {
+        "severity": "medium"
+      }
+    },
+    {
+      "number": 6,
+      "state": "open",
+      "created_at": "2026-10-01T10:00:00Z",
+      "security_advisory": {
+        "severity": "low"
+      },
+      "security_vulnerability": {
+        "severity": "low"
+      }
+    }
+  ],
+  "codeScanning": [
+    {
+      "number": 1,
+      "state": "open",
+      "created_at": "2026-06-01T10:00:00Z",
+      "rule": {
+        "id": "js/xss",
+        "security_severity_level": "critical",
+        "severity": "error"
+      }
+    }
+  ],
+  "secretScanning": null,
+  "secretScanningEnabled": false
+}

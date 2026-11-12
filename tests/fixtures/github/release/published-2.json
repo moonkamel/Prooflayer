@@ -1,0 +1,53 @@
+{
+  "action": "published",
+  "release": {
+    "id": 170000002,
+    "tag_name": "api-1.8.0",
+    "target_commitish": "main",
+    "name": null,
+    "draft": false,
+    "prerelease": false,
+    "created_at": "2026-11-02T11:00:00Z",
+    "published_at": "2026-11-02T11:00:00Z",
+    "author": {
+      "login": "dev-alice",
+      "id": 8500001,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-alice"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api/releases/tag/api-1.8.0",
+    "body": "Notes internes : client Banque X, contact cto@banque-x.example",
+    "assets": [
+      {
+        "name": "model.bin",
+        "browser_download_url": "https://github.com/x"
+      }
+    ]
+  },
+  "repository": {
+    "id": 701234568,
+    "node_id": "R_kgDO701234568",
+    "name": "scoring-api",
+    "full_name": "talvio-demo/scoring-api",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "dev-alice",
+    "id": 8500001,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/dev-alice"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

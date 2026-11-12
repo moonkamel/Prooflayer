@@ -212,6 +212,16 @@ packages/verify/         outil de vérification open source
   NULL (effacement), suppression seulement sous `app.purge_org`. Les nettoyages de tests passent par la purge.
 - Stockage objet : `src/server/storage/object-store.ts` (`local` en développement et test ; S3 Supabase à PL-108).
 
+## Normaliseurs GitHub (conventions établies par PL-305)
+- `src/server/connectors/github/normalizers/` : un fichier par type de preuve, fonction pure
+  `(charge, { orgId, resourceId, capturedVia, warn }) → GitHubEvidence[]`, entrée validée par Zod, liste blanche
+  stricte (ni corps, ni diff, ni commentaire, ni email, ni contenu de fichier, ni valeur de secret).
+- Charge invalide : `[]` et un avertissement qui ne contient que le type et le chemin fautif, jamais la charge.
+- Clés de déduplication fondées sur les identifiants numériques GitHub (un renommage de dépôt ne les casse pas) ;
+  instantanés : une preuve par jour et par état (`…:{AAAA-MM-JJ}:{empreinte de l'état}`).
+- PR fusionnées : webhook et rattrapage GraphQL (`pullRequestFromGraphQL`) donnent la même preuve.
+- Fixtures : `tests/fixtures/github/<événement>/` (3 par type, anonymisées, champs sensibles présents à dessein).
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
