@@ -1,6 +1,11 @@
 // Erreur métier levée par les services. `reason` est une clé stable, traduite par l'interface.
 export type ServiceErrorCode =
-  "FORBIDDEN" | "NOT_FOUND" | "BAD_REQUEST" | "CONFLICT" | "TOO_MANY_REQUESTS";
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "BAD_REQUEST"
+  | "CONFLICT"
+  | "TOO_MANY_REQUESTS"
+  | "PRECONDITION_FAILED";
 
 export class ServiceError extends Error {
   constructor(

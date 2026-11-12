@@ -140,7 +140,23 @@
     "revoke": "Révoquer",
     "noInvitations": "Aucune invitation en attente.",
     "forbidden": "Votre rôle ne permet pas cette action.",
-    "lastOwner": "L'organisation doit garder au moins un propriétaire."
+    "lastOwner": "L'organisation doit garder au moins un propriétaire.",
+    "jira": {
+      "title": "Jira",
+      "description": "Connexion en lecture seule à Jira Cloud, par OAuth : registre des risques, incidents, revues de surveillance. Seuls les tickets que vous désignez serviront de preuve.",
+      "connect": "Connecter Jira",
+      "status": {
+        "connected": "Jira est connecté.",
+        "denied": "La connexion à Jira a été annulée.",
+        "invalidState": "Le lien de connexion a expiré ou ne correspond pas à votre session. Recommencez.",
+        "exchangeFailed": "Atlassian a refusé l'autorisation. Recommencez.",
+        "noUsableSite": "Aucun site Jira n'a accordé les autorisations nécessaires.",
+        "siteLinkedElsewhere": "Ce site Jira est déjà relié à une autre organisation.",
+        "notConfigured": "La connexion à Jira n'est pas encore disponible.",
+        "forbidden": "Seuls les propriétaires et administrateurs peuvent connecter Jira.",
+        "error": "La connexion à Jira a échoué. Recommencez."
+      }
+    }
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -195,7 +211,8 @@
     "control_instantiate": "Ouverture des contrôles d'un système",
     "exemption_save": "Enregistrement d'un dossier d'exemption",
     "exemption_sign": "Signature d'un dossier d'exemption",
-    "exemption_signRefused": "Signature de dossier refusée : mot de passe incorrect"
+    "exemption_signRefused": "Signature de dossier refusée : mot de passe incorrect",
+    "integration_connect": "Intégration connectée"
   },
   "controlStatus": {
     "PASS": "OK",

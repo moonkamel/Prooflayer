@@ -140,7 +140,23 @@
     "revoke": "Revoke",
     "noInvitations": "No pending invitations.",
     "forbidden": "Your role does not allow this action.",
-    "lastOwner": "The organization must keep at least one owner."
+    "lastOwner": "The organization must keep at least one owner.",
+    "jira": {
+      "title": "Jira",
+      "description": "Read-only connection to Jira Cloud through OAuth: risk register, incidents, monitoring reviews. Only the issues you designate will serve as evidence.",
+      "connect": "Connect Jira",
+      "status": {
+        "connected": "Jira is connected.",
+        "denied": "The Jira connection was cancelled.",
+        "invalidState": "The connection link expired or does not match your session. Try again.",
+        "exchangeFailed": "Atlassian refused the authorisation. Try again.",
+        "noUsableSite": "No Jira site granted the required permissions.",
+        "siteLinkedElsewhere": "This Jira site is already linked to another organisation.",
+        "notConfigured": "The Jira connection is not available yet.",
+        "forbidden": "Only owners and administrators can connect Jira.",
+        "error": "The Jira connection failed. Try again."
+      }
+    }
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -195,7 +211,8 @@
     "control_instantiate": "System controls opened",
     "exemption_save": "Exemption file saved",
     "exemption_sign": "Exemption file signed",
-    "exemption_signRefused": "Exemption file signature refused: incorrect password"
+    "exemption_signRefused": "Exemption file signature refused: incorrect password",
+    "integration_connect": "Integration connected"
   },
   "controlStatus": {
     "PASS": "OK",

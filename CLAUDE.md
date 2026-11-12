@@ -357,3 +357,16 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   dans `src/lib/sentry-scrub.ts` (`sendDefaultPii: false`, ni utilisateur, ni en-têtes, ni corps, ni variables locales ;
   emails et jetons masqués). Inactif sans `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`.
 - Santé : `GET /api/health` (200 si la base répond, 503 sinon), pour la surveillance de disponibilité.
+
+## Connexion Jira (conventions établies par PL-403)
+- `src/server/connectors/jira/oauth.ts` (sans état, `fetch` injecté) : `state` signé HMAC (10 min, orgId + userId),
+  `authorizeUrl`, `exchangeCode`, `refreshTokens` (`JiraOAuthError` : invalid_grant, http, invalid_response),
+  `accessibleResources` / `usableSites`, `jiraApiUrl` (hôte `api.atlassian.com` fixe, cloudId UUID, chemin contrôlé).
+- `src/server/services/jira-integration.ts` : `jiraAuthorizeUrl`, `completeJiraAuthorization` (state vérifié contre
+  la session, site lié ailleurs → CONFLICT), `jiraAccessToken` (rafraîchissement sous `SELECT … FOR UPDATE` de la ligne
+  `Integration`, invalid_grant → REVOKED), `jiraGet`. Jetons chiffrés AES-256-GCM sous la clé de données de
+  l'organisation (AAD `integration:{orgId}:JIRA:{cloudId}`), jamais en clair en base, au journal ni dans une erreur.
+- Routeur `integration.jira` (`authorizeUrl`, `complete`, rôle admin). Routes `/api/integrations/jira/start` et
+  `/api/integrations/jira/callback` (sans logique) ; résultat affiché sur `/organization?jira=<clé>` (liste fermée,
+  `src/lib/integration-status.ts`). Variables `JIRA_CLIENT_ID`, `JIRA_CLIENT_SECRET`, `BETTER_AUTH_URL`.
+- Tests : Atlassian simulé (`tests/integration/jira-integration.test.ts`), dont deux rafraîchissements concurrents.

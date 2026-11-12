@@ -39,6 +39,16 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
     await expectNoViolations(page, path);
   }
 
+  // Connexion Jira (PL-403) : sans application OAuth configurée, retour sur la page avec un message d'erreur.
+  await page.goto("/organization");
+  await page.getByRole("link", { name: "Connecter Jira" }).click();
+  await expect(page).toHaveURL(/\/organization\?jira=notConfigured$/u);
+  await expect(
+    page.getByRole("alert").filter({ hasText: "La connexion à Jira n'est pas encore disponible." }),
+  ).toBeVisible();
+  await expectNoViolations(page, "/organization?jira=notConfigured");
+  await page.goto("/systems");
+
   // Registre (PL-201) : fiche système et ses onglets, champ en cours d'édition compris.
   await page.getByLabel("Nom", { exact: true }).fill("Système accessible");
   await page.getByLabel("Finalité prévue").fill("Vérifier l'accessibilité de la fiche");
