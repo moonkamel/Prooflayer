@@ -28,3 +28,6 @@ blob-report/
 
 # Boîte d'envoi locale des emails (transport outbox)
 .outbox/
+
+# Stockage objet local (développement et tests, PL-304)
+.objects/
