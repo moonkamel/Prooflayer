@@ -219,20 +219,15 @@ beforeAll(async () => {
   for (const org of [A, B]) {
     await prisma.organization.create({ data: { id: org, name: org, slug: org } });
   }
-  await prisma.controlDefinition.create({
-    data: {
-      id: DEFINITION_ID,
-      key: `AIA-ISO-${run}`,
-      libraryVersion: "test",
-      articleRef: "Art. 0",
-      pack: "A",
-      title: {},
-      statement: {},
-      automation: "MANUAL",
-      evaluatorKey: "none",
-      params: {},
-    },
-  });
+  // Référentiel commun, écrit sous le rôle de migration (PL-206 : le rôle applicatif ne l'écrit pas).
+  await asMigrationRole(
+    `INSERT INTO "ControlDefinition"
+       (id, key, "libraryVersion", "articleRef", pack, title, statement, "appliesToRoles", "appliesToTiers",
+        automation, "evidenceKinds", "evaluatorKey", params)
+     VALUES ($1, $2, 'test', 'Art. 0', 'A', '{}', '{}', ARRAY[]::"AiActRole"[], ARRAY[]::"RiskTier"[],
+        'MANUAL', ARRAY[]::text[], 'none', '{}')`,
+    [DEFINITION_ID, `AIA-ISO-${run}`],
+  );
   // Écritures légitimes : chaque organisation écrit ses propres lignes, sous le rôle applicatif, via forOrg.
   for (const org of [A, B]) {
     const db = forOrg(org);
