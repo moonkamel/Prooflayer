@@ -58,7 +58,7 @@ afterAll(async () => {
       await client.query(`DELETE FROM "Member" WHERE "organizationId" = $1`, [org]);
       await client.query(`DELETE FROM "Organization" WHERE "id" = $1`, [org]);
     }
-    await client.query(`DELETE FROM "User" WHERE "id" = ANY($1)`, [[admin, other]]);
+    await client.query(`DELETE FROM "User" WHERE "id" LIKE $1`, [`usr_cls_%_${run}`]);
     await client.query("COMMIT");
   } finally {
     await client.end();
@@ -112,12 +112,19 @@ describe("questionnaire de classification", () => {
     expect(actions.filter((a) => a.action === "classification.saveAnswers")).toHaveLength(7);
     expect(actions.map((a) => a.action)).toContain("classification.compute");
 
-    // Retour arrière : la branche abandonnée est retirée, le résultat effacé.
+    // Retour arrière : le résultat est effacé, le chemin s'arrête à la première question sans réponse.
     const changed = await api.saveAnswers({ systemId, questionId: "annexIII", value: [] });
     expect(changed.result).toBeNull();
     expect(changed.answered).toEqual(["aiSystem", "scope", "prohibited", "annexI", "annexIII"]);
-    expect(changed.responses).not.toHaveProperty("profiling");
     expect(changed.current).toBe("transparency");
+    // La réponse déjà donnée plus loin sur le chemin est retrouvée ; celle de la branche abandonnée est
+    // écartée au calcul.
+    const resumed = await api.saveAnswers({ systemId, questionId: "transparency", value: [] });
+    expect(resumed.answered).toContain("developer");
+    expect(resumed.current).toBeNull();
+    const recomputed = await api.compute({ systemId });
+    expect(recomputed.result?.tier).toBe("MINIMAL");
+    expect(recomputed.responses).not.toHaveProperty("profiling");
   });
 
   it("refuse une réponse invalide, un système archivé et l'accès d'une autre organisation", async () => {
@@ -273,6 +280,74 @@ describe("signature (PL-204)", () => {
         (e: Error) => e.message,
       );
     expect(superseded).toContain("aucune modification");
+  });
+
+  it("une requalification reprend les réponses de la version signée, résultat à recalculer", async () => {
+    const { id: systemId } = await newSystem("Requalifié");
+    const first = await qualify(systemId, highRisk);
+    await sign(systemId);
+    const api = callerFor(admin).classification;
+    const draft = await api.draft({ systemId });
+    expect(draft.id).not.toBe(first.id);
+    expect(draft.responses).toEqual(Object.fromEntries(highRisk));
+    expect(draft).toMatchObject({ status: "DRAFT", current: null, result: null });
+    // Seule la réponse qui a changé est modifiée (§2.2) : plus de profilage, condition (a).
+    await api.saveAnswers({ systemId, questionId: "profiling", value: false });
+    const changed = await api.saveAnswers({ systemId, questionId: "art63", value: ["a"] });
+    expect(changed.answered).toContain("developer");
+    expect((await api.compute({ systemId })).result?.tier).toBe("HIGH_RISK_EXEMPT_ART6_3");
+    const entry = await forOrg(A).auditLog.findFirst({
+      where: { targetId: draft.id, action: "classification.draft" },
+    });
+    expect(entry?.metadata).toMatchObject({ prefilledFrom: first.id });
+  });
+
+  it("modifier la fiche ne marque « à revoir » qu'une classification signée", async () => {
+    const { id: systemId } = await newSystem("Brouillon seul");
+    const api = callerFor(admin);
+    await api.classification.draft({ systemId });
+    expect(
+      await api.system.update({ id: systemId, patch: { intendedPurpose: "Autre finalité" } }),
+    ).toMatchObject({ classificationStale: false });
+    await qualify(systemId, highRisk);
+    await sign(systemId);
+    expect(
+      await api.system.update({ id: systemId, patch: { intendedPurpose: "Encore une autre" } }),
+    ).toMatchObject({ classificationStale: true });
+  });
+
+  it("bloque la signature après cinq mots de passe refusés, même avec le bon ensuite", async () => {
+    // Un utilisateur à part : le blocage vaut par utilisateur et ne doit pas gêner les autres tests.
+    const signer = `usr_cls_signer_${run}`;
+    await prisma.user.create({ data: { id: signer, email: `${signer}@cls.test`, name: signer } });
+    await prisma.member.create({
+      data: { id: `mem_${signer}`, organizationId: A, userId: signer, role: "admin" },
+    });
+    const { id: systemId } = await newSystem("Essais limités");
+    const draft = await qualify(systemId, highRisk);
+    const attempt = (password: string) =>
+      signClassification(
+        { ...ctx(), userId: signer, role: "admin" },
+        { systemId, name: "Signataire", title: "CTO", password, locale: "fr" },
+        accept,
+      ).then(
+        () => "signée",
+        (e: Error) => e.message,
+      );
+    for (let i = 0; i < 5; i++) {
+      expect(await attempt(`mauvais-${i}`)).toBe("classification.invalidPassword");
+    }
+    expect(await attempt("bon-mot-de-passe")).toBe("classification.tooManyAttempts");
+    expect((await forOrg(A).classification.findUnique({ where: { id: draft.id } }))?.status).toBe(
+      "DRAFT",
+    );
+    const refusals = await forOrg(A).auditLog.findMany({
+      where: { action: "classification.signRefused", actorId: signer },
+    });
+    expect(refusals).toHaveLength(5);
+    expect(JSON.stringify(refusals)).not.toContain("mauvais");
+    // Un autre utilisateur n'est pas bloqué.
+    expect(await sign(systemId).then(() => "signée")).toBe("signée");
   });
 
   it("une pratique interdite ne se signe pas", async () => {

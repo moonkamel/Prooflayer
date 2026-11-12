@@ -190,7 +190,8 @@
     "classification_draft": "Classification questionnaire opened",
     "classification_saveAnswers": "Classification questionnaire answered",
     "classification_compute": "Classification computed",
-    "classification_sign": "Classification signed"
+    "classification_sign": "Classification signed",
+    "classification_signRefused": "Signature refused: incorrect password"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -603,6 +604,14 @@
       "page": "Page {page} of {pages}",
       "generatedAt": "Note generated on {date}"
     },
-    "rulesHeader": "Rules"
+    "rulesHeader": "Rules",
+    "tooManyAttempts": "Too many attempts. Try again in fifteen minutes.",
+    "breadcrumb": "Breadcrumb",
+    "register": "Register",
+    "notStarted": "This system has not been qualified yet. The questionnaire has at most nine questions; each answer is saved.",
+    "start": "Start the questionnaire",
+    "inForce": "Signed version in force",
+    "draftInProgress": "A requalification is in progress. The signed version below stays in force until the next signature.",
+    "readOnly": "Only an owner or an admin can qualify a system."
   }
 }

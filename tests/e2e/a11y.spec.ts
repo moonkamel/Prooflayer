@@ -1,19 +1,9 @@
 // PL-109 — Audit axe sans erreur sur la coque (§5.2 : WCAG 2.2 niveau AA), langue et navigation au clavier.
-import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { createWorkspace, signUpAndVerify, uniqueEmail, withFreshClientIp } from "./helpers/auth";
+import { expectNoViolations } from "./helpers/a11y";
 
 test.describe.configure({ mode: "serial", timeout: 120_000 });
-
-const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-
-async function expectNoViolations(page: Page, label: string) {
-  const { violations } = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
-  const summary = violations.map(
-    (v) => `${v.id} (${v.impact}) : ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
-  );
-  expect(summary, `violations axe sur ${label}`).toEqual([]);
-}
 
 test("écrans publics : aucune violation WCAG 2.2 AA", async ({ page }) => {
   await withFreshClientIp(page);
@@ -58,7 +48,7 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
   await page.getByRole("button", { name: "Ajouter un modèle" }).click();
   await expectNoViolations(page, "/systems/[id] (édition)");
   const fiche = new URL(page.url()).pathname;
-  for (const tab of ["changes", "history"]) {
+  for (const tab of ["changes", "history", "classification"]) {
     await page.goto(`${fiche}/${tab}`);
     await expectNoViolations(page, `/systems/[id]/${tab}`);
   }

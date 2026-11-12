@@ -1,7 +1,7 @@
 // PL-203 — Questionnaire de bout en bout : une question par écran, enregistrement automatique, reprise après
 // rechargement, retour arrière, résultat du moteur (objectif démontrable du sprint 2, §9.4).
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { expectNoViolations } from "./helpers/a11y";
 import { createWorkspace, uniqueEmail } from "./helpers/auth";
 import { E2E_PASSWORD } from "./helpers/env";
 
@@ -21,16 +21,6 @@ async function answer(page: Page, label: string) {
   await page.getByRole("button", { name: "Suivant" }).click();
 }
 
-async function expectNoViolations(page: Page, label: string) {
-  const { violations } = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
-  expect(
-    violations.map((v) => v.id),
-    label,
-  ).toEqual([]);
-}
-
 test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fournisseur", async ({
   page,
 }) => {
@@ -39,7 +29,16 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await page.getByLabel("Nom", { exact: true }).fill("Score d'adéquation candidat");
   await page.getByLabel("Finalité prévue").fill("Classe les candidatures par adéquation au poste");
   await page.getByRole("button", { name: "Ajouter au registre" }).click();
-  await page.getByRole("link", { name: "Qualifier ce système" }).click();
+  await expect(page).toHaveURL(/\/systems\/[^/]+$/u);
+  // Afficher la page de classification ne crée rien : le brouillon naît d'une action explicite.
+  await page.goto(`${new URL(page.url()).pathname}/classification`);
+  await expect(page.getByText("Ce système n'est pas encore qualifié.")).toBeVisible();
+  const breadcrumb = page.getByRole("navigation", { name: "Fil d'Ariane" });
+  await expect(breadcrumb.getByRole("link", { name: "Registre" })).toBeVisible();
+  await expect(breadcrumb.getByText("Classification")).toHaveAttribute("aria-current", "page");
+  await breadcrumb.getByRole("link", { name: "Score d'adéquation candidat" }).click();
+  await page.getByRole("button", { name: "Qualifier ce système" }).click();
+  await expect(page).toHaveURL(/\/classification$/u);
 
   await expect(page.getByText("Question 1 sur 8 environ")).toBeVisible();
   await expect(page.getByRole("link", { name: "Art. 3(1)" })).toBeVisible();
@@ -119,4 +118,13 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await expect(page.getByRole("button", { name: "Signer la classification" })).toHaveCount(0);
   await expect(page.getByTestId("system-identity")).toHaveText("Haut risque · 4(a) · Fournisseur");
   await expectNoViolations(page, "classification signée");
+
+  // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
+  await page.getByRole("button", { name: "Requalifier le système" }).click();
+  await expect(question(page)).toHaveAttribute("data-question", "aiSystem");
+  await expect(question(page).getByLabel("Oui", { exact: true })).toBeChecked();
+  await expect(page.getByText("Une requalification est en cours.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Version signée en vigueur" })).toBeVisible();
+  await expect(page.getByTestId("classification-version")).toHaveCount(1);
+  await expectNoViolations(page, "requalification en cours");
 });

@@ -190,7 +190,8 @@
     "classification_draft": "Ouverture d'un questionnaire de classification",
     "classification_saveAnswers": "Réponse au questionnaire de classification",
     "classification_compute": "Calcul d'une classification",
-    "classification_sign": "Signature d'une classification"
+    "classification_sign": "Signature d'une classification",
+    "classification_signRefused": "Signature refusée : mot de passe incorrect"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -603,6 +604,14 @@
       "page": "Page {page} sur {pages}",
       "generatedAt": "Note générée le {date}"
     },
-    "rulesHeader": "Règles"
+    "rulesHeader": "Règles",
+    "tooManyAttempts": "Trop d'essais. Réessayez dans un quart d'heure.",
+    "breadcrumb": "Fil d'Ariane",
+    "register": "Registre",
+    "notStarted": "Ce système n'est pas encore qualifié. Le questionnaire compte neuf questions au plus ; chaque réponse est enregistrée.",
+    "start": "Commencer le questionnaire",
+    "inForce": "Version signée en vigueur",
+    "draftInProgress": "Une requalification est en cours. La version signée ci-dessous reste en vigueur jusqu'à la prochaine signature.",
+    "readOnly": "Seuls un owner ou un admin peuvent qualifier un système."
   }
 }
