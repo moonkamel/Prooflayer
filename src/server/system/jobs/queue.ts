@@ -8,6 +8,7 @@
 //   transaction, à condition que le jeton n'ait pas changé. Un worker interrompu ne valide rien ; un worker dont
 //   le bail a été repris ne peut plus valider. Les effets hors base doivent être idempotents (registry.ts).
 // - Réessais exponentiels avec aléa, 8 tentatives au plus, puis FAILED (§4.5.3).
+import { randomUUID } from "node:crypto";
 import { waitUntil } from "@vercel/functions";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/server/db";
@@ -175,4 +176,32 @@ export async function drainJobs(
     for (const job of batch) stats[await executeJob(job, registry)] += 1;
   }
   return stats;
+}
+
+/**
+ * Programme un job dans une transaction en cours (§4.5.1 : « INSERT EvidenceItem, liens, Job control.evaluate »),
+ * dédupliqué par `dedupeKey` tant qu'il attend : un job déjà QUEUED n'est pas dupliqué. Un job terminé, en échec ou
+ * en cours avec la même clé est réarmé ; une tentative en cours perd alors son jeton et s'annule, et la suivante
+ * relit l'état à jour (aucune preuve arrivée pendant l'exécution n'est perdue).
+ * Retourne l'identifiant du job créé ou réarmé, null s'il attendait déjà.
+ */
+export async function enqueueInTransaction<P>(
+  tx: Prisma.TransactionClient,
+  job: JobDefinition<P>,
+  payload: P,
+  options: { dedupeKey: string; orgId?: string | null; runAt?: Date },
+): Promise<string | null> {
+  const data = JSON.stringify(job.schema.parse(payload));
+  const runAt = options.runAt ?? new Date();
+  const maxAttempts = Math.min(job.maxAttempts ?? MAX_ATTEMPTS, MAX_ATTEMPTS);
+  const rows = await tx.$queryRaw<{ id: string }[]>`
+    INSERT INTO "Job" (id, type, "orgId", payload, "dedupeKey", "runAt", "maxAttempts")
+    VALUES (${`job_${randomUUID().replaceAll("-", "")}`}, ${job.type}, ${options.orgId ?? null},
+      ${data}::jsonb, ${options.dedupeKey}, ${runAt}, ${maxAttempts})
+    ON CONFLICT ("dedupeKey") DO UPDATE SET
+      status = 'QUEUED', payload = EXCLUDED.payload, "runAt" = EXCLUDED."runAt", attempts = 0,
+      "maxAttempts" = EXCLUDED."maxAttempts", "lockedAt" = NULL, "finishedAt" = NULL, "lastError" = NULL
+    WHERE "Job".status <> 'QUEUED'
+    RETURNING id`;
+  return rows[0]?.id ?? null;
 }

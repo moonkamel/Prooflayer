@@ -1,12 +1,13 @@
 // Contrôles d'un système (PL-207, §9.4, §3.2 E6). À la signature d'une classification, les contrôles applicables à
 // la catégorie et au rôle sont ouverts ; une reclassification ajoute les manquants et marque les autres non
-// applicables, sans rien supprimer. L'évaluation des contrôles arrive au sprint 4.
+// applicables, sans rien supprimer. L'évaluation des contrôles : ./evaluation.ts (PL-401).
 import type { OrgTransaction } from "@/server/db";
 import type { AiActRole, RiskTier } from "@/generated/prisma/enums";
 import { LIBRARY_VERSION } from "@/server/rules/library";
 import { NA_BY_RECLASSIFICATION, planInstances } from "@/server/rules/instantiate";
 import type { Evaluation } from "@/server/rules/evaluation";
 import { ServiceError } from "./errors";
+import { writeEvaluation } from "./evaluation";
 import type { OrgContext } from "./organization";
 
 export interface InstantiationReport {
@@ -133,23 +134,12 @@ export async function recordEvaluation(
     },
   });
   if (!instance) return false;
-  await tx.controlEvaluation.create({
-    data: {
-      orgId: input.orgId,
-      controlInstanceId: instance.id,
-      status: input.evaluation.status,
-      reasons: input.evaluation.reasons as unknown as object,
-      evidenceIds: input.evaluation.evidenceIds,
-      evaluatorVersion: input.evaluatorVersion,
-      evaluatedAt: input.at,
-    },
-  });
-  await tx.controlInstance.update({
-    where: { id: instance.id },
-    data: {
-      ...(instance.notApplicable ? {} : { status: input.evaluation.status }),
-      lastEvaluatedAt: input.at,
-    },
+  await writeEvaluation(tx, {
+    orgId: input.orgId,
+    instance,
+    evaluatorVersion: input.evaluatorVersion,
+    evaluation: input.evaluation,
+    at: input.at,
   });
   return true;
 }
