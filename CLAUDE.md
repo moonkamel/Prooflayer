@@ -199,6 +199,19 @@ packages/verify/         outil de vérification open source
 - Table système `PublicLead` (sans organisation ni RLS), accessible seulement par `src/server/system/public-leads.ts`.
 - Transport d'email : `attachments` (base64) dans `EmailMessage`.
 
+## Magasin de preuves (conventions établies par PL-304)
+- `src/server/seal/` (pur) : `jcs.ts` (RFC 8785), `merkle.ts` (RFC 6962, code du §4.6.2), `evidence.ts` (contentSha256,
+  enveloppe { v, org, id, kind, sourceRef, occurredAt, capturedAt, contentSha256, attachmentSha256 }, leafHash).
+  Encodage de l'enveloppe : empreintes en hexadécimal minuscule, dates ISO 8601 UTC à la milliseconde.
+- `createEvidence(tx, orgId, input)` (`src/server/services/evidence.ts`) : dans une transaction où app.org_id est
+  positionné (job, `withOrgTransaction`) ; doublon (orgId, dedupeKey) ignoré sans erreur ; identifiant `ev_…` tiré
+  avant l'insertion (il entre dans l'enveloppe). Charge brute (`raw`) chiffrée AES-256-GCM par la clé de données de
+  l'organisation (`OrgEncryptionKey`, enveloppée par `PROOFLAYER_MASTER_KEY`), écrite en stockage objet
+  (`orgs/{orgId}/raw/{id}.bin`), jamais en base ni dans les journaux.
+- Trigger `evidence_guard` (§4.3.3) : champs scellés immuables, scellement une seule fois, charge seulement mise à
+  NULL (effacement), suppression seulement sous `app.purge_org`. Les nettoyages de tests passent par la purge.
+- Stockage objet : `src/server/storage/object-store.ts` (`local` en développement et test ; S3 Supabase à PL-108).
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
