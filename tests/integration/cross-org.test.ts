@@ -57,6 +57,7 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     input: { id: a.designChangeId, isSignificant: true, reason: "Croisé" },
     code: "NOT_FOUND",
   }),
+  "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "classification.current": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "classification.history": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "classification.note": () => ({

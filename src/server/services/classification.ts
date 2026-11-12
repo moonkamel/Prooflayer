@@ -17,6 +17,7 @@ import {
 } from "@/server/classify/questionnaire";
 import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
+import { instantiateControls } from "./controls";
 import { ServiceError } from "./errors";
 import type { OrgContext } from "./organization";
 
@@ -290,7 +291,7 @@ export async function signClassification(
   }
   const statement = signatureStatement(input.locale);
   const signedAt = new Date();
-  const { superseded, roleBefore } = await withOrgTransaction(ctx.orgId, async (tx) => {
+  const { superseded, roleBefore, controls } = await withOrgTransaction(ctx.orgId, async (tx) => {
     const previous = await tx.classification.findMany({
       where: { systemId: draft.systemId, status: "SIGNED" },
       select: { id: true },
@@ -321,7 +322,14 @@ export async function signClassification(
         classificationStale: false,
       },
     });
-    return { superseded: previous.map((p) => p.id), roleBefore: system.role };
+    // Contrôles ouverts dans la même transaction : la classification signée ne va pas sans eux (PL-207).
+    const controls = await instantiateControls(tx, {
+      orgId: ctx.orgId,
+      systemId: draft.systemId,
+      tier: draft.tier,
+      role: draft.role,
+    });
+    return { superseded: previous.map((p) => p.id), roleBefore: system.role, controls };
   });
 
   await record(ctx, "classification.sign", draft.id, {
@@ -334,6 +342,17 @@ export async function signClassification(
     signedByTitle: input.title,
     supersedes: superseded,
   });
+  await audit(
+    {
+      orgId: ctx.orgId,
+      actor: { type: "user", id: ctx.userId },
+      ipAddress: clientIp(ctx.headers),
+      db: ctx.db,
+    },
+    "control.instantiate",
+    { type: "ai_system", id: draft.systemId },
+    { classificationId: draft.id, tier: draft.tier, role: draft.role, ...controls },
+  );
   // Le rôle de la fiche est un champ historisé (PL-201) : son changement par la signature figure à l'historique.
   if (roleBefore !== draft.role) {
     await audit(
@@ -351,7 +370,7 @@ export async function signClassification(
       },
     );
   }
-  return { id: draft.id, signedAt: signedAt.toISOString() };
+  return { id: draft.id, signedAt: signedAt.toISOString(), controls };
 }
 
 /** Versions signées et remplacées du système, de la plus récente à la plus ancienne (§4.4.2 `history`). */

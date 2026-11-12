@@ -152,6 +152,10 @@ export async function getSystem(ctx: OrgContext, input: { id: string }) {
     monitored: s.monitored,
     classificationStale: s.classificationStale,
     staleCause: s.classificationStale ? await staleCause(ctx, s.id) : null,
+    /** Contrôles ouverts et applicables (onglet « Contrôles » de l'écran B). */
+    controlCount: await dbOf(ctx).controlInstance.count({
+      where: { systemId: s.id, notApplicable: false },
+    }),
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
     archivedAt: s.archivedAt?.toISOString() ?? null,

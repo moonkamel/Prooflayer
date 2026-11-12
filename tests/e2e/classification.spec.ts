@@ -86,6 +86,9 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await expect(profiling.getByText("Votre réponse : Oui")).toBeVisible();
   await expect(profiling.getByRole("link", { name: "Art. 6(3), dernier alinéa" })).toBeVisible();
   await expect(page.getByText("Application : 2 décembre 2027 · Art. 113")).toBeVisible();
+  await expect(page.getByTestId("result-controls")).toHaveText(
+    "37 contrôles applicables, dont 19 évaluables automatiquement",
+  );
   await expect(
     page.getByText("Évaluation : contrôle interne · Art. 43(2), Annexe VI"),
   ).toBeVisible();
@@ -118,6 +121,21 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await expect(page.getByRole("button", { name: "Signer la classification" })).toHaveCount(0);
   await expect(page.getByTestId("system-identity")).toHaveText("Haut risque · 4(a) · Fournisseur");
   await expectNoViolations(page, "classification signée");
+
+  // Les contrôles sont ouverts dès la signature (objectif démontrable du sprint 2 : « 37 contrôles »).
+  await page
+    .getByRole("navigation", { name: "Sections de la fiche" })
+    .getByRole("link", { name: "Contrôles 37" })
+    .click();
+  await expect(page.getByTestId("controls-summary")).toHaveText(
+    "37 contrôles applicables, dont 19 évaluables automatiquement.",
+  );
+  await expect(page.getByTestId("control")).toHaveCount(37);
+  await expect(page.locator('[data-testid="control"][data-key="AIA-15-02"]')).toContainText(
+    "PR approuvées par un tiers",
+  );
+  await expectNoViolations(page, "contrôles");
+  await page.goBack();
 
   // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
   await page.getByRole("button", { name: "Requalifier le système" }).click();

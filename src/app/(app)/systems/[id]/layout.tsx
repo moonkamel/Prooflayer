@@ -1,5 +1,5 @@
 // Fiche système (§5.3, écran B) : en-tête d'identité et navigation latérale par onglet.
-// Onglets de PL-201 : Vue, Changements, Historique. Contrôles, Preuves, Sources et Packs arrivent avec leurs tickets.
+// Onglets : Vue, Contrôles (PL-207), Changements, Historique. Preuves, Sources et Packs arrivent avec leurs tickets.
 import type { ReactNode } from "react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { NavLink } from "@/components/shell/nav-link";
@@ -54,6 +54,11 @@ export default async function SystemLayout({
         <nav aria-label={t("sections")} className="flex flex-row flex-wrap gap-1 md:flex-col">
           <NavLink href={base} exact>
             {t("overview")}
+          </NavLink>
+          <NavLink href={`${base}/controls`}>
+            {system.controlCount > 0
+              ? t("controlsCount", { count: system.controlCount })
+              : t("controls")}
           </NavLink>
           <NavLink href={`${base}/changes`}>{t("changes")}</NavLink>
           <NavLink href={`${base}/history`}>{t("history")}</NavLink>

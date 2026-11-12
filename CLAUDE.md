@@ -168,6 +168,17 @@ packages/verify/         outil de vérification open source
   lecture seule pour le rôle applicatif. Un contrôle retiré est marqué `deprecatedAt`, jamais supprimé.
 - Toute évolution du référentiel publie une nouvelle `LIBRARY_VERSION`.
 
+## Contrôles d'un système (conventions établies par PL-207)
+- Plan pur dans `src/server/rules/instantiate.ts` (`planInstances`) ; application dans
+  `src/server/services/controls.ts` (`instantiateControls`), appelée dans la transaction de signature.
+- Les définitions applicables viennent de `ControlDefinition` (version `LIBRARY_VERSION` publiée) : sans bibliothèque
+  publiée, la signature échoue (`controls.libraryNotPublished`). Les tests d'intégration et e2e la publient d'abord
+  (`tests/publish-control-library.ts`, déclaré en `globalSetup`).
+- Reclassification : les contrôles manquants sont créés ; ceux qui ne s'appliquent plus passent `notApplicable` avec
+  la justification `auto:reclassification` (statut NOT_APPLICABLE) et sont rouverts s'ils s'appliquent de nouveau.
+  Rien n'est supprimé ; une non-applicabilité posée par un administrateur n'est jamais levée automatiquement.
+- Routeur `control` : `listBySystem` (lecture, tout membre). Écran : `/systems/[id]/controls`.
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure

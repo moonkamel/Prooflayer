@@ -11,5 +11,6 @@ export default defineConfig({
     environment: "node",
     // Une seule base partagée : fichiers exécutés l'un après l'autre.
     fileParallelism: false,
+    globalSetup: ["tests/publish-control-library.ts"],
   },
 });

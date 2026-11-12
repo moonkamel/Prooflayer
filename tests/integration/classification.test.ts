@@ -385,3 +385,115 @@ describe("signature (PL-204)", () => {
     ).toBe("NOT_FOUND");
   });
 });
+
+describe("contrôles ouverts à la signature (PL-207)", () => {
+  const ctx = () => ({
+    headers: new Headers(),
+    userId: admin,
+    orgId: A,
+    role: "owner" as const,
+    db: forOrg(A),
+  });
+  const sign = (systemId: string) =>
+    signClassification(
+      ctx(),
+      { systemId, name: "Clara Martin", title: "CTO", password: "x", locale: "fr" },
+      { verifyPassword: async () => true },
+    );
+  async function qualify(systemId: string, answers: [string, boolean | string[]][]) {
+    const api = callerFor(admin).classification;
+    await api.draft({ systemId });
+    for (const [questionId, value] of answers) {
+      await api.saveAnswers({ systemId, questionId: questionId as never, value });
+    }
+    await api.compute({ systemId });
+    return sign(systemId);
+  }
+  const base: [string, boolean | string[]][] = [
+    ["aiSystem", true],
+    ["scope", []],
+    ["prohibited", []],
+    ["annexI", false],
+    ["annexIII", ["4(a)"]],
+  ];
+  const highRiskProvider = [...base, ["profiling", true], ["developer", true]] as typeof base;
+  const exempt = [
+    ...base,
+    ["profiling", false],
+    ["art63", ["a"]],
+    ["developer", true],
+  ] as typeof base;
+  const controls = (systemId: string) => callerFor(admin).control.listBySystem({ systemId });
+
+  it("Talvio : fournisseur à haut risque → 37 contrôles, dont 19 automatiques, tous en attente de preuve", async () => {
+    const { id: systemId } = await newSystem("Score Talvio");
+    const signed = await qualify(systemId, highRiskProvider);
+    expect(signed.controls).toMatchObject({ applicable: 37, created: 37, markedNotApplicable: 0 });
+    const list = await controls(systemId);
+    expect(list).toHaveLength(37);
+    expect(list.filter((c) => c.automation === "AUTOMATED")).toHaveLength(19);
+    expect(new Set(list.map((c) => c.status))).toEqual(new Set(["MISSING"]));
+    expect(list[0]).toMatchObject({ key: "AIA-04-01", pack: "A", notApplicable: false });
+    expect((await callerFor(admin).system.get({ id: systemId })).controlCount).toBe(37);
+    const entry = await forOrg(A).auditLog.findFirst({
+      where: { action: "control.instantiate", targetId: systemId },
+    });
+    expect(entry?.metadata).toMatchObject({ created: 37, libraryVersion: "2026.11.0" });
+  });
+
+  it("Recrutys : exempté → 6 contrôles ; reclassé haut risque → 31 de plus ; retour → 31 écartés, rien supprimé", async () => {
+    const { id: systemId } = await newSystem("ATS Recrutys");
+    expect((await qualify(systemId, exempt)).controls).toMatchObject({ applicable: 6, created: 6 });
+    expect(await controls(systemId)).toHaveLength(6);
+
+    // Le score de pertinence classe les candidatures : la réponse sur le profilage change (§2.2).
+    const api = callerFor(admin).classification;
+    await api.draft({ systemId });
+    await api.saveAnswers({ systemId, questionId: "profiling", value: true });
+    await api.compute({ systemId });
+    expect((await sign(systemId)).controls).toMatchObject({
+      applicable: 37,
+      created: 31,
+      markedNotApplicable: 0,
+    });
+    const before = await controls(systemId);
+    expect(before).toHaveLength(37);
+
+    // Retour à l'exemption : les 31 contrôles restent, marqués non applicables.
+    await api.draft({ systemId });
+    await api.saveAnswers({ systemId, questionId: "profiling", value: false });
+    await api.saveAnswers({ systemId, questionId: "art63", value: ["a"] });
+    await api.compute({ systemId });
+    expect((await sign(systemId)).controls).toMatchObject({
+      applicable: 6,
+      created: 0,
+      markedNotApplicable: 31,
+    });
+    const after = await controls(systemId);
+    expect(after.map((c) => c.id).sort()).toEqual(before.map((c) => c.id).sort());
+    const setAside = after.filter((c) => c.notApplicable);
+    expect(setAside).toHaveLength(31);
+    expect(
+      setAside.every((c) => c.status === "NOT_APPLICABLE" && c.notApplicableByReclassification),
+    ).toBe(true);
+    expect((await callerFor(admin).system.get({ id: systemId })).controlCount).toBe(6);
+
+    // De nouveau haut risque : les contrôles écartés sont rouverts, pas recréés.
+    await api.draft({ systemId });
+    await api.saveAnswers({ systemId, questionId: "profiling", value: true });
+    await api.compute({ systemId });
+    expect((await sign(systemId)).controls).toMatchObject({ created: 0, reactivated: 31 });
+    expect(
+      (await controls(systemId)).every((c) => !c.notApplicable && c.status === "MISSING"),
+    ).toBe(true);
+  });
+
+  it("les contrôles d'une organisation sont invisibles d'une autre", async () => {
+    const { id: systemId } = await newSystem("Cloisonné");
+    await qualify(systemId, exempt);
+    expect((await errorOf(callerFor(other, B).control.listBySystem({ systemId }))).code).toBe(
+      "NOT_FOUND",
+    );
+    expect(await forOrg(B).controlInstance.count()).toBe(0);
+  });
+});
