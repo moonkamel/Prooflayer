@@ -220,7 +220,8 @@
     "title": "ProofLayer",
     "tagline": "The evidence the AI Act requires, captured where the work happens, timestamped and verifiable without us.",
     "signUp": "Create my workspace",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "classifier": "Classify a system without an account"
   },
   "aiActRole": {
     "PROVIDER": "Provider",
@@ -730,5 +731,30 @@
     "SE": "Sweden",
     "SI": "Slovenia",
     "SK": "Slovakia"
+  },
+  "publicClassifier": {
+    "title": "Classify an AI system",
+    "intro": "Answer at most nine questions to see where your system stands under the AI Act. No account: your answers stay in your browser.",
+    "systemName": "System name (optional)",
+    "result": "Result",
+    "disclaimer": "Indicative result, produced by public deterministic rules. It does not replace legal advice and does not bind ProofLayer.",
+    "share": "Shareable link, with your answers",
+    "copy": "Copy link",
+    "copied": "Link copied.",
+    "noteTitle": "Receive the classification note as a PDF",
+    "noteIntro": "The note details the reasoning article by article. It is sent to a work email address.",
+    "email": "Work email address",
+    "consent": "I agree that ProofLayer may contact me about bringing this system into line with the AI Act. I can withdraw this consent at any time.",
+    "send": "Receive the note",
+    "sent": "Note sent to {email}.",
+    "notProfessional": "Use a work email address: consumer mailboxes are not accepted.",
+    "tooMany": "Too many requests. Try again later.",
+    "restart": "Start over",
+    "edit": "Change my answers",
+    "signUp": "Track this system in ProofLayer",
+    "defaultSystemName": "Assessed system",
+    "noPurpose": "Not provided (public classifier)",
+    "emailSubject": "AI Act classification note: {name}",
+    "emailBody": "Hello,\n\nPlease find attached the classification note produced by the ProofLayer public classifier. It is indicative and does not bind ProofLayer.\n\nThe ProofLayer team"
   }
 }

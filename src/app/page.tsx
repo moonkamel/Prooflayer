@@ -20,6 +20,9 @@ export default async function HomePage() {
             {t("signIn")}
           </Link>
         </p>
+        <p>
+          <Link href="/classifier">{t("classifier")}</Link>
+        </p>
       </main>
     </>
   );

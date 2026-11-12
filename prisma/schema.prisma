@@ -282,6 +282,29 @@ model ExemptionDossier {
   @@index([orgId, systemId])
 }
 
+// PL-208 : demande de note du classifieur public (§7.2, canal 2). Table système, sans organisation : ProofLayer en
+// est responsable de traitement (prospection, §8.2). Ni RLS ni accès par le rôle applicatif hors src/server/system/.
+model PublicLead {
+  id             String     @id @default(cuid())
+  email          String
+  emailDomain    String
+  contactConsent Boolean // consentement explicite à être recontacté, case non cochée par défaut
+  consentText    String? // libellé exact accepté, dans la langue de l'interface
+  consentAt      DateTime?
+  locale         String
+  systemName     String?
+  responses      Json // réponses au questionnaire public
+  rulesetVersion String
+  tier           RiskTier
+  role           AiActRole
+  ipHash         String // HMAC de l'adresse IP : limitation de débit sans conserver l'adresse
+  noteSentAt     DateTime?
+  createdAt      DateTime   @default(now())
+
+  @@index([email, createdAt])
+  @@index([ipHash, createdAt])
+}
+
 model DesignChange {
   id                  String    @id @default(cuid())
   orgId               String

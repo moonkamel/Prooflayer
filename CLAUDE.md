@@ -189,6 +189,16 @@ packages/verify/         outil de vérification open source
   l'instance. Évaluateurs purs dans `src/server/rules/evaluators/` (`Evaluation` de `src/server/rules/evaluation.ts`).
   AIA-06-02 (`internal.exemptionDossier`) est évalué à chaque signature de classification ou de dossier.
 
+## Classifieur public (conventions établies par PL-208)
+- `/classifier` (groupe `src/app/(public)/`, sans session) : questionnaire et moteur exécutés dans le navigateur (mêmes
+  fonctions pures). Lien partageable `?r=` : `src/server/classify/share.ts` (base64url, réponses validées et élaguées).
+- Note PDF : `POST /api/public/classifier/note` → `requestNote` (`src/server/services/public-classifier.ts`) : adresse
+  professionnelle (`professional-email.ts`), résultat recalculé côté serveur, limites de 3 demandes par adresse et par
+  jour et 10 par IP et par heure (IP en HMAC), consentement à être recontacté explicite et facultatif. Envoi par le
+  job `publicClassifier.sendNote` (pièce jointe PDF, idempotent par `noteSentAt`).
+- Table système `PublicLead` (sans organisation ni RLS), accessible seulement par `src/server/system/public-leads.ts`.
+- Transport d'email : `attachments` (base64) dans `EmailMessage`.
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
