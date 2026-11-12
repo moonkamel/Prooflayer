@@ -19,6 +19,7 @@ import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { instantiateControls } from "./controls";
 import { scheduleOrgSweep } from "./evaluation";
+import { recordClassificationSigned, recordRegistrySnapshot } from "./system-evidence";
 import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
 import { assertSignAttemptsLeft, recordSignRefusal, type SignDependencies } from "./sign-guard";
 
@@ -326,6 +327,9 @@ export async function signClassification(
       systemId: draft.systemId,
       at: signedAt,
     });
+    // Preuves émises par ProofLayer (PL-402) : la signature et l'état de la fiche qui en résulte.
+    await recordClassificationSigned(tx, ctx.orgId, draft.id);
+    await recordRegistrySnapshot(tx, ctx.orgId, draft.systemId, signedAt);
     // Les autres contrôles évaluables sont jugés sur les preuves déjà présentes (PL-401), par la file de jobs.
     await scheduleOrgSweep(tx, ctx.orgId, scheduleEvaluation, draft.systemId);
     return { superseded: previous.map((p) => p.id), roleBefore: system.role, controls };

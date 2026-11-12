@@ -2,10 +2,11 @@
 // journal d'audit (qui, quand, avant, après) ; modifier un champ utilisé par la classification la marque « à revoir ».
 // Les modifications de conception (DesignChange) fondent l'analyse de l'Art. 111(2) : elles se qualifient
 // « significatives ou non » avec un motif.
-import type { forOrg } from "@/server/db";
+import { withOrgTransaction, type forOrg } from "@/server/db";
 import { findMembership, usersByIds } from "@/server/system/identity";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { ServiceError } from "./errors";
+import { recordRegistrySnapshot } from "./system-evidence";
 import type { OrgContext } from "./organization";
 import {
   CLASSIFICATION_FIELDS,
@@ -195,8 +196,13 @@ export async function createSystem(
       ownerUserId: system.ownerUserId,
     },
   );
+  await snapshotRegistry(ctx, system.id);
   return { id: system.id, slug: system.slug };
 }
+
+/** Instantané de la fiche au magasin de preuves (PL-402), après chaque écriture : responsables, « à revoir ». */
+const snapshotRegistry = (ctx: OrgContext, systemId: string) =>
+  withOrgTransaction(ctx.orgId, (tx) => recordRegistrySnapshot(tx, ctx.orgId, systemId));
 
 /**
  * Modification de fiche. Chaque champ modifié est inscrit au journal avec sa valeur avant et après.
@@ -246,6 +252,7 @@ export async function updateSystem(ctx: OrgContext, input: { id: string; patch: 
       ...(markStale ? { classificationStale: true } : {}),
     },
   );
+  await snapshotRegistry(ctx, current.id);
   return { changed: changes.length, classificationStale: current.classificationStale || markStale };
 }
 
@@ -265,6 +272,7 @@ export async function archiveSystem(ctx: OrgContext, input: { id: string }) {
       monitored: current.monitored,
     },
   );
+  await snapshotRegistry(ctx, current.id);
 }
 
 /** Historique de la fiche : création, modifications champ par champ, archivage. Du plus récent au plus ancien. */

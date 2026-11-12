@@ -26,13 +26,22 @@ const evaluableWhere = (registry: EvaluatorRegistry) => ({
   definition: { evaluatorKey: { in: implementedEvaluatorKeys(registry) } },
 });
 
+/** Preuve nouvelle, telle que la réévaluation incrémentale la cible. */
+export interface NewEvidence {
+  id: string;
+  kind: string;
+  resourceId: string | null;
+  /** Preuve émise par ProofLayer sur un système (`system.*`, PL-402). */
+  systemId?: string;
+}
+
 /**
  * Contrôles concernés par des preuves nouvelles : ceux qui acceptent leur type, sur les systèmes liés à leur
- * ressource (`SystemResourceLink`) ou rattachés explicitement par `EvidenceLink`.
+ * ressource (`SystemResourceLink`), sur le système d'une preuve `system.*`, ou rattachés par `EvidenceLink`.
  */
 export async function instancesConcernedBy(
   tx: OrgTransaction,
-  evidence: { id: string; kind: string; resourceId: string | null }[],
+  evidence: NewEvidence[],
   registry: EvaluatorRegistry = EVALUATORS,
 ): Promise<string[]> {
   if (evidence.length === 0) return [];
@@ -44,7 +53,12 @@ export async function instancesConcernedBy(
         select: { systemId: true },
       })
     : [];
-  const systemIds = [...new Set(links.map((l) => l.systemId))];
+  const systemIds = [
+    ...new Set([
+      ...links.map((l) => l.systemId),
+      ...evidence.flatMap((e) => (e.systemId ? [e.systemId] : [])),
+    ]),
+  ];
   const instances = await tx.controlInstance.findMany({
     where: {
       ...evaluableWhere(registry),
@@ -70,7 +84,7 @@ export async function instancesConcernedBy(
 export async function scheduleEvaluations(
   tx: OrgTransaction,
   orgId: string,
-  evidence: { id: string; kind: string; resourceId: string | null }[],
+  evidence: NewEvidence[],
   schedule: ScheduleEvaluation,
 ): Promise<string[]> {
   const jobs: string[] = [];
@@ -100,7 +114,10 @@ export async function scheduleOrgSweep(
   return instances.length;
 }
 
-/** Preuves lues par l'évaluateur d'un contrôle : types acceptés, ressources du système ou rattachement explicite. */
+/**
+ * Preuves lues par l'évaluateur d'un contrôle : types acceptés, ressources du système, preuves `system.*` du système,
+ * ou rattachement explicite.
+ */
 async function evidenceFor(
   tx: OrgTransaction,
   instance: { id: string; systemId: string; evidenceKinds: string[] },
@@ -114,6 +131,10 @@ async function evidenceFor(
       kind: { in: instance.evidenceKinds },
       OR: [
         ...(resources.length ? [{ resourceId: { in: resources.map((r) => r.resourceId) } }] : []),
+        {
+          kind: { startsWith: "system." },
+          payload: { path: ["systemId"], equals: instance.systemId },
+        },
         { links: { some: { controlInstanceId: instance.id } } },
       ],
     },

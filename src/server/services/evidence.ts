@@ -44,10 +44,11 @@ export interface EvidenceDependencies {
   now: () => Date;
 }
 
-const defaults = (): EvidenceDependencies => ({
-  store: createObjectStore(),
-  master: masterKeyFromEnv(),
-  now: () => new Date(),
+/** Le stockage et la clé maîtresse ne sont lus que pour une preuve qui porte une charge brute à chiffrer. */
+const resolve = (deps: Partial<EvidenceDependencies>) => ({
+  now: deps.now ?? (() => new Date()),
+  store: () => deps.store ?? createObjectStore(),
+  master: () => deps.master ?? masterKeyFromEnv(),
 });
 
 /** Transaction dans laquelle app.org_id est positionné (job, withOrgTransaction). */
@@ -73,8 +74,9 @@ export async function createEvidence(
   tx: Tx,
   orgId: string,
   input: EvidenceInput,
-  deps: EvidenceDependencies = defaults(),
+  dependencies: Partial<EvidenceDependencies> = {},
 ): Promise<CreateEvidenceResult> {
+  const deps = resolve(dependencies);
   const duplicate = await tx.evidenceItem.findUnique({
     where: { orgId_dedupeKey: { orgId, dedupeKey: input.dedupeKey } },
     select: { id: true },
@@ -98,10 +100,10 @@ export async function createEvidence(
 
   let rawKey: string | null = null;
   if (input.raw !== undefined) {
-    const dek = await orgDataKey(tx, orgId, deps.master);
+    const dek = await orgDataKey(tx, orgId, deps.master());
     rawKey = rawObjectKey(orgId, id);
     const plaintext = Buffer.from(JSON.stringify(input.raw), "utf8");
-    await deps.store.put(rawKey, encrypt(dek, plaintext, `raw:${orgId}:${id}`));
+    await deps.store().put(rawKey, encrypt(dek, plaintext, `raw:${orgId}:${id}`));
   }
 
   await tx.evidenceItem.create({

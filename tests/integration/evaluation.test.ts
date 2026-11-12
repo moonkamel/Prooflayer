@@ -140,7 +140,7 @@ beforeAll(async () => {
   const definitions = await prisma.controlDefinition.findMany({
     where: {
       libraryVersion: LIBRARY_VERSION,
-      key: { in: ["AIA-13-01", "AIA-10-01", "AIA-15-02"] },
+      key: { in: ["AIA-13-01", "AIA-10-01", "AIA-09-01"] },
     },
   });
   for (const systemId of [ids.system, ids.other, ids.archived]) {
@@ -178,11 +178,11 @@ describe("réévaluation incrémentale", () => {
       fileSnapshot(ids.resource, "docs/ai/instructions-for-use.md", true, new Date()),
     ]);
     const main = instances[ids.system]!;
-    // AIA-13-01 et AIA-10-01 acceptent github.file.snapshot ; AIA-15-02 non (et son évaluateur arrive avec PL-402).
+    // AIA-13-01 et AIA-10-01 acceptent github.file.snapshot ; AIA-09-01 (Jira) non, et son évaluateur arrive avec PL-404.
     expect(jobs).toHaveLength(2);
     expect((await jobsOf(main["AIA-13-01"]!))[0]?.status).toBe("QUEUED");
     expect((await jobsOf(main["AIA-10-01"]!))[0]?.status).toBe("QUEUED");
-    expect(await jobsOf(main["AIA-15-02"]!)).toHaveLength(0);
+    expect(await jobsOf(main["AIA-09-01"]!)).toHaveLength(0);
     // Système non lié au dépôt, système archivé : rien.
     expect(await jobsOf(instances[ids.other]!["AIA-13-01"]!)).toHaveLength(0);
     expect(await jobsOf(instances[ids.archived]!["AIA-13-01"]!)).toHaveLength(0);
@@ -274,7 +274,7 @@ describe("réévaluation incrémentale", () => {
     const outcomes = await withOrgTransaction(A, async (tx) => [
       await evaluateInstance(tx, A, instances[ids.other]!["AIA-13-01"]!, new Date()),
       await evaluateInstance(tx, A, instances[ids.archived]!["AIA-13-01"]!, new Date()),
-      await evaluateInstance(tx, A, instances[ids.system]!["AIA-15-02"]!, new Date()),
+      await evaluateInstance(tx, A, instances[ids.system]!["AIA-09-01"]!, new Date()),
       await evaluateInstance(tx, A, "cin_inconnue", new Date()),
     ]);
     expect(outcomes).toEqual([
