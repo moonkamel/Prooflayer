@@ -1,0 +1,29 @@
+{
+  "repository": {
+    "id": 701234567,
+    "node_id": "R_kgDO701234567",
+    "name": "scoring-model",
+    "full_name": "talvio-demo/scoring-model",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model",
+    "default_branch": "main"
+  },
+  "ref": "main",
+  "takenAt": "2026-11-12T03:00:00Z",
+  "path": "CODEOWNERS",
+  "file": {
+    "type": "file",
+    "name": "CODEOWNERS",
+    "path": "CODEOWNERS",
+    "sha": "f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2",
+    "size": 128,
+    "encoding": "base64",
+    "content": "IyBOb3RpY2UgY29uZmlkZW50aWVsbGU=",
+    "html_url": "https://github.com/talvio-demo/scoring-model/blob/main/CODEOWNERS"
+  }
+}

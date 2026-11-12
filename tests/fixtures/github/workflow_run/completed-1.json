@@ -1,0 +1,103 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 9100000001,
+    "name": "eval",
+    "node_id": "WFR_x",
+    "head_branch": "main",
+    "head_sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "path": ".github/workflows/eval.yml",
+    "display_title": "Message de commit avec email bob@talvio.example",
+    "run_number": 40,
+    "event": "release",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 550000,
+    "url": "https://api.github.com/x",
+    "html_url": "https://github.com/talvio-demo/scoring-model/actions/runs/9100000001",
+    "created_at": "2026-10-28T14:10:00Z",
+    "updated_at": "2026-10-28T14:31:00Z",
+    "run_attempt": 1,
+    "run_started_at": "2026-10-28T14:10:00Z",
+    "actor": {
+      "login": "lead-bob",
+      "id": 8400000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/lead-bob"
+    },
+    "triggering_actor": {
+      "login": "lead-bob",
+      "id": 8400000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/lead-bob"
+    },
+    "head_commit": {
+      "id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "message": "Corrige le seuil",
+      "author": {
+        "name": "Bob",
+        "email": "bob@talvio.example"
+      }
+    },
+    "repository": {
+      "id": 701234567,
+      "node_id": "R_kgDO701234567",
+      "name": "scoring-model",
+      "full_name": "talvio-demo/scoring-model",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/scoring-model",
+      "default_branch": "main"
+    },
+    "head_repository": {
+      "id": 701234567,
+      "node_id": "R_kgDO701234567",
+      "name": "scoring-model",
+      "full_name": "talvio-demo/scoring-model",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/scoring-model",
+      "default_branch": "main"
+    }
+  },
+  "workflow": {
+    "id": 550000,
+    "name": "eval",
+    "path": ".github/workflows/eval.yml"
+  },
+  "repository": {
+    "id": 701234567,
+    "node_id": "R_kgDO701234567",
+    "name": "scoring-model",
+    "full_name": "talvio-demo/scoring-model",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "lead-bob",
+    "id": 8400000,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/lead-bob"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

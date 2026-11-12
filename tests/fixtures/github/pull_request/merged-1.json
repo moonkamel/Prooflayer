@@ -1,0 +1,138 @@
+{
+  "action": "closed",
+  "number": 214,
+  "pull_request": {
+    "url": "https://api.github.com/repos/talvio-demo/scoring-model/pulls/214",
+    "id": 1900000000,
+    "html_url": "https://github.com/talvio-demo/scoring-model/pull/214",
+    "number": 214,
+    "state": "closed",
+    "locked": false,
+    "title": "Recalibrage du modèle de score v2.14",
+    "user": {
+      "login": "dev-alice",
+      "id": 8000000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-alice"
+    },
+    "body": "Contexte confidentiel : jeu de données clients, voir ticket AIR-42. Contact : alice@talvio.example",
+    "created_at": "2026-10-20T08:00:00Z",
+    "updated_at": "2026-10-28T14:02:11Z",
+    "closed_at": "2026-10-28T14:02:11Z",
+    "merged_at": "2026-10-28T14:02:11Z",
+    "merge_commit_sha": "9f8e7d6c5b4a39281706f5e4d3c2b1a098765432",
+    "assignee": null,
+    "requested_reviewers": [],
+    "labels": [
+      {
+        "id": 100,
+        "name": "model",
+        "color": "ededed"
+      },
+      {
+        "id": 101,
+        "name": "risk",
+        "color": "ededed"
+      }
+    ],
+    "draft": false,
+    "head": {
+      "label": "talvio-demo:feature",
+      "ref": "feature/x",
+      "sha": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "user": {
+        "login": "dev-alice",
+        "id": 8000000,
+        "type": "User",
+        "site_admin": false,
+        "html_url": "https://github.com/dev-alice"
+      },
+      "repo": {
+        "id": 701234567,
+        "node_id": "R_kgDO701234567",
+        "name": "scoring-model",
+        "full_name": "talvio-demo/scoring-model",
+        "private": true,
+        "owner": {
+          "login": "talvio-demo",
+          "id": 9000001,
+          "type": "Organization"
+        },
+        "html_url": "https://github.com/talvio-demo/scoring-model",
+        "default_branch": "main"
+      }
+    },
+    "base": {
+      "label": "talvio-demo:main",
+      "ref": "main",
+      "sha": "0000000000000000000000000000000000000000",
+      "user": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "User",
+        "site_admin": false,
+        "html_url": "https://github.com/talvio-demo"
+      },
+      "repo": {
+        "id": 701234567,
+        "node_id": "R_kgDO701234567",
+        "name": "scoring-model",
+        "full_name": "talvio-demo/scoring-model",
+        "private": true,
+        "owner": {
+          "login": "talvio-demo",
+          "id": 9000001,
+          "type": "Organization"
+        },
+        "html_url": "https://github.com/talvio-demo/scoring-model",
+        "default_branch": "main"
+      }
+    },
+    "author_association": "MEMBER",
+    "merged": true,
+    "mergeable": null,
+    "merged_by": {
+      "login": "lead-bob",
+      "id": 8100000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/lead-bob"
+    },
+    "comments": 2,
+    "review_comments": 5,
+    "commits": 4,
+    "additions": 120,
+    "deletions": 30,
+    "changed_files": 12
+  },
+  "repository": {
+    "id": 701234567,
+    "node_id": "R_kgDO701234567",
+    "name": "scoring-model",
+    "full_name": "talvio-demo/scoring-model",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model",
+    "default_branch": "main"
+  },
+  "organization": {
+    "login": "talvio-demo",
+    "id": 9000001
+  },
+  "sender": {
+    "login": "lead-bob",
+    "id": 8100000,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/lead-bob"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

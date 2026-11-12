@@ -1,0 +1,53 @@
+{
+  "action": "published",
+  "release": {
+    "id": 170000001,
+    "tag_name": "v2.14.0",
+    "target_commitish": "main",
+    "name": "Score v2.14",
+    "draft": false,
+    "prerelease": false,
+    "created_at": "2026-10-28T15:00:00Z",
+    "published_at": "2026-10-28T15:00:00Z",
+    "author": {
+      "login": "lead-bob",
+      "id": 8500000,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/lead-bob"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model/releases/tag/v2.14.0",
+    "body": "Notes internes : client Banque X, contact cto@banque-x.example",
+    "assets": [
+      {
+        "name": "model.bin",
+        "browser_download_url": "https://github.com/x"
+      }
+    ]
+  },
+  "repository": {
+    "id": 701234567,
+    "node_id": "R_kgDO701234567",
+    "name": "scoring-model",
+    "full_name": "talvio-demo/scoring-model",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-model",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "lead-bob",
+    "id": 8500000,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/lead-bob"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

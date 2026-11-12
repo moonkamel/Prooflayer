@@ -1,0 +1,103 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 9100000003,
+    "name": "nightly",
+    "node_id": "WFR_x",
+    "head_branch": "develop",
+    "head_sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "path": ".github/workflows/nightly.yml",
+    "display_title": "Message de commit avec email bob@talvio.example",
+    "run_number": 42,
+    "event": "schedule",
+    "status": "completed",
+    "conclusion": "cancelled",
+    "workflow_id": 550002,
+    "url": "https://api.github.com/x",
+    "html_url": "https://github.com/talvio-demo/ml-pipelines/actions/runs/9100000003",
+    "created_at": "2026-11-04T02:00:00Z",
+    "updated_at": "2026-11-04T02:00:40Z",
+    "run_attempt": 1,
+    "run_started_at": "2026-11-04T02:00:00Z",
+    "actor": {
+      "login": "github-actions[bot]",
+      "id": 8400002,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/github-actions[bot]"
+    },
+    "triggering_actor": {
+      "login": "github-actions[bot]",
+      "id": 8400002,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/github-actions[bot]"
+    },
+    "head_commit": {
+      "id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "message": "Corrige le seuil",
+      "author": {
+        "name": "Bob",
+        "email": "bob@talvio.example"
+      }
+    },
+    "repository": {
+      "id": 701234569,
+      "node_id": "R_kgDO701234569",
+      "name": "ml-pipelines",
+      "full_name": "talvio-demo/ml-pipelines",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/ml-pipelines",
+      "default_branch": "main"
+    },
+    "head_repository": {
+      "id": 701234569,
+      "node_id": "R_kgDO701234569",
+      "name": "ml-pipelines",
+      "full_name": "talvio-demo/ml-pipelines",
+      "private": true,
+      "owner": {
+        "login": "talvio-demo",
+        "id": 9000001,
+        "type": "Organization"
+      },
+      "html_url": "https://github.com/talvio-demo/ml-pipelines",
+      "default_branch": "main"
+    }
+  },
+  "workflow": {
+    "id": 550002,
+    "name": "nightly",
+    "path": ".github/workflows/nightly.yml"
+  },
+  "repository": {
+    "id": 701234569,
+    "node_id": "R_kgDO701234569",
+    "name": "ml-pipelines",
+    "full_name": "talvio-demo/ml-pipelines",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/ml-pipelines",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "github-actions[bot]",
+    "id": 8400002,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/github-actions[bot]"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}

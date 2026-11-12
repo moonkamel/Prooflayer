@@ -1,0 +1,19 @@
+{
+  "repository": {
+    "id": 701234569,
+    "node_id": "R_kgDO701234569",
+    "name": "ml-pipelines",
+    "full_name": "talvio-demo/ml-pipelines",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/ml-pipelines",
+    "default_branch": "main"
+  },
+  "branch": "main",
+  "takenAt": "2026-11-12T03:00:00Z",
+  "protection": null
+}

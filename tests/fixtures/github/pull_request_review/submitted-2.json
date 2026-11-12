@@ -1,0 +1,77 @@
+{
+  "action": "submitted",
+  "review": {
+    "id": 3100000002,
+    "node_id": "PRR_x",
+    "user": {
+      "login": "dev-alice",
+      "id": 8200001,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-alice"
+    },
+    "body": "Voir mon commentaire privé sur les données personnelles de candidats.",
+    "commit_id": "dddddddddddddddddddddddddddddddddddddddd",
+    "submitted_at": "2026-11-01T16:20:00Z",
+    "state": "changes_requested",
+    "html_url": "https://github.com/talvio-demo/scoring-api/pull/88#pullrequestreview-3100000002",
+    "author_association": "MEMBER"
+  },
+  "pull_request": {
+    "number": 88,
+    "title": "x",
+    "user": {
+      "login": "dev-carla",
+      "id": 8300001,
+      "type": "User",
+      "site_admin": false,
+      "html_url": "https://github.com/dev-carla"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api/pull/88",
+    "base": {
+      "ref": "main",
+      "repo": {
+        "id": 701234568,
+        "node_id": "R_kgDO701234568",
+        "name": "scoring-api",
+        "full_name": "talvio-demo/scoring-api",
+        "private": true,
+        "owner": {
+          "login": "talvio-demo",
+          "id": 9000001,
+          "type": "Organization"
+        },
+        "html_url": "https://github.com/talvio-demo/scoring-api",
+        "default_branch": "main"
+      }
+    },
+    "head": {
+      "sha": "dddddddddddddddddddddddddddddddddddddddd"
+    }
+  },
+  "repository": {
+    "id": 701234568,
+    "node_id": "R_kgDO701234568",
+    "name": "scoring-api",
+    "full_name": "talvio-demo/scoring-api",
+    "private": true,
+    "owner": {
+      "login": "talvio-demo",
+      "id": 9000001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/talvio-demo/scoring-api",
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "dev-alice",
+    "id": 8200001,
+    "type": "User",
+    "site_admin": false,
+    "html_url": "https://github.com/dev-alice"
+  },
+  "installation": {
+    "id": 52000001,
+    "node_id": "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uNTIwMDAwMDE="
+  }
+}
