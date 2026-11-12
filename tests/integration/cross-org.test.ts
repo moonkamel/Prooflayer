@@ -142,6 +142,8 @@ beforeAll(async () => {
   process.env.JIRA_CLIENT_SECRET ??= "secret-test";
   process.env.BETTER_AUTH_URL ??= "http://localhost:3000";
   process.env.PROOFLAYER_MASTER_KEY ??= generateKey().toString("base64");
+  // Le job CI `db` ne définit pas de secret d'authentification : un secret propre à ce test signe le state.
+  process.env.BETTER_AUTH_SECRET ??= "cross-org-test-secret-0123456789-0123456789";
   for (const [org, user] of [
     [A, ownerA],
     [B, ownerB],
