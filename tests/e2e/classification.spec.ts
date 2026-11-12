@@ -165,7 +165,37 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await expectNoViolations(page, "dashboard filtré");
   await page.getByRole("button", { name: "Réinitialiser les filtres" }).click();
   await expect(page.getByTestId("dashboard-control")).toHaveCount(37);
-  await page.goto(page.url().replace(/\/dashboard.*$/u, "/classification"));
+
+  // Détail d'un contrôle (PL-407, écran D) : preuve attendue, responsable, commentaire, non-applicabilité justifiée.
+  await page.getByRole("link", { name: /AIA-15-02/u }).click();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "PR approuvées par un tiers" }),
+  ).toBeVisible();
+  await expect(page.getByTestId("expected")).toBeVisible();
+  await expectNoViolations(page, "détail d'un contrôle");
+  const owner = page.getByTestId("owner-form");
+  await owner.getByLabel("Responsable du contrôle").selectOption({ index: 1 });
+  await owner.getByRole("button", { name: "Assigner" }).click();
+  await expect(owner.getByText("Responsable enregistré.")).toBeVisible();
+  await expect(page.getByTestId("control-owner")).not.toHaveText("Aucun responsable assigné.");
+  const comment = page.getByTestId("comment-form");
+  await comment
+    .getByLabel("Ajouter un commentaire")
+    .fill("Branche protégée en cours de configuration.");
+  await comment.getByRole("button", { name: "Commenter" }).click();
+  await expect(page.getByTestId("comments")).toContainText(
+    "Branche protégée en cours de configuration.",
+  );
+  const na = page.getByTestId("na-form");
+  await na
+    .getByLabel("Justification de la non-applicabilité")
+    .fill("Le dépôt est géré hors GitHub pendant la phase pilote.");
+  await na.getByRole("button", { name: "Déclarer non applicable" }).click();
+  await expect(page.getByTestId("control-status")).toHaveText("Non applicable");
+  await expectNoViolations(page, "contrôle non applicable");
+  await na.getByRole("button", { name: "Rouvrir le contrôle" }).click();
+  await expect(page.getByTestId("control-status")).toHaveText("Sans preuve");
+  await page.goto(page.url().replace(/\/controls\/.*$/u, "/classification"));
 
   // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
   await page.getByRole("button", { name: "Requalifier le système" }).click();

@@ -3,6 +3,7 @@
 // Tableau du dashboard système (§5.3 écran C) : filtres (statut, article, responsable, source, recherche) appliqués
 // instantanément et reflétés dans l'adresse (lien partageable, retour arrière), contrôles groupés par article avec
 // lignes repliables, décompte annoncé aux lecteurs d'écran. Aucune donnée n'est rechargée au filtrage.
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -262,8 +263,10 @@ export function ControlsExplorer({
                     >
                       <td className="px-3 py-2 align-top">
                         <p className="font-medium">
-                          <code className="mr-1 rounded bg-muted px-1 py-0.5">{c.key}</code>
-                          {c.title[locale]}
+                          <Link href={`/systems/${systemId}/controls/${c.id}`}>
+                            <code className="mr-1 rounded bg-muted px-1 py-0.5">{c.key}</code>
+                            {c.title[locale]}
+                          </Link>
                         </p>
                         <p className="text-xs text-muted-foreground">{c.articleRef}</p>
                       </td>

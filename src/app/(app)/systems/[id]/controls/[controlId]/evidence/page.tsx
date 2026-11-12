@@ -1,5 +1,5 @@
 // Ajout d'une preuve à un contrôle (PL-405, §3.2 E5) : document déposé ou attestation signée, toujours déclaratifs.
-// L'écran D complet (détail du contrôle, raisons, preuves) arrive avec PL-407.
+// Le détail du contrôle (écran D) : ../page.tsx (PL-407).
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";

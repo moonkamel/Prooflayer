@@ -421,3 +421,17 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   filtrable (recherche, statut, article, responsable, source) dont les filtres vivent dans l'adresse (`router.replace`).
 - Direction artistique : bleu institutionnel `--primary` #003399 et or `--gold` #ffcc00 purement décoratif (jamais
   porteur d'information ni de texte) ; aucun emblème ni visuel officiel de l'Union européenne.
+
+## Détail d'un contrôle (conventions établies par PL-407)
+- Fonctions pures `src/server/services/control-detail-data.ts` : `weeklyHistory` (12 semaines, lundi UTC, dernier
+  statut de la semaine), `faultyEvidenceIds` / `orderEvidence` (preuves citées par les raisons d'une évaluation FAIL,
+  PARTIAL ou STALE : fautives, en tête), `expectedEvidence` (types, chemin `docs/ai/…`, fraîcheur, connecteur, finalité
+  Jira), `safeSourceUrl` (https seulement), `parseReasons` (colonne JSON relue sans confiance).
+- Service `src/server/services/control-detail.ts`, routeur `control` : `get` (pages de 20 preuves), `evaluations`
+  (lecture, tout membre), `assignOwner` (contributor, membre de l'organisation seulement), `setNotApplicable` (admin,
+  justification de 20 caractères au moins ; réouverture → MISSING et `control.evaluate` programmé ; un contrôle écarté
+  par reclassification ne se rouvre pas à la main), `comment` (contributor). Fiche archivée : CONFLICT `system.archived`.
+- Table `ControlComment` (RLS, en ajout seul : UPDATE et DELETE retirés au rôle applicatif). Le texte d'un commentaire
+  n'entre jamais au journal d'audit (identifiant et longueur seulement).
+- Écran D : `/systems/[id]/controls/[controlId]` (`?page=`), accessible depuis l'onglet Contrôles et le dashboard.
+  Libellés des types de preuves : `evidenceKinds.<type avec _>` dans `messages/{fr,en}.json`.
