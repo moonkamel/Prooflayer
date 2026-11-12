@@ -7,10 +7,18 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+export interface EmailAttachment {
+  filename: string;
+  contentType: string;
+  /** Contenu encodé en base64. */
+  contentBase64: string;
+}
+
 export interface EmailMessage {
   to: string;
   subject: string;
   text: string;
+  attachments?: EmailAttachment[];
 }
 
 export interface EmailTransport {

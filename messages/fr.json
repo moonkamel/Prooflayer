@@ -220,7 +220,8 @@
     "title": "ProofLayer",
     "tagline": "Les preuves exigées par l'AI Act, capturées là où le travail se fait, horodatées et vérifiables sans nous.",
     "signUp": "Créer mon espace",
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "classifier": "Classifier un système sans compte"
   },
   "aiActRole": {
     "PROVIDER": "Fournisseur",
@@ -730,5 +731,30 @@
     "SE": "Suède",
     "SI": "Slovénie",
     "SK": "Slovaquie"
+  },
+  "publicClassifier": {
+    "title": "Classifier un système d'IA",
+    "intro": "Répondez à neuf questions au plus pour savoir où votre système se situe dans l'AI Act. Sans compte : vos réponses restent dans votre navigateur.",
+    "systemName": "Nom du système (facultatif)",
+    "result": "Résultat",
+    "disclaimer": "Résultat indicatif, établi par des règles déterministes publiques. Il ne remplace pas l'avis d'un juriste et n'engage pas ProofLayer.",
+    "share": "Lien à partager, avec vos réponses",
+    "copy": "Copier le lien",
+    "copied": "Lien copié.",
+    "noteTitle": "Recevoir la note de classification en PDF",
+    "noteIntro": "La note détaille le raisonnement article par article. Elle est envoyée à une adresse professionnelle.",
+    "email": "Adresse email professionnelle",
+    "consent": "J'accepte que ProofLayer me recontacte au sujet de la mise en conformité de ce système. Je peux retirer ce consentement à tout moment.",
+    "send": "Recevoir la note",
+    "sent": "Note envoyée à {email}.",
+    "notProfessional": "Indiquez une adresse professionnelle : les messageries grand public ne sont pas acceptées.",
+    "tooMany": "Trop de demandes. Réessayez plus tard.",
+    "restart": "Recommencer",
+    "edit": "Modifier mes réponses",
+    "signUp": "Suivre ce système dans ProofLayer",
+    "defaultSystemName": "Système évalué",
+    "noPurpose": "Non renseignée (classifieur public)",
+    "emailSubject": "Note de classification AI Act : {name}",
+    "emailBody": "Bonjour,\n\nVous trouverez en pièce jointe la note de classification produite par le classifieur public de ProofLayer. Elle est indicative et n'engage pas ProofLayer.\n\nL'équipe ProofLayer"
   }
 }

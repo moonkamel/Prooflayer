@@ -9,6 +9,7 @@ interface OutboxEmail {
   subject: string;
   text: string;
   sentAt: string;
+  attachments?: { filename: string; contentType: string; contentBase64: string }[];
 }
 
 async function readOutbox(): Promise<OutboxEmail[]> {
@@ -39,4 +40,21 @@ export async function waitForEmailLink(to: string, subject: string, since: Date)
     )
     .toBeTruthy();
   return link!;
+}
+
+/** Attend un email pour `to` dont le sujet contient `subject`, envoyé après `since`, et le renvoie. */
+export async function waitForEmail(to: string, subject: string, since: Date): Promise<OutboxEmail> {
+  let found: OutboxEmail | undefined;
+  await expect
+    .poll(
+      async () => {
+        found = (await readOutbox())
+          .filter((e) => e.to === to && e.subject.includes(subject) && new Date(e.sentAt) >= since)
+          .at(-1);
+        return found;
+      },
+      { timeout: 20_000, message: `email « ${subject} » pour ${to}` },
+    )
+    .toBeTruthy();
+  return found!;
 }
