@@ -106,17 +106,34 @@ function findDraft(ctx: OrgContext, systemId: string) {
   });
 }
 
-/** Brouillon en cours du système, créé s'il n'existe pas (questionnaire ouvert ou repris). */
+/**
+ * Brouillon en cours du système, créé s'il n'existe pas. Une requalification reprend les réponses de la version
+ * signée en vigueur (§2.2 : seule la réponse qui a changé est à modifier) ; le résultat reste à recalculer, avec la
+ * version de règles courante. Les réponses devenues invalides ou hors chemin sont écartées.
+ */
 export async function openDraft(ctx: OrgContext, input: { systemId: string }) {
   const system = await activeSystem(ctx, input.systemId);
   const existing = await findDraft(ctx, system.id);
   if (existing) return view(existing);
+  const signed = await dbOf(ctx).classification.findFirst({
+    where: { systemId: system.id, orgId: ctx.orgId, status: "SIGNED" },
+    orderBy: { signedAt: "desc" },
+  });
+  const responses = signed
+    ? pruneResponses(
+        Object.fromEntries(
+          Object.entries(responsesOf(signed.answers)).filter(([id, value]) =>
+            isValidResponse(id as QuestionId, value),
+          ),
+        ) as Responses,
+      )
+    : {};
   const created = await dbOf(ctx).classification.create({
     data: {
       orgId: ctx.orgId,
       systemId: system.id,
       rulesetVersion: CURRENT_RULESET,
-      answers: { responses: {} },
+      answers: { responses },
       tier: "UNCLASSIFIED",
       role: system.role,
       annexIIIPoints: [],
@@ -127,6 +144,7 @@ export async function openDraft(ctx: OrgContext, input: { systemId: string }) {
   await record(ctx, "classification.draft", created.id, {
     systemId: system.id,
     rulesetVersion: CURRENT_RULESET,
+    ...(signed ? { prefilledFrom: signed.id } : {}),
   });
   return view(created);
 }
@@ -139,8 +157,8 @@ async function requireDraft(ctx: OrgContext, systemId: string) {
 }
 
 /**
- * Enregistre la réponse à une question (enregistrement automatique). Les réponses d'une branche abandonnée après un
- * retour arrière sont retirées ; un résultat déjà calculé est effacé, puisqu'il ne correspond plus aux réponses.
+ * Enregistre la réponse à une question (enregistrement automatique). Un résultat déjà calculé est effacé, puisqu'il
+ * ne correspond plus aux réponses.
  */
 export async function saveAnswer(
   ctx: OrgContext,
@@ -151,7 +169,9 @@ export async function saveAnswer(
   }
   const draft = await requireDraft(ctx, input.systemId);
   const before = responsesOf(draft.answers);
-  const responses = pruneResponses({ ...before, [input.questionId]: input.value });
+  // Les réponses déjà données sont conservées : si le nouveau chemin repasse par leurs questions, l'utilisateur les
+  // retrouve et n'a pas à les ressaisir. Celles restées hors du chemin sont écartées au calcul (computeDraft).
+  const responses: Responses = { ...before, [input.questionId]: input.value };
   const { count } = await dbOf(ctx).classification.updateMany({
     where: { id: draft.id, status: "DRAFT" },
     data: {
@@ -176,12 +196,15 @@ export async function saveAnswer(
 /** Calcule la classification d'un questionnaire complet avec la version de règles du brouillon. */
 export async function computeDraft(ctx: OrgContext, input: { systemId: string }) {
   const draft = await requireDraft(ctx, input.systemId);
-  const responses = responsesOf(draft.answers);
-  if (pathOf(responses).current !== null) {
+  const stored = responsesOf(draft.answers);
+  if (pathOf(stored).current !== null) {
     throw new ServiceError("BAD_REQUEST", "classification.incomplete");
   }
+  // Seules les réponses du chemin parcouru fondent la classification et sont gardées avec elle.
+  const responses = pruneResponses(stored);
   const result = classify(toAnswers(responses), draft.rulesetVersion);
   const data = {
+    answers: { responses },
     tier: result.tier,
     role: result.role,
     annexIIIPoints: result.annexIIIPoints,
@@ -224,6 +247,10 @@ export function signatureStatement(locale: string): string {
   return (locale === "en" ? en : fr).classificationResult.statement;
 }
 
+/** Après ce nombre de mots de passe refusés dans la fenêtre, la signature est bloquée pour l'utilisateur. */
+export const SIGN_MAX_REFUSALS = 5;
+export const SIGN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+
 export interface SignDependencies {
   /** Vérifie le mot de passe de l'utilisateur courant (Better Auth, verifyPassword). */
   verifyPassword: (password: string) => Promise<boolean>;
@@ -245,7 +272,20 @@ export async function signClassification(
     throw new ServiceError("BAD_REQUEST", "classification.notComputed");
   if (draft.tier === "PROHIBITED")
     throw new ServiceError("BAD_REQUEST", "classification.prohibited");
+  // Confirmation par mot de passe, à essais limités (§4.7) : une session volée ne permet pas de deviner le mot de
+  // passe à force d'essais. Chaque refus est journalisé, sans le mot de passe.
+  const refusals = await dbOf(ctx).auditLog.count({
+    where: {
+      action: "classification.signRefused",
+      actorId: ctx.userId,
+      createdAt: { gte: new Date(Date.now() - SIGN_ATTEMPT_WINDOW_MS) },
+    },
+  });
+  if (refusals >= SIGN_MAX_REFUSALS) {
+    throw new ServiceError("TOO_MANY_REQUESTS", "classification.tooManyAttempts");
+  }
   if (!(await deps.verifyPassword(input.password))) {
+    await record(ctx, "classification.signRefused", draft.id, { systemId: draft.systemId });
     throw new ServiceError("FORBIDDEN", "classification.invalidPassword");
   }
   const statement = signatureStatement(input.locale);

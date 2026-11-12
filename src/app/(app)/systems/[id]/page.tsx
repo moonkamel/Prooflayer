@@ -5,9 +5,8 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
 import { AI_ACT_ROLES, SYSTEM_STATUSES, type SystemField } from "@/server/services/system-registry";
 import { ArchiveSystemButton, EditableField } from "../system-controls";
-import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { StartClassificationButton } from "./classification/result";
 import { loadSystem } from "./load";
 
 type Params = { params: Promise<{ id: string }> };
@@ -45,11 +44,7 @@ export default async function SystemOverviewPage({ params }: Params) {
       {system.riskTier === "UNCLASSIFIED" && (
         <div className="space-y-2">
           <Alert>{t("unclassified")}</Alert>
-          {editable && (
-            <Button asChild>
-              <Link href={`/systems/${system.id}/classification`}>{t("qualify")}</Link>
-            </Button>
-          )}
+          {editable && <StartClassificationButton systemId={system.id} label={t("qualify")} />}
         </div>
       )}
       {system.classificationStale && (
@@ -65,9 +60,7 @@ export default async function SystemOverviewPage({ params }: Params) {
         </Alert>
       )}
       {system.classificationStale && editable && (
-        <Button asChild variant="outline">
-          <Link href={`/systems/${system.id}/classification`}>{t("review")}</Link>
-        </Button>
+        <StartClassificationButton systemId={system.id} label={t("review")} variant="outline" />
       )}
 
       <dl>

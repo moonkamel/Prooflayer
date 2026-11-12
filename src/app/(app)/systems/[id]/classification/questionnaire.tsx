@@ -5,16 +5,13 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { QUESTIONS, type QuestionId, type Response } from "@/server/classify/questionnaire";
+import { regulationUrl } from "@/lib/regulation";
 import { trpc } from "@/lib/trpc";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ClassificationResult } from "./result";
 
 type Draft = Awaited<ReturnType<typeof trpc.classification.draft.mutate>>;
-
-/** Texte du règlement sur EUR-Lex, dans la langue de l'interface. */
-const eurLex = (locale: string) =>
-  `https://eur-lex.europa.eu/legal-content/${locale === "en" ? "EN" : "FR"}/TXT/?uri=CELEX:32024R1689`;
 
 export function Questionnaire({
   systemId,
@@ -32,7 +29,8 @@ export function Questionnaire({
   const tc = useTranslations("common");
   const [draft, setDraft] = useState(initial);
   const [viewing, setViewing] = useState<QuestionId | null>(
-    initial.result ? null : (initial.current ?? initial.answered.at(-1) ?? "aiSystem"),
+    // Questionnaire complet sans résultat (requalification préremplie) : relecture depuis la première question.
+    initial.result ? null : (initial.current ?? initial.answered[0] ?? "aiSystem"),
   );
   const [pending, start] = useTransition();
   const [status, setStatus] = useState<"saved" | "error" | null>(null);
@@ -147,7 +145,7 @@ export function Questionnaire({
         <summary className="cursor-pointer font-medium">{t("why")}</summary>
         <div className="mt-2 space-y-2 text-sm">
           <p>
-            <a href={eurLex(locale)} target="_blank" rel="noreferrer">
+            <a href={regulationUrl(locale)} target="_blank" rel="noreferrer">
               {question.articleRef}
             </a>
             {" — "}

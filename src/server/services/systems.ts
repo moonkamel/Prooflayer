@@ -196,7 +196,8 @@ export async function createSystem(
 
 /**
  * Modification de fiche. Chaque champ modifié est inscrit au journal avec sa valeur avant et après.
- * Si un champ utilisé par la classification change alors qu'une classification existe, elle passe « à revoir ».
+ * Si un champ utilisé par la classification change alors qu'une classification signée est en vigueur, elle passe
+ * « à revoir » ; un brouillon seul n'a rien à revoir.
  * Écriture conditionnée à `updatedAt` : deux modifications simultanées ne s'écrasent pas sans être historisées.
  */
 export async function updateSystem(ctx: OrgContext, input: { id: string; patch: SystemPatch }) {
@@ -219,7 +220,7 @@ export async function updateSystem(ctx: OrgContext, input: { id: string; patch: 
     touchesClassification(changes) &&
     !current.classificationStale &&
     (await db.classification.count({
-      where: { systemId: current.id, status: { not: "SUPERSEDED" } },
+      where: { systemId: current.id, status: "SIGNED" },
     })) > 0;
 
   const data: Record<string, unknown> = {};

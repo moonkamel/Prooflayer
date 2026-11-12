@@ -22,7 +22,11 @@ export default async function SystemLayout({
   const tk = await getTranslations("riskTier");
   const format = await getFormatter();
   const base = `/systems/${system.id}`;
-  const identity = [tk(system.riskTier), ...system.annexIIIPoints, tr(system.role)].join(" · ");
+  // Le rôle est un résultat de la classification (§5.1) : il n'est affiché qu'une fois le système qualifié.
+  const identity =
+    system.riskTier === "UNCLASSIFIED"
+      ? tk(system.riskTier)
+      : [tk(system.riskTier), ...system.annexIIIPoints, tr(system.role)].join(" · ");
 
   return (
     <div className="space-y-6">

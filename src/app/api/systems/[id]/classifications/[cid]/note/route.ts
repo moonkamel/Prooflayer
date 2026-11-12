@@ -5,6 +5,7 @@ import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { isLocale } from "@/i18n/config";
 import { createContext } from "@/server/context";
 import { createCaller } from "@/server/routers/_app";
+import { slugify } from "@/server/services/system-registry";
 import { renderClassificationNote } from "@/server/services/classification-note";
 
 export async function GET(
@@ -18,11 +19,7 @@ export async function GET(
     const api = createCaller(await createContext(request.headers));
     const data = await api.classification.note({ systemId: id, classificationId: cid });
     const pdf = await renderClassificationNote(data, locale, new Date());
-    const slug = data.system.name
-      .normalize("NFD")
-      .replace(/[^\w-]+/gu, "-")
-      .toLowerCase()
-      .slice(0, 60);
+    const slug = slugify(data.system.name);
     return new Response(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",

@@ -105,7 +105,8 @@ packages/verify/         outil de vérification open source
 - Règle ESLint `react/jsx-no-literals` : aucun texte en dur dans le JSX, ni dans `aria-label`, `title`, `alt`, `placeholder`.
 - Chaque page exporte `generateMetadata` avec un titre traduit (gabarit « %s · ProofLayer »).
 - Liens soulignés par défaut ; erreurs en `<Alert tone="error">` (role="alert"), informations en `<Alert>` (role="status").
-- Accessibilité : `tests/e2e/a11y.spec.ts` (axe, WCAG 2.2 AA) ; tout nouvel écran y est ajouté.
+- Accessibilité : tout nouvel écran passe `expectNoViolations` (`tests/e2e/helpers/a11y.ts`, axe, WCAG 2.2 AA), dans
+  `tests/e2e/a11y.spec.ts` quand une adresse suffit, sinon dans le parcours qui amène l'écran dans l'état voulu.
 
 ## Registre des systèmes d'IA (conventions établies par PL-201)
 - Routeur `system` (`src/server/routers/system.ts`), logique dans `src/server/services/systems.ts`, fonctions pures
@@ -113,7 +114,7 @@ packages/verify/         outil de vérification open source
 - Historique d'une fiche = journal d'audit (`targetType` `ai_system`, métadonnées `changes: [{ field, before, after }]`).
   Un champ inchangé n'est pas historisé ; écriture conditionnée à `updatedAt` (CONFLICT `system.conflict`).
 - `CLASSIFICATION_FIELDS` : finalité prévue, rôle, fournisseur tiers, modèles, catégories de données. Leur modification
-  passe `classificationStale` à vrai si une classification non remplacée existe. Le moteur (PL-202) s'y conforme.
+  passe `classificationStale` à vrai si une classification signée est en vigueur (un brouillon seul n'a rien à revoir).
 - Fiche archivée : lecture et export seulement ; elle sort de la surveillance.
 - Modifications de conception : saisie manuelle (`designChanges.create`) en attendant les releases GitHub ; qualification
   significative ou non avec motif obligatoire (`qualifiedAt`, `qualificationReason`), requalification journalisée.
@@ -135,22 +136,31 @@ packages/verify/         outil de vérification open source
   hors chemin. Test croisé : chaque cas de `cases.ts` donne le même résultat par le questionnaire.
 - Textes : `messages/{fr,en}.json`, `questionnaire.questions.<id>` (`title`, `why`, `example1`, `example2`, `options`).
 - Routeur `classification` (`src/server/services/classification.ts`) : `draft` (un brouillon DRAFT par système, créé
-  ou repris), `saveAnswers` (une question, réponse journalisée, branche abandonnée retirée, résultat effacé),
-  `compute` (questionnaire complet, version de règles du brouillon). `Classification.answers = { responses }`.
-- Écran : `/systems/[id]/classification` ; « Qualifier ce système » et « Revoir la classification » sur la fiche.
+  ou repris ; une requalification reprend les réponses de la version signée), `saveAnswers` (une question, réponse
+  journalisée, résultat effacé, réponses déjà données conservées), `compute` (questionnaire complet, version de
+  règles du brouillon, seules les réponses du chemin sont gardées). `Classification.answers = { responses }`.
+- Écran : `/systems/[id]/classification`, en lecture seule à l'affichage : le brouillon naît d'une action explicite
+  (`StartClassificationButton` : « Qualifier ce système », « Revoir la classification », « Requalifier le système »).
 
 ## Résultat, signature et note (conventions établies par PL-204)
 - Écran A : `src/app/(app)/systems/[id]/classification/result.tsx` ; trace et implications pures dans
   `src/server/classify/explain.ts` (dates du §1.5 : Annexe III 2 décembre 2027, Annexe I 2 août 2028, Art. 50
   2 août 2026, Art. 5 2 février 2025).
 - Signature (`classification.sign`) : nom, fonction, déclaration (`classificationResult.statement`, langue du signataire),
-  mot de passe vérifié par Better Auth (`passwordVerifier`, injectable). Pratique interdite : jamais signée.
+  mot de passe vérifié par Better Auth (`passwordVerifier`, injectable), 5 refus au plus par quart d'heure et par
+  utilisateur (`classification.signRefused` au journal, puis TOO_MANY_REQUESTS). Pratique interdite : jamais signée.
   Dans `withOrgTransaction` (src/server/db.ts) : l'ancienne version passe à SUPERSEDED, la fiche reprend catégorie,
   points et rôle, `classificationStale` repasse à faux ; un changement de rôle est historisé sur la fiche.
 - Immuabilité en base : trigger `classification_guard` (seul passage SIGNED → SUPERSEDED autorisé ; suppression
   d'une version signée seulement sous `app.purge_org`).
 - Note PDF : `@react-pdf/renderer`, `src/server/services/classification-note.tsx`, route
   `/api/systems/[id]/classifications/[cid]/note?lang=fr|en`. Textes : `classificationResult.note`.
+
+## Étanchéité par procédure (convention établie par l'audit du sprint 2)
+- `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
+  une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
+  ajoutée sans y figurer fait échouer le test « inventaire ».
+- Lien vers le règlement : `regulationUrl` (`src/lib/regulation.ts`), seul endroit où l'adresse EUR-Lex est écrite.
 
 ## Sommaire du cahier des charges
 

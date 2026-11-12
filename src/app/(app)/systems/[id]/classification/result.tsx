@@ -12,6 +12,7 @@ import type { AiActRole, RiskTier } from "@/generated/prisma/enums";
 import type { ClassifiedTier } from "@/server/classify/engine";
 import { implicationsOf, traceLines } from "@/server/classify/explain";
 import { type QuestionId, type Responses } from "@/server/classify/questionnaire";
+import { regulationUrl } from "@/lib/regulation";
 import { trpc } from "@/lib/trpc";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type View = Awaited<ReturnType<typeof trpc.classification.draft.mutate>>;
-
-const eurLex = (locale: string) =>
-  `https://eur-lex.europa.eu/legal-content/${locale === "en" ? "EN" : "FR"}/TXT/?uri=CELEX:32024R1689`;
 
 export function ClassificationResult({
   systemId,
@@ -31,6 +29,7 @@ export function ClassificationResult({
   defaultName,
   onEdit,
   extraActions,
+  headingKey = "title",
 }: {
   systemId: string;
   classification: View;
@@ -39,6 +38,8 @@ export function ClassificationResult({
   defaultName: string;
   onEdit?: () => void;
   extraActions?: ReactNode;
+  /** Titre de la section : « Classification », ou « Version signée en vigueur » sous un brouillon en cours. */
+  headingKey?: "title" | "inForce";
 }) {
   const t = useTranslations("classificationResult");
   const tq = useTranslations("questionnaire");
@@ -46,6 +47,7 @@ export function ClassificationResult({
   const tr = useTranslations("aiActRole");
   const format = useFormatter();
   const result = classification.result!;
+  const uid = classification.id;
   const tier = result.tier as ClassifiedTier;
   const implications = implicationsOf(tier, result.annexIIIPoints);
   const responses: Responses = classification.responses;
@@ -62,11 +64,11 @@ export function ClassificationResult({
 
   return (
     <section
-      aria-labelledby="result-title"
+      aria-labelledby={`result-title-${uid}`}
       className="max-w-3xl space-y-5"
       data-testid="classification-result"
     >
-      <h2 id="result-title">{t("title")}</h2>
+      <h2 id={`result-title-${uid}`}>{t(headingKey)}</h2>
       <div className="grid gap-1 rounded-md border border-border p-4 sm:grid-cols-[1fr_auto]">
         <p className="text-lg font-bold uppercase" data-testid="result-tier">
           {tk(tier as RiskTier)}
@@ -93,8 +95,8 @@ export function ClassificationResult({
         </Alert>
       )}
 
-      <section aria-labelledby="why-title" className="space-y-2">
-        <h3 id="why-title" className="font-semibold">
+      <section aria-labelledby={`why-title-${uid}`} className="space-y-2">
+        <h3 id={`why-title-${uid}`} className="font-semibold">
           {t("why")}
         </h3>
         <ol className="list-decimal space-y-1 pl-6" data-testid="reasoning">
@@ -118,7 +120,7 @@ export function ClassificationResult({
                     </>
                   )}
                   <p>
-                    <a href={eurLex(locale)} target="_blank" rel="noreferrer">
+                    <a href={regulationUrl(locale)} target="_blank" rel="noreferrer">
                       {line.articleRef}
                     </a>
                   </p>
@@ -129,8 +131,8 @@ export function ClassificationResult({
         </ol>
       </section>
 
-      <section aria-labelledby="implies-title" className="space-y-1">
-        <h3 id="implies-title" className="font-semibold">
+      <section aria-labelledby={`implies-title-${uid}`} className="space-y-1">
+        <h3 id={`implies-title-${uid}`} className="font-semibold">
           {t("implies")}
         </h3>
         {implications.applicationDate ? (
@@ -217,10 +219,13 @@ function SignDialog({
         setOpen(false);
         router.refresh();
       } catch (err) {
+        const reason = err instanceof TRPCClientError ? err.message : "";
         setError(
-          err instanceof TRPCClientError && err.message === "classification.invalidPassword"
+          reason === "classification.invalidPassword"
             ? t("invalidPassword")
-            : tc("genericError"),
+            : reason === "classification.tooManyAttempts"
+              ? t("tooManyAttempts")
+              : tc("genericError"),
         );
       }
     });
@@ -279,8 +284,19 @@ function SignDialog({
   );
 }
 
-export function RequalifyButton({ systemId }: { systemId: string }) {
-  const t = useTranslations("classificationResult");
+/**
+ * Ouvre le questionnaire par une action explicite : le brouillon est créé (ou repris) par la mutation
+ * `classification.draft`, jamais par le simple affichage d'une page.
+ */
+export function StartClassificationButton({
+  systemId,
+  label,
+  variant = "default",
+}: {
+  systemId: string;
+  label: string;
+  variant?: "default" | "outline";
+}) {
   const tc = useTranslations("common");
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -288,7 +304,7 @@ export function RequalifyButton({ systemId }: { systemId: string }) {
   return (
     <>
       <Button
-        variant="outline"
+        variant={variant}
         type="button"
         disabled={pending}
         onClick={() =>
@@ -296,6 +312,7 @@ export function RequalifyButton({ systemId }: { systemId: string }) {
             setError(false);
             try {
               await trpc.classification.draft.mutate({ systemId });
+              router.push(`/systems/${systemId}/classification`);
               router.refresh();
             } catch {
               setError(true);
@@ -303,7 +320,7 @@ export function RequalifyButton({ systemId }: { systemId: string }) {
           })
         }
       >
-        {t("requalify")}
+        {label}
       </Button>
       {error && <Alert tone="error">{tc("genericError")}</Alert>}
     </>

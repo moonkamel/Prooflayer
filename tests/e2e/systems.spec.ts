@@ -37,7 +37,7 @@ test("registre : création, édition en place historisée, modification de conce
   await page.getByRole("button", { name: "Ajouter au registre" }).click();
   await expect(page).toHaveURL(/\/systems\/[^/]+$/u);
   await expect(page.getByTestId("system-name")).toHaveText("Score d'adéquation candidat");
-  await expect(page.getByTestId("system-identity")).toHaveText("Non qualifié · Fournisseur");
+  await expect(page.getByTestId("system-identity")).toHaveText("Non qualifié");
   await expect(page).toHaveTitle("Score d'adéquation candidat · ProofLayer");
 
   // Édition en place : cycle de vie, date de mise sur le marché, modèles.

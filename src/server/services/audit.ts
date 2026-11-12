@@ -23,6 +23,7 @@ export const AUDIT_ACTIONS = [
   "classification.saveAnswers",
   "classification.compute",
   "classification.sign",
+  "classification.signRefused",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

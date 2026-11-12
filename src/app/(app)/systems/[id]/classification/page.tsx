@@ -1,8 +1,9 @@
-// Classification d'un système (PL-203, PL-204) : questionnaire et écran A (§5.3) pour le brouillon en cours ;
-// classification signée en vigueur et ses versions sinon. Écriture : owner et admin (§4.4.2).
+// Classification d'un système (PL-203, PL-204, §5.3 écran A). La page ne fait que lire : le brouillon est créé par
+// une action explicite (« Commencer le questionnaire », « Requalifier le système »). Brouillon en cours :
+// questionnaire puis résultat à signer ; la version signée en vigueur et ses versions restent visibles.
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
-import { TRPCError } from "@trpc/server";
 import type { AiActRole, RiskTier } from "@/generated/prisma/enums";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
 import { requireSession } from "@/server/services/session";
@@ -10,7 +11,7 @@ import { Alert } from "@/components/ui/alert";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
 import { loadSystem } from "../load";
 import { Questionnaire } from "./questionnaire";
-import { ClassificationResult, RequalifyButton } from "./result";
+import { ClassificationResult, StartClassificationButton } from "./result";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -23,38 +24,87 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ClassificationPage({ params }: Params) {
   const session = await requireSession();
   const { api, system } = await loadSystem((await params).id);
-  const [org, current] = await Promise.all([
+  const [org, current, versions] = await Promise.all([
     api.org.get(),
     api.classification.current({ systemId: system.id }),
+    api.classification.history({ systemId: system.id }),
   ]);
-  const isAdmin = ADMIN_ROLES.includes(org.role);
+  const canWrite = ADMIN_ROLES.includes(org.role) && !system.archivedAt;
   const locale = await getLocale();
-  const t = await getTranslations("questionnaire");
+  const t = await getTranslations("classificationResult");
+  const tk = await getTranslations("riskTier");
+  const ta = await getTranslations("aiActRole");
+  const format = await getFormatter();
+  const { draft, signed } = current;
 
-  if (!current.draft && current.signed) {
-    const versions = await api.classification.history({ systemId: system.id });
-    const tr = await getTranslations("classificationResult");
-    const tk = await getTranslations("riskTier");
-    const ta = await getTranslations("aiActRole");
-    const format = await getFormatter();
-    return (
-      <>
+  return (
+    <>
+      <nav aria-label={t("breadcrumb")} className="text-sm">
+        <ol className="flex flex-wrap gap-2">
+          <li>
+            <Link href="/systems">{t("register")}</Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li>
+            <Link href={`/systems/${system.id}`}>{system.name}</Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page">{t("title")}</li>
+        </ol>
+      </nav>
+
+      {draft && canWrite && (
+        <Questionnaire
+          systemId={system.id}
+          initial={draft}
+          locale={locale}
+          defaultName={session.user.name}
+        />
+      )}
+      {draft && signed && <Alert>{t("draftInProgress")}</Alert>}
+      {!draft && !signed && (
+        <section aria-labelledby="start-title" className="max-w-3xl space-y-3">
+          <h2 id="start-title">{t("title")}</h2>
+          <p>{t("notStarted")}</p>
+          {canWrite ? (
+            <StartClassificationButton systemId={system.id} label={t("start")} />
+          ) : (
+            <Alert>{t("readOnly")}</Alert>
+          )}
+        </section>
+      )}
+      {draft && !signed && !canWrite && <Alert>{t("readOnly")}</Alert>}
+
+      {signed && (
         <ClassificationResult
           systemId={system.id}
-          classification={current.signed}
+          classification={signed}
           locale={locale}
           canSign={false}
           defaultName={session.user.name}
-          extraActions={isAdmin && !system.archivedAt && <RequalifyButton systemId={system.id} />}
+          headingKey={draft ? "inForce" : "title"}
+          extraActions={
+            !draft &&
+            canWrite && (
+              <StartClassificationButton
+                systemId={system.id}
+                label={t("requalify")}
+                variant="outline"
+              />
+            )
+          }
         />
+      )}
+
+      {versions.length > 0 && (
         <section aria-labelledby="versions-title" className="max-w-3xl space-y-2">
-          <h2 id="versions-title">{tr("versions")}</h2>
+          <h2 id="versions-title">{t("versions")}</h2>
           <Table data-testid="classification-versions">
             <thead>
               <tr>
-                <TableHead scope="col">{tr("title")}</TableHead>
-                <TableHead scope="col">{tr("signedTitle")}</TableHead>
-                <TableHead scope="col">{tr("rulesHeader")}</TableHead>
+                <TableHead scope="col">{t("title")}</TableHead>
+                <TableHead scope="col">{t("signedTitle")}</TableHead>
+                <TableHead scope="col">{t("rulesHeader")}</TableHead>
               </tr>
             </thead>
             <tbody>
@@ -64,11 +114,11 @@ export default async function ClassificationPage({ params }: Params) {
                     {tk(v.tier as RiskTier)} · {ta(v.role as AiActRole)}
                     {v.annexIIIPoints.length > 0 && ` · ${v.annexIIIPoints.join(", ")}`}
                     {" — "}
-                    {v.status === "SIGNED" ? tr("versionCurrent") : tr("versionSuperseded")}
+                    {v.status === "SIGNED" ? t("versionCurrent") : t("versionSuperseded")}
                   </TableCell>
                   <TableCell>
                     {v.signedAt &&
-                      tr("signedBy", {
+                      t("signedBy", {
                         date: format.dateTime(new Date(v.signedAt), { dateStyle: "long" }),
                         name: v.signedByName ?? "",
                         title: v.signedByTitle ?? "",
@@ -80,38 +130,7 @@ export default async function ClassificationPage({ params }: Params) {
             </tbody>
           </Table>
         </section>
-      </>
-    );
-  }
-
-  let draft: Awaited<ReturnType<typeof api.classification.draft>>;
-  try {
-    draft = current.draft ?? (await api.classification.draft({ systemId: system.id }));
-  } catch (error) {
-    if (error instanceof TRPCError && (error.code === "FORBIDDEN" || error.code === "CONFLICT")) {
-      return (
-        <section aria-labelledby="questionnaire-title" className="space-y-3">
-          <h2 id="questionnaire-title">{t("title")}</h2>
-          <Alert tone="error">{error.code === "FORBIDDEN" ? t("forbidden") : t("archived")}</Alert>
-        </section>
-      );
-    }
-    throw error;
-  }
-  if (!isAdmin) {
-    return (
-      <section aria-labelledby="questionnaire-title" className="space-y-3">
-        <h2 id="questionnaire-title">{t("title")}</h2>
-        <Alert tone="error">{t("forbidden")}</Alert>
-      </section>
-    );
-  }
-  return (
-    <Questionnaire
-      systemId={system.id}
-      initial={draft}
-      locale={locale}
-      defaultName={session.user.name}
-    />
+      )}
+    </>
   );
 }

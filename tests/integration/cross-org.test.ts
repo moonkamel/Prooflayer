@@ -1,0 +1,204 @@
+// §4.7 — « test automatisé qui tente pour chaque procédure de lire une ressource d'une autre organisation et attend
+// un refus ». Les procédures sont énumérées depuis le routeur : chacune doit figurer ici, soit avec une entrée qui
+// désigne une ressource de l'organisation A (appelée par un owner de B → refus attendu), soit dans la liste des
+// procédures sans identifiant de ressource (portée par l'organisation active, couverte par isolation.test.ts).
+// Une procédure ajoutée sans être classée fait échouer le test « inventaire ».
+import { randomUUID } from "node:crypto";
+import { TRPCError } from "@trpc/server";
+import pg from "pg";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { forOrg, prisma } from "@/server/db";
+import { appRouter, createCaller } from "@/server/routers/_app";
+
+const run = randomUUID().slice(0, 8);
+const A = `org_xorg_a_${run}`;
+const B = `org_xorg_b_${run}`;
+const ownerA = `usr_xorg_a_${run}`;
+const ownerB = `usr_xorg_b_${run}`;
+const invitationA = `inv_xorg_${run}`;
+
+const callerFor = (userId: string, orgId: string) =>
+  createCaller({ headers: new Headers(), session: { userId, activeOrganizationId: orgId } });
+
+/** Ressources de l'organisation A, créées avant les tests. */
+const a = { systemId: "", designChangeId: "", classificationId: "", memberId: `mem_${ownerA}` };
+
+type Refusal = "NOT_FOUND" | "BAD_REQUEST";
+
+/** Entrée désignant une ressource de A, et refus attendu quand un membre de B l'envoie. */
+const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
+  "org.members.setRole": () => ({
+    input: { memberId: a.memberId, role: "auditor" },
+    code: "NOT_FOUND",
+  }),
+  "org.members.remove": () => ({ input: { memberId: a.memberId }, code: "NOT_FOUND" }),
+  "org.members.revokeInvitation": () => ({
+    input: { invitationId: invitationA },
+    code: "NOT_FOUND",
+  }),
+  "system.get": () => ({ input: { id: a.systemId }, code: "NOT_FOUND" }),
+  "system.history": () => ({ input: { id: a.systemId }, code: "NOT_FOUND" }),
+  "system.update": () => ({
+    input: { id: a.systemId, patch: { name: "Pris" } },
+    code: "NOT_FOUND",
+  }),
+  "system.archive": () => ({ input: { id: a.systemId }, code: "NOT_FOUND" }),
+  // Le responsable désigné appartient à A : une référence vers une autre organisation est refusée.
+  "system.create": () => ({
+    input: { name: "Croisé", intendedPurpose: "Test", ownerUserId: ownerA },
+    code: "BAD_REQUEST",
+  }),
+  "system.designChanges.list": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "system.designChanges.create": () => ({
+    input: { systemId: a.systemId, occurredAt: "2026-01-01", summary: "Croisé" },
+    code: "NOT_FOUND",
+  }),
+  "system.designChanges.qualify": () => ({
+    input: { id: a.designChangeId, isSignificant: true, reason: "Croisé" },
+    code: "NOT_FOUND",
+  }),
+  "classification.current": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "classification.history": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "classification.note": () => ({
+    input: { systemId: a.systemId, classificationId: a.classificationId },
+    code: "NOT_FOUND",
+  }),
+  "classification.draft": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "classification.saveAnswers": () => ({
+    input: { systemId: a.systemId, questionId: "aiSystem", value: false },
+    code: "NOT_FOUND",
+  }),
+  "classification.compute": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "classification.sign": () => ({
+    input: { systemId: a.systemId, name: "X", title: "Y", password: "z", locale: "fr" },
+    code: "NOT_FOUND",
+  }),
+};
+
+/** Procédures sans identifiant de ressource : elles ne portent que sur l'organisation active. */
+const ORG_SCOPED = [
+  "org.get",
+  "org.update",
+  "org.members.list",
+  "org.members.invite",
+  "org.members.invitations",
+  "audit.list",
+  "audit.export",
+  "system.list",
+  "system.export",
+];
+
+const paths = Object.keys(appRouter._def.procedures as unknown as Record<string, unknown>);
+
+function call(caller: ReturnType<typeof callerFor>, path: string, input: unknown) {
+  const fn = path
+    .split(".")
+    .reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], caller);
+  return (fn as (input?: unknown) => Promise<unknown>)(input);
+}
+
+beforeAll(async () => {
+  for (const [org, user] of [
+    [A, ownerA],
+    [B, ownerB],
+  ] as const) {
+    await prisma.organization.create({ data: { id: org, name: org, slug: org } });
+    await prisma.user.create({ data: { id: user, email: `${user}@xorg.test`, name: user } });
+    await prisma.member.create({
+      data: { id: `mem_${user}`, organizationId: org, userId: user, role: "owner" },
+    });
+  }
+  await prisma.invitation.create({
+    data: {
+      id: invitationA,
+      organizationId: A,
+      email: `invite-${run}@xorg.test`,
+      role: "auditor",
+      expiresAt: new Date(Date.now() + 86_400_000),
+      inviterId: ownerA,
+    },
+  });
+  const api = callerFor(ownerA, A);
+  a.systemId = (
+    await api.system.create({ name: "Système de A", intendedPurpose: "Test", ownerUserId: ownerA })
+  ).id;
+  a.designChangeId = (
+    await api.system.designChanges.create({
+      systemId: a.systemId,
+      occurredAt: "2026-01-01",
+      summary: "Changement de A",
+    })
+  ).id;
+  await api.classification.draft({ systemId: a.systemId });
+  await api.classification.saveAnswers({
+    systemId: a.systemId,
+    questionId: "aiSystem",
+    value: false,
+  });
+  await api.classification.saveAnswers({
+    systemId: a.systemId,
+    questionId: "developer",
+    value: true,
+  });
+  a.classificationId = (await api.classification.compute({ systemId: a.systemId })).id;
+});
+
+afterAll(async () => {
+  const client = new pg.Client({ connectionString: process.env.DIRECT_DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    for (const org of [A, B]) {
+      await client.query("SELECT set_config('app.purge_org', $1, TRUE)", [org]);
+      await client.query(`DELETE FROM "AuditLog" WHERE "orgId" = $1`, [org]);
+      await client.query(`DELETE FROM "AiSystem" WHERE "orgId" = $1`, [org]);
+      await client.query(`DELETE FROM "Organization" WHERE "id" = $1`, [org]);
+    }
+    await client.query(`DELETE FROM "User" WHERE "id" = ANY($1)`, [[ownerA, ownerB]]);
+    await client.query("COMMIT");
+  } finally {
+    await client.end();
+  }
+  await prisma.$disconnect();
+});
+
+describe("inventaire", () => {
+  it("chaque procédure est classée : ressource d'une autre organisation, ou portée par l'organisation active", () => {
+    const classified = [...Object.keys(CROSS_ORG), ...ORG_SCOPED].sort();
+    expect(classified).toEqual([...paths].sort());
+  });
+});
+
+describe("ressource d'une autre organisation → refus", () => {
+  it.each(Object.keys(CROSS_ORG))("%s", async (path) => {
+    const { input, code } = CROSS_ORG[path]!();
+    const error = await call(callerFor(ownerB, B), path, input).then(
+      () => null,
+      (e: unknown) => e,
+    );
+    expect(error, `${path} aurait dû être refusé`).toBeInstanceOf(TRPCError);
+    expect((error as TRPCError).code).toBe(code);
+  });
+
+  it("le propriétaire de la ressource, lui, y accède : les entrées du test sont valides", async () => {
+    const api = callerFor(ownerA, A);
+    expect((await api.system.get({ id: a.systemId })).name).toBe("Système de A");
+    expect((await api.classification.current({ systemId: a.systemId })).draft?.id).toBe(
+      a.classificationId,
+    );
+    expect(await api.system.designChanges.list({ systemId: a.systemId })).toHaveLength(1);
+  });
+
+  it("rien n'a été modifié dans l'organisation A", async () => {
+    const system = await forOrg(A).aiSystem.findUnique({ where: { id: a.systemId } });
+    expect(system).toMatchObject({ name: "Système de A", archivedAt: null });
+    expect(await forOrg(A).aiSystem.count()).toBe(1);
+    expect(await forOrg(B).aiSystem.count()).toBe(0);
+    const change = await forOrg(A).designChange.findUnique({ where: { id: a.designChangeId } });
+    expect(change?.isSignificant).toBeNull();
+    expect((await prisma.member.findUnique({ where: { id: a.memberId } }))?.role).toBe("owner");
+    expect((await prisma.invitation.findUnique({ where: { id: invitationA } }))?.status).toBe(
+      "pending",
+    );
+  });
+});
