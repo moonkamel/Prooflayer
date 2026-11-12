@@ -2,7 +2,7 @@
 // un sel de 32 octets, construit l'enveloppe et la feuille de Merkle, chiffre la charge brute avec la clé de
 // l'organisation et l'écrit en stockage objet, puis insère la preuve. Unicité (orgId, dedupeKey) : un doublon est
 // ignoré sans erreur. Une preuve ne se modifie plus (trigger evidence_guard), hors scellement et effacement.
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type { EvidenceSource, CaptureMethod } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 import {
@@ -35,6 +35,8 @@ export interface EvidenceInput {
   raw?: unknown;
   declarative?: boolean;
   validUntil?: Date | null;
+  /** Pièce jointe (preuve manuelle, PL-405) : empreinte SHA-256 du clair scellée, fichier chiffré en stockage objet. */
+  attachment?: { data: Buffer; mime: string };
   createdByUserId?: string | null;
 }
 
@@ -68,6 +70,9 @@ export async function orgDataKey(tx: Tx, orgId: string, master: MasterKey): Prom
 export const rawObjectKey = (orgId: string, evidenceId: string) =>
   `orgs/${orgId}/raw/${evidenceId}.bin`;
 
+export const attachmentObjectKey = (orgId: string, evidenceId: string) =>
+  `orgs/${orgId}/attachments/${evidenceId}.bin`;
+
 export type CreateEvidenceResult = { id: string; created: true } | { id: string; created: false };
 
 export async function createEvidence(
@@ -86,6 +91,9 @@ export async function createEvidence(
   const id = `ev_${randomUUID().replaceAll("-", "")}`;
   const capturedAt = deps.now();
   const content = contentSha256(input.payload);
+  const attachmentSha256 = input.attachment
+    ? createHash("sha256").update(input.attachment.data).digest()
+    : null;
   const salt = randomBytes(SALT_BYTES);
   const envelope = envelopeOf({
     orgId,
@@ -95,7 +103,7 @@ export async function createEvidence(
     occurredAt: input.occurredAt,
     capturedAt,
     contentSha256: content,
-    attachmentSha256: null,
+    attachmentSha256,
   });
 
   let rawKey: string | null = null;
@@ -104,6 +112,15 @@ export async function createEvidence(
     rawKey = rawObjectKey(orgId, id);
     const plaintext = Buffer.from(JSON.stringify(input.raw), "utf8");
     await deps.store().put(rawKey, encrypt(dek, plaintext, `raw:${orgId}:${id}`));
+  }
+
+  let attachmentKey: string | null = null;
+  if (input.attachment) {
+    const dek = await orgDataKey(tx, orgId, deps.master());
+    attachmentKey = attachmentObjectKey(orgId, id);
+    await deps
+      .store()
+      .put(attachmentKey, encrypt(dek, input.attachment.data, `attachment:${orgId}:${id}`));
   }
 
   await tx.evidenceItem.create({
@@ -127,6 +144,9 @@ export async function createEvidence(
       salt: new Uint8Array(salt),
       leafHash: new Uint8Array(evidenceLeafHash(salt, envelope)),
       rawObjectKey: rawKey,
+      attachmentKey,
+      attachmentSha256: attachmentSha256 ? new Uint8Array(attachmentSha256) : null,
+      attachmentMime: input.attachment?.mime ?? null,
       declarative: input.declarative ?? false,
       validUntil: input.validUntil ?? null,
       createdByUserId: input.createdByUserId ?? null,

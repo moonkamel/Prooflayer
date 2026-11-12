@@ -135,7 +135,24 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
     "PR approuvées par un tiers",
   );
   await expectNoViolations(page, "contrôles");
-  await page.goBack();
+
+  // Preuve déclarative (PL-405) : attestation signée sur la revue annuelle des pratiques interdites (AIA-05-01).
+  await page.getByRole("link", { name: "Ajouter une preuve · AIA-05-01" }).click();
+  await expect(page.getByRole("heading", { name: "Ajouter une preuve" })).toBeVisible();
+  await expectNoViolations(page, "ajout d'une preuve");
+  const attestation = page.getByTestId("attest-form");
+  await attestation
+    .getByLabel("Déclaration")
+    .fill("J'atteste qu'aucune pratique interdite par l'Art. 5 n'a été identifiée.");
+  await attestation.getByLabel("Nom du signataire").fill("Clara Martin");
+  await attestation.getByLabel("Fonction").fill("CTO");
+  await attestation
+    .getByLabel("Valable jusqu'au")
+    .fill(new Date(Date.now() + 200 * 86_400_000).toISOString().slice(0, 10));
+  await attestation.getByLabel("Mot de passe").fill(E2E_PASSWORD);
+  await attestation.getByRole("button", { name: "Signer l'attestation" }).click();
+  await expect(page).toHaveURL(/\/controls$/u);
+  await page.goto(page.url().replace(/\/controls$/u, "/classification"));
 
   // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
   await page.getByRole("button", { name: "Requalifier le système" }).click();

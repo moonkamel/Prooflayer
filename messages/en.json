@@ -213,7 +213,10 @@
     "exemption_sign": "Exemption file signed",
     "exemption_signRefused": "Exemption file signature refused: incorrect password",
     "integration_connect": "Integration connected",
-    "integration_mapping": "Jira mapping saved"
+    "integration_mapping": "Jira mapping saved",
+    "evidence_upload": "Manual evidence uploaded",
+    "evidence_attest": "Attestation signed",
+    "evidence_attestRefused": "Attestation refused: incorrect password"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -645,7 +648,7 @@
   },
   "controls": {
     "title": "Controls",
-    "intro": "The controls opened by the signed classification. Each control awaits evidence; their evaluation arrives with the connectors.",
+    "intro": "Controls opened by the signed classification and their status, evaluated from captured or uploaded evidence.",
     "empty": "No control opened. Controls open when the classification is signed.",
     "summary": "{count, plural, one {# applicable control} other {# applicable controls}}, {automated} of them evaluated automatically.",
     "control": "Control",
@@ -657,7 +660,8 @@
       "SEMI_AUTOMATED": "Semi-automatic",
       "MANUAL": "Manual"
     },
-    "byReclassification": "Set aside by the last reclassification"
+    "byReclassification": "Set aside by the last reclassification",
+    "addEvidence": "Add evidence"
   },
   "exemption": {
     "title": "Exemption file",
@@ -801,6 +805,35 @@
       "acceptanceField": "Residual risk acceptance field (optional)",
       "acceptanceHelp": "Identifier of the Jira custom field (user picker) naming the person who accepted the residual risk, for example customfield_10050.",
       "invalidField": "Expected a field identifier such as customfield_12345."
+    }
+  },
+  "manualEvidence": {
+    "title": "Add evidence",
+    "declarative": "Uploaded evidence or an attestation is declarative: it is marked as such everywhere, including in the audit pack, and stops counting at its validity date.",
+    "forbidden": "Your role does not allow adding evidence.",
+    "uploadTitle": "Upload a document",
+    "uploadHelp": "PDF, DOCX, PNG, JPG, MD or CSV, 25 MB at most. Its fingerprint is computed and sealed; the file is stored encrypted.",
+    "file": "File",
+    "documentTitle": "Document title (optional)",
+    "validUntil": "Valid until",
+    "upload": "Upload",
+    "uploaded": "Document uploaded.",
+    "attestTitle": "Sign an attestation",
+    "attestHelp": "Statement signed in your name, with your job title and a validity date. Your password confirms the signature.",
+    "statement": "Statement",
+    "signerName": "Signatory name",
+    "signerTitle": "Job title",
+    "password": "Password",
+    "attest": "Sign the attestation",
+    "attested": "Attestation signed.",
+    "errors": {
+      "evidence_unsupportedType": "File type not accepted (PDF, DOCX, PNG, JPG, MD or CSV).",
+      "evidence_tooLarge": "File empty or too large (25 MB at most).",
+      "evidence_contentMismatch": "The file content does not match its type.",
+      "evidence_invalidValidity": "The validity date must be after today.",
+      "evidence_uploadMissing": "The file was not received. Try again.",
+      "classification_invalidPassword": "Incorrect password.",
+      "classification_tooManyAttempts": "Too many attempts: try again in fifteen minutes."
     }
   }
 }

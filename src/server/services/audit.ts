@@ -30,6 +30,9 @@ export const AUDIT_ACTIONS = [
   "exemption.signRefused",
   "integration.connect",
   "integration.mapping",
+  "evidence.upload",
+  "evidence.attest",
+  "evidence.attestRefused",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

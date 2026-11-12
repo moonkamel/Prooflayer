@@ -178,7 +178,7 @@ describe("réévaluation incrémentale", () => {
       fileSnapshot(ids.resource, "docs/ai/instructions-for-use.md", true, new Date()),
     ]);
     const main = instances[ids.system]!;
-    // AIA-13-01 et AIA-10-01 acceptent github.file.snapshot ; AIA-47-01 (manuel) non, et son évaluateur arrive avec PL-405.
+    // AIA-13-01 et AIA-10-01 acceptent github.file.snapshot ; AIA-47-01 (manuel) non.
     expect(jobs).toHaveLength(2);
     expect((await jobsOf(main["AIA-13-01"]!))[0]?.status).toBe("QUEUED");
     expect((await jobsOf(main["AIA-10-01"]!))[0]?.status).toBe("QUEUED");
@@ -274,7 +274,8 @@ describe("réévaluation incrémentale", () => {
     const outcomes = await withOrgTransaction(A, async (tx) => [
       await evaluateInstance(tx, A, instances[ids.other]!["AIA-13-01"]!, new Date()),
       await evaluateInstance(tx, A, instances[ids.archived]!["AIA-13-01"]!, new Date()),
-      await evaluateInstance(tx, A, instances[ids.system]!["AIA-47-01"]!, new Date()),
+      // Registre vide : un contrôle dont l'évaluateur n'est pas livré n'est pas évalué.
+      await evaluateInstance(tx, A, instances[ids.system]!["AIA-47-01"]!, new Date(), {}),
       await evaluateInstance(tx, A, "cin_inconnue", new Date()),
     ]);
     expect(outcomes).toEqual([
@@ -297,7 +298,7 @@ describe("passage quotidien", () => {
       where: { dedupeKey: `control.sweepOrg:${A}:2026-11-13` },
     });
     expect(await runJobNow(sweep.id, jobRegistry)).toBe("done");
-    // Contrôles évaluables : AIA-13-01 et AIA-10-01 du système principal, AIA-10-01 de l'autre système.
+    // Contrôles évaluables : AIA-13-01, AIA-10-01 et AIA-47-01 du système principal ; AIA-10-01 et AIA-47-01 de l'autre système.
     const queued = await prisma.job.findMany({
       where: { orgId: A, type: "control.evaluate", status: "QUEUED" },
     });
@@ -306,6 +307,9 @@ describe("passage quotidien", () => {
         evaluationDedupeKey(instances[ids.system]!["AIA-13-01"]!),
         evaluationDedupeKey(instances[ids.system]!["AIA-10-01"]!),
         evaluationDedupeKey(instances[ids.other]!["AIA-10-01"]!),
+        // Contrôle manuel (PL-405), évaluable lui aussi : preuve absente tant que rien n'est déposé.
+        evaluationDedupeKey(instances[ids.system]!["AIA-47-01"]!),
+        evaluationDedupeKey(instances[ids.other]!["AIA-47-01"]!),
       ].sort(),
     );
     await drainOrg();

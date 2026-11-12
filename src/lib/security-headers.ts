@@ -4,7 +4,22 @@
 /** Hôte d'ingestion Sentry en région UE (§4.2) : seule origine externe à laquelle le navigateur envoie des données. */
 export const SENTRY_INGEST = "https://*.ingest.de.sentry.io";
 
-export function contentSecurityPolicy(nonce: string, options: { dev: boolean }): string {
+/** Origine du stockage objet S3 (dépôt direct des preuves manuelles par le navigateur, PL-405), si configuré. */
+export function storageOrigin(endpoint: string | undefined): string | null {
+  if (!endpoint) return null;
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === "https:" ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+export function contentSecurityPolicy(
+  nonce: string,
+  options: { dev: boolean; connect?: (string | null)[] },
+): string {
+  const connect = [`'self'`, SENTRY_INGEST, ...(options.connect ?? []).filter(Boolean)];
   const directives = [
     "default-src 'self'",
     // 'strict-dynamic' : seuls les scripts portant le nonce, et ceux qu'ils chargent, s'exécutent.
@@ -13,7 +28,7 @@ export function contentSecurityPolicy(nonce: string, options: { dev: boolean }):
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
-    `connect-src 'self' ${SENTRY_INGEST}`,
+    `connect-src ${connect.join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

@@ -8,6 +8,8 @@ import { TRPCError } from "@trpc/server";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { signState } from "@/server/connectors/jira/oauth";
+import { signToken } from "@/server/crypto/signed-token";
+import { LIBRARY_VERSION } from "@/server/rules/library";
 import { generateKey } from "@/server/crypto/envelope";
 import { forOrg, prisma } from "@/server/db";
 import { appRouter, createCaller } from "@/server/routers/_app";
@@ -23,7 +25,13 @@ const callerFor = (userId: string, orgId: string) =>
   createCaller({ headers: new Headers(), session: { userId, activeOrganizationId: orgId } });
 
 /** Ressources de l'organisation A, créées avant les tests. */
-const a = { systemId: "", designChangeId: "", classificationId: "", memberId: `mem_${ownerA}` };
+const a = {
+  systemId: "",
+  designChangeId: "",
+  classificationId: "",
+  controlInstanceId: "",
+  memberId: `mem_${ownerA}`,
+};
 
 type Refusal = "NOT_FOUND" | "BAD_REQUEST";
 
@@ -113,6 +121,49 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     input: { integrationId: "int_de_a", jql: "labels = ai-risk" },
     code: "NOT_FOUND",
   }),
+  // Preuves manuelles (PL-405) : un contrôle de A est introuvable depuis B ; un jeton de dépôt émis pour A est refusé.
+  "evidence.createUploadUrl": () => ({
+    input: {
+      controlInstanceIds: [a.controlInstanceId],
+      filename: "x.pdf",
+      contentType: "application/pdf",
+      size: 10,
+    },
+    code: "NOT_FOUND",
+  }),
+  "evidence.attest": () => ({
+    input: {
+      controlInstanceIds: [a.controlInstanceId],
+      statement: "Déclaration croisée de test",
+      name: "X",
+      title: "Y",
+      validUntil: "2099-01-01",
+      password: "z",
+    },
+    code: "NOT_FOUND",
+  }),
+  "evidence.registerUpload": () => ({
+    input: {
+      token: signToken(
+        {
+          orgId: A,
+          userId: ownerA,
+          uploadId: "u",
+          key: "k",
+          filename: "x.pdf",
+          contentType: "application/pdf",
+          controlInstanceIds: [],
+        },
+        {
+          secret: process.env.BETTER_AUTH_SECRET!,
+          purpose: "evidence-upload",
+          expiresAt: new Date(Date.now() + 60_000),
+        },
+      ),
+      validUntil: "2099-01-01",
+    },
+    code: "BAD_REQUEST",
+  }),
   // Un state de connexion Jira émis pour l'organisation A ne lie rien à B.
   "integration.jira.complete": () => ({
     input: {
@@ -197,6 +248,14 @@ beforeAll(async () => {
     value: true,
   });
   a.classificationId = (await api.classification.compute({ systemId: a.systemId })).id;
+  const definition = await prisma.controlDefinition.findFirstOrThrow({
+    where: { key: "AIA-05-01", libraryVersion: LIBRARY_VERSION },
+  });
+  a.controlInstanceId = (
+    await forOrg(A).controlInstance.create({
+      data: { orgId: A, systemId: a.systemId, definitionId: definition.id },
+    })
+  ).id;
 });
 
 afterAll(async () => {

@@ -57,6 +57,14 @@ export default async function SystemControlsPage({ params }: Params) {
                   <TableCell>{t(`automation.${c.automation}`)}</TableCell>
                   <TableCell>
                     <StatusBadge status={c.status} />
+                    {!c.notApplicable && c.automation !== "AUTOMATED" && !system.archivedAt && (
+                      <p className="mt-1 text-sm">
+                        <a href={`/systems/${system.id}/controls/${c.id}/evidence`}>
+                          {t("addEvidence")}
+                          <span className="sr-only"> · {c.key}</span>
+                        </a>
+                      </p>
+                    )}
                     {c.notApplicableByReclassification && (
                       <p className="mt-1 text-xs text-muted-foreground">
                         {t("byReclassification")}

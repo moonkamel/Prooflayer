@@ -1,4 +1,4 @@
-// Registre des évaluateurs livrés (PL-401, PL-402, PL-404). Chaque clé de `EVALUATOR_KEYS` y entre avec le ticket qui la
+// Registre des évaluateurs livrés (PL-401, PL-402, PL-404, PL-405). Chaque clé de `EVALUATOR_KEYS` y entre avec le ticket qui la
 // livre ; une clé absente ne produit pas d'évaluation et le contrôle garde son statut. AIA-06-02
 // (`internal.exemptionDossier`, ./exemption-dossier.ts) est évalué à chaque signature de classification ou de dossier
 // (PL-205), à partir des faits de ProofLayer : il n'est pas réévalué par le moteur, pour n'avoir qu'une source.
@@ -15,6 +15,7 @@ import {
 import { secretScanningEvaluator, vulnerabilityAgeEvaluator } from "./github-security";
 import { documentEvaluator } from "./document";
 import { JIRA_EVALUATORS } from "./jira";
+import { manualEvidenceEvaluator } from "./manual";
 import {
   classificationFreshEvaluator,
   packArchivedEvaluator,
@@ -39,6 +40,8 @@ export const EVALUATORS: EvaluatorRegistry = {
   "internal.packArchived": packArchivedEvaluator,
   // Jira (PL-404)
   ...JIRA_EVALUATORS,
+  // Preuves manuelles et attestations (PL-405)
+  "manual.evidencePresent": manualEvidenceEvaluator,
 };
 
 /** Clés dont l'évaluateur est livré. */
