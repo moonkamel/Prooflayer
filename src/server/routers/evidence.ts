@@ -1,5 +1,5 @@
 // Routeur `evidence` (§4.4.2, rôle contributor en écriture). PL-405 : `createUploadUrl`, `registerUpload`, `attest`.
-// list, get, proof et redact arrivent avec l'écran D (PL-407), le scellement (sprint 5) et l'effacement. Aucune
+// list, get, proof et redact arrivent avec le scellement (sprint 5) et l'effacement. Aucune
 // logique ici : src/server/services/manual-evidence.ts.
 import { z } from "zod";
 import * as manual from "@/server/services/manual-evidence";

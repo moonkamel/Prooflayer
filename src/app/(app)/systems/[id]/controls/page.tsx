@@ -1,6 +1,7 @@
 // Fiche système, onglet « Contrôles » (PL-207, écran B) : les contrôles ouverts par la classification signée, avec
-// leur statut. L'évaluation et le détail d'un contrôle arrivent au sprint 4 (écrans C et D).
+// leur statut ; chaque contrôle mène à son détail (écran D, PL-407).
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { StatusBadge } from "@/components/status-badge";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
@@ -49,7 +50,9 @@ export default async function SystemControlsPage({ params }: Params) {
                 <tr key={c.id} data-testid="control" data-key={c.key}>
                   <TableCell>
                     <p className="font-medium">
-                      <code>{c.key}</code> {c.title[locale]}
+                      <Link href={`/systems/${system.id}/controls/${c.id}`}>
+                        <code>{c.key}</code> {c.title[locale]}
+                      </Link>
                     </p>
                     <p className="text-sm text-muted-foreground">{c.statement[locale]}</p>
                   </TableCell>

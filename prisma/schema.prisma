@@ -376,6 +376,7 @@ model ControlInstance {
   definition      ControlDefinition   @relation(fields: [definitionId], references: [id])
   evaluations     ControlEvaluation[]
   evidenceLinks   EvidenceLink[]
+  comments        ControlComment[]
 
   @@unique([systemId, definitionId])
   @@index([orgId, systemId, status])
@@ -394,6 +395,19 @@ model ControlEvaluation {
 
   @@index([controlInstanceId, evaluatedAt(sort: Desc)])
   @@index([orgId, evaluatedAt])
+}
+
+// Commentaires d'un contrôle (PL-407, §5.3 écran D) : en ajout seul.
+model ControlComment {
+  id                String          @id @default(cuid())
+  orgId             String
+  controlInstanceId String
+  authorUserId      String
+  body              String
+  createdAt         DateTime        @default(now())
+  controlInstance   ControlInstance @relation(fields: [controlInstanceId], references: [id], onDelete: Cascade)
+
+  @@index([controlInstanceId, createdAt])
 }
 
 // ───────────── Intégrations ─────────────

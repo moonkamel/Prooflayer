@@ -68,6 +68,24 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     code: "NOT_FOUND",
   }),
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "control.get": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
+  "control.evaluations": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
+  "control.assignOwner": () => ({
+    input: { controlId: a.controlInstanceId, ownerUserId: null },
+    code: "NOT_FOUND",
+  }),
+  "control.setNotApplicable": () => ({
+    input: {
+      controlId: a.controlInstanceId,
+      notApplicable: true,
+      justification: "Justification suffisamment longue pour passer la validation.",
+    },
+    code: "NOT_FOUND",
+  }),
+  "control.comment": () => ({
+    input: { controlId: a.controlInstanceId, body: "Commentaire" },
+    code: "NOT_FOUND",
+  }),
   "dashboard.systemSummary": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "dashboard.coverageTimeline": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "exemption.get": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),

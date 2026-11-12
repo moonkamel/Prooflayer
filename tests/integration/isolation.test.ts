@@ -101,6 +101,17 @@ const fixtures: [model: string, table: string, build: (org: string, tag?: string
     }),
   ],
   [
+    "controlComment",
+    "ControlComment",
+    (o, t = "") => ({
+      id: id(o, "ccm", t),
+      orgId: o,
+      controlInstanceId: id(o, "cin"),
+      authorUserId: "usr_isolation",
+      body: "C",
+    }),
+  ],
+  [
     "integration",
     "Integration",
     (o, t = "") => ({
