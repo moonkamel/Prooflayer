@@ -797,7 +797,10 @@
       "save": "Save",
       "count": "{count, plural, =0 {No issue matches.} one {# issue matches.} other {# issues match.}}",
       "saved": "Mapping saved ({count, plural, =0 {no issue} one {# issue} other {# issues}}): backfill in progress.",
-      "invalidJql": "Jira rejects this JQL query. Check its syntax."
+      "invalidJql": "Jira rejects this JQL query. Check its syntax.",
+      "acceptanceField": "Residual risk acceptance field (optional)",
+      "acceptanceHelp": "Identifier of the Jira custom field (user picker) naming the person who accepted the residual risk, for example customfield_10050.",
+      "invalidField": "Expected a field identifier such as customfield_12345."
     }
   }
 }

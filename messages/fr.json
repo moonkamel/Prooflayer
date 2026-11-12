@@ -797,7 +797,10 @@
       "save": "Enregistrer",
       "count": "{count, plural, =0 {Aucun ticket ne correspond.} one {# ticket correspond.} other {# tickets correspondent.}}",
       "saved": "Correspondance enregistrée ({count, plural, =0 {aucun ticket} one {# ticket} other {# tickets}}) : rattrapage en cours.",
-      "invalidJql": "Jira refuse cette requête JQL. Vérifiez sa syntaxe."
+      "invalidJql": "Jira refuse cette requête JQL. Vérifiez sa syntaxe.",
+      "acceptanceField": "Champ d'acceptation du risque résiduel (facultatif)",
+      "acceptanceHelp": "Identifiant du champ personnalisé Jira (sélecteur d'utilisateur) qui désigne la personne ayant accepté le risque résiduel, par exemple customfield_10050.",
+      "invalidField": "Identifiant de champ attendu sous la forme customfield_12345."
     }
   }
 }
