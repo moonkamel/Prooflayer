@@ -1,11 +1,14 @@
 // Proxy Next.js (PL-108) : nonce CSP tiré à chaque requête de page, transmis au rendu (en-tête de requête, lu par
 // Next.js pour ses propres scripts) et posé sur la réponse. Les pages sont rendues dynamiquement.
 import { NextResponse, type NextRequest } from "next/server";
-import { contentSecurityPolicy } from "@/lib/security-headers";
+import { contentSecurityPolicy, storageOrigin } from "@/lib/security-headers";
 
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const csp = contentSecurityPolicy(nonce, { dev: process.env.NODE_ENV === "development" });
+  const csp = contentSecurityPolicy(nonce, {
+    dev: process.env.NODE_ENV === "development",
+    connect: [storageOrigin(process.env.S3_ENDPOINT)],
+  });
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);
   headers.set("Content-Security-Policy", csp);

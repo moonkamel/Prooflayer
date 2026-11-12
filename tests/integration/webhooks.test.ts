@@ -196,6 +196,7 @@ describe("traitement", () => {
       },
       get: async () => null,
       delete: async () => {},
+      presignPut: async () => "",
     };
     expect(await handleDelivery(claimed!, { store: broken, master: masterKeyFromEnv() })).toBe(
       "retry",

@@ -5,6 +5,8 @@ export const ORG_ROLES: readonly OrgRole[] = ["owner", "admin", "contributor", "
 
 /** Rôles qui administrent l'organisation : membres, invitations, configuration. */
 export const ADMIN_ROLES: readonly OrgRole[] = ["owner", "admin"];
+/** Rôles autorisés à déposer une preuve ou signer une attestation (writeProcedure, §4.4.2). */
+export const WRITE_ROLES: readonly OrgRole[] = ["owner", "admin", "contributor"];
 
 /**
  * Un admin gère les admins, contributeurs et auditeurs. Seul un owner touche au rôle owner :

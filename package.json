@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1166.0",
+    "@aws-sdk/s3-request-presigner": "3.1166.0",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@react-pdf/renderer": "4.9.0",

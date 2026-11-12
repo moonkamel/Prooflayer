@@ -1,4 +1,4 @@
-// Confirmation par mot de passe des signatures (classification, dossier d'exemption) : essais limités (§4.7).
+// Confirmation par mot de passe des signatures (classification, dossier d'exemption, attestation) : essais limités (§4.7).
 import type { forOrg } from "@/server/db";
 import { audit, clientIp } from "./audit";
 import { ServiceError } from "./errors";
@@ -13,7 +13,11 @@ export interface SignDependencies {
   verifyPassword: (password: string) => Promise<boolean>;
 }
 
-const REFUSAL_ACTIONS = ["classification.signRefused", "exemption.signRefused"] as const;
+const REFUSAL_ACTIONS = [
+  "classification.signRefused",
+  "exemption.signRefused",
+  "evidence.attestRefused",
+] as const;
 
 /**
  * Confirmation par mot de passe à essais limités (§4.7), commune à toutes les signatures : une session volée ne
@@ -34,8 +38,22 @@ export async function assertSignAttemptsLeft(ctx: OrgContext) {
 
 export function recordSignRefusal(
   ctx: OrgContext,
-  input: { systemId: string; target: "classification" | "exemption"; targetId: string },
+  input: {
+    systemId: string;
+    target: "classification" | "exemption" | "evidence";
+    targetId: string;
+  },
 ) {
+  const action = {
+    classification: "classification.signRefused",
+    exemption: "exemption.signRefused",
+    evidence: "evidence.attestRefused",
+  } as const;
+  const targetType = {
+    classification: "classification",
+    exemption: "exemption_dossier",
+    evidence: "control_instance",
+  } as const;
   return audit(
     {
       orgId: ctx.orgId,
@@ -43,11 +61,8 @@ export function recordSignRefusal(
       ipAddress: clientIp(ctx.headers),
       db: ctx.db,
     },
-    input.target === "classification" ? "classification.signRefused" : "exemption.signRefused",
-    {
-      type: input.target === "classification" ? "classification" : "exemption_dossier",
-      id: input.targetId,
-    },
+    action[input.target],
+    { type: targetType[input.target], id: input.targetId },
     { systemId: input.systemId },
   );
 }

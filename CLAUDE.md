@@ -392,3 +392,18 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   High ; acceptation = champ configuré sur la correspondance (absent → PARTIAL) ; incident grave = étiquette
   `serious-incident`, délai Art. 73 réduit par `incident-death` (10 j) ou `incident-critical-infrastructure` /
   `incident-widespread` (2 j), notification = passage à un statut « Notifié » / « Notified », compté depuis la création.
+
+## Preuves manuelles et attestations (conventions établies par PL-405)
+- `src/server/services/manual-evidence.ts` : `createUploadUrl` (adresse de dépôt direct `presignPut`, 10 min, vers la zone
+  d'arrivée `orgs/{orgId}/incoming/` ; jeton d'enregistrement signé 30 min), `registerUpload` (type par extension, MIME
+  et signature du contenu, 25 Mo, SHA-256 scellé dans l'enveloppe, fichier chiffré en `orgs/{orgId}/attachments/`, zone
+  d'arrivée effacée), `attest` (mot de passe à essais limités, action `evidence.attestRefused`). Date de validité
+  obligatoire ; `declarative: true` ; rattachement aux contrôles par `EvidenceLink` (`linkedBy` = utilisateur).
+- Jetons signés génériques : `src/server/crypto/signed-token.ts` (usage + échéance, secret dérivé de BETTER_AUTH_SECRET).
+- `ObjectStore.presignPut` : S3 (`@aws-sdk/s3-request-presigner`) ; local par `/api/uploads/local?t=` (jeton signé,
+  refusé en production). L'origine `S3_ENDPOINT` est ajoutée à `connect-src` de la CSP.
+- `createEvidence` accepte `attachment: { data, mime }`.
+- Évaluateur `manual.evidencePresent` (`src/server/rules/evaluators/manual.ts`) : preuve rattachée par un utilisateur en
+  cours de validité → PASS (« déclarative ») ; expirée ou durée de fraîcheur dépassée → STALE ; aucune → MISSING.
+- Routeur `evidence` (`createUploadUrl`, `registerUpload`, `attest`, rôle contributor). Écran
+  `/systems/[id]/controls/[controlId]/evidence`, lien « Ajouter une preuve » sur les contrôles manuels et semi-automatiques.

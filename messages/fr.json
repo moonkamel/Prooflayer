@@ -213,7 +213,10 @@
     "exemption_sign": "Signature d'un dossier d'exemption",
     "exemption_signRefused": "Signature de dossier refusée : mot de passe incorrect",
     "integration_connect": "Intégration connectée",
-    "integration_mapping": "Correspondance Jira enregistrée"
+    "integration_mapping": "Correspondance Jira enregistrée",
+    "evidence_upload": "Preuve manuelle déposée",
+    "evidence_attest": "Attestation signée",
+    "evidence_attestRefused": "Attestation refusée : mot de passe incorrect"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -645,7 +648,7 @@
   },
   "controls": {
     "title": "Contrôles",
-    "intro": "Les contrôles ouverts par la classification signée. Chaque contrôle attend une preuve ; leur évaluation arrive avec les connecteurs.",
+    "intro": "Les contrôles ouverts par la classification signée et leur statut, évalué à partir des preuves capturées ou déposées.",
     "empty": "Aucun contrôle ouvert. Les contrôles s'ouvrent à la signature de la classification.",
     "summary": "{count, plural, one {# contrôle applicable} other {# contrôles applicables}}, dont {automated} évaluables automatiquement.",
     "control": "Contrôle",
@@ -657,7 +660,8 @@
       "SEMI_AUTOMATED": "Semi-automatique",
       "MANUAL": "Manuelle"
     },
-    "byReclassification": "Écarté par la dernière reclassification"
+    "byReclassification": "Écarté par la dernière reclassification",
+    "addEvidence": "Ajouter une preuve"
   },
   "exemption": {
     "title": "Dossier d'exemption",
@@ -801,6 +805,35 @@
       "acceptanceField": "Champ d'acceptation du risque résiduel (facultatif)",
       "acceptanceHelp": "Identifiant du champ personnalisé Jira (sélecteur d'utilisateur) qui désigne la personne ayant accepté le risque résiduel, par exemple customfield_10050.",
       "invalidField": "Identifiant de champ attendu sous la forme customfield_12345."
+    }
+  },
+  "manualEvidence": {
+    "title": "Ajouter une preuve",
+    "declarative": "Une preuve déposée ou une attestation est déclarative : elle est marquée comme telle partout, y compris dans le pack d'audit, et cesse de compter à sa date de validité.",
+    "forbidden": "Votre rôle ne permet pas d'ajouter une preuve.",
+    "uploadTitle": "Déposer un document",
+    "uploadHelp": "PDF, DOCX, PNG, JPG, MD ou CSV, 25 Mo au plus. Son empreinte est calculée et scellée ; le fichier est conservé chiffré.",
+    "file": "Fichier",
+    "documentTitle": "Titre du document (facultatif)",
+    "validUntil": "Valable jusqu'au",
+    "upload": "Déposer",
+    "uploaded": "Document déposé.",
+    "attestTitle": "Signer une attestation",
+    "attestHelp": "Déclaration signée en votre nom, avec votre fonction et une date de validité. Votre mot de passe confirme la signature.",
+    "statement": "Déclaration",
+    "signerName": "Nom du signataire",
+    "signerTitle": "Fonction",
+    "password": "Mot de passe",
+    "attest": "Signer l'attestation",
+    "attested": "Attestation signée.",
+    "errors": {
+      "evidence_unsupportedType": "Type de fichier non accepté (PDF, DOCX, PNG, JPG, MD ou CSV).",
+      "evidence_tooLarge": "Fichier vide ou trop volumineux (25 Mo au plus).",
+      "evidence_contentMismatch": "Le contenu du fichier ne correspond pas à son type.",
+      "evidence_invalidValidity": "La date de validité doit être postérieure à aujourd'hui.",
+      "evidence_uploadMissing": "Le fichier n'a pas été reçu. Recommencez.",
+      "classification_invalidPassword": "Mot de passe incorrect.",
+      "classification_tooManyAttempts": "Trop d'essais : réessayez dans un quart d'heure."
     }
   }
 }

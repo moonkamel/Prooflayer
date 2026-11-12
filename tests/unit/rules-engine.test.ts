@@ -55,10 +55,8 @@ const control = (overrides: Partial<EvaluableControl> = {}): EvaluableControl =>
 });
 
 describe("moteur", () => {
-  it("sans évaluateur livré, aucune évaluation", () => {
-    expect(
-      evaluate(control({ evaluatorKey: "manual.evidencePresent" }), [], now, EVALUATORS),
-    ).toBeNull();
+  it("sans évaluateur livré (registre vide), aucune évaluation", () => {
+    expect(evaluate(control({ evaluatorKey: "manual.evidencePresent" }), [], now, {})).toBeNull();
   });
 
   it("ne transmet que les preuves des types acceptés, et donne la version de l'évaluateur", () => {
