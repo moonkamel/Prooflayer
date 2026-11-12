@@ -1,0 +1,69 @@
+{
+  "id": "10101",
+  "key": "AIR-12",
+  "self": "https://api.atlassian.com/ex/jira/11111111-2222-4333-8444-555555555555/rest/api/3/issue/10101",
+  "fields": {
+    "summary": "Biais de genre dans le score d'adéquation",
+    "description": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Contenu confidentiel du ticket, jamais conservé." }
+          ]
+        }
+      ]
+    },
+    "project": { "key": "AIR", "name": "AI Risks" },
+    "issuetype": { "name": "Risk" },
+    "status": { "name": "En cours", "statusCategory": { "key": "indeterminate" } },
+    "priority": { "name": "High" },
+    "labels": ["fairness", "ai-risk"],
+    "assignee": {
+      "accountId": "5f0000000000000000000001",
+      "displayName": "Clara Martin",
+      "emailAddress": "clara@talvio.example"
+    },
+    "reporter": {
+      "accountId": "5f0000000000000000000002",
+      "displayName": "Sam Lee",
+      "emailAddress": "sam@talvio.example"
+    },
+    "resolution": null,
+    "resolutiondate": null,
+    "created": "2026-08-01T09:00:00.000+0200",
+    "updated": "2026-11-05T14:30:00.000+0100",
+    "comment": { "comments": [{ "body": "commentaire privé" }] },
+    "customfield_10050": {
+      "accountId": "5f0000000000000000000003",
+      "displayName": "Responsable risques"
+    },
+    "issuelinks": [
+      { "type": { "name": "Relates" }, "outwardIssue": { "key": "AIR-14" } },
+      { "type": { "name": "Blocks" }, "inwardIssue": { "key": "ENG-301" } }
+    ]
+  },
+  "changelog": {
+    "histories": [
+      {
+        "id": "20001",
+        "created": "2026-08-02T10:00:00.000+0200",
+        "author": {
+          "accountId": "5f0000000000000000000001",
+          "emailAddress": "clara@talvio.example"
+        },
+        "items": [
+          { "field": "status", "fromString": "À faire", "toString": "En cours" },
+          { "field": "description", "fromString": "ancien texte", "toString": "nouveau texte" }
+        ]
+      },
+      {
+        "id": "20002",
+        "created": "2026-11-05T14:30:00.000+0100",
+        "author": { "accountId": "5f0000000000000000000002" },
+        "items": [{ "field": "priority", "fromString": "Medium", "toString": "High" }]
+      }
+    ]
+  }
+}

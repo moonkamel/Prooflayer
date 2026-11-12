@@ -1,0 +1,17 @@
+{
+  "id": "10301",
+  "key": "OPS-7",
+  "fields": {
+    "summary": "Revue trimestrielle des données de surveillance — T3",
+    "project": { "key": "OPS" },
+    "issuetype": { "name": "Task" },
+    "status": { "name": "Done", "statusCategory": { "key": "done" } },
+    "priority": { "name": "Medium" },
+    "labels": ["ai-monitoring-review"],
+    "assignee": { "accountId": "5f0000000000000000000005" },
+    "resolution": { "name": "Done" },
+    "resolutiondate": "2026-09-30T17:00:00.000Z",
+    "created": "2026-09-15T08:00:00.000Z",
+    "updated": "2026-09-30T17:00:00.000Z"
+  }
+}

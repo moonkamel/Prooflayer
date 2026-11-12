@@ -7,7 +7,8 @@ import { createEvidence, type EvidenceDependencies } from "@/server/services/evi
 import { scheduleEvaluations } from "@/server/services/evaluation";
 import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
 import { jobRegistry } from "@/server/system/jobs/handlers";
-import { runJobNow } from "@/server/system/jobs/queue";
+import { enqueueInTransaction, runJobNow } from "@/server/system/jobs/queue";
+import { jiraIssueSyncJob } from "@/server/system/jobs/jira";
 import {
   claimDeliveries,
   failDelivery,
@@ -29,6 +30,7 @@ export async function handleDelivery(
   deps?: Partial<EvidenceDependencies>,
 ): Promise<DeliveryOutcome> {
   try {
+    if (delivery.provider === "JIRA") return await handleJiraDelivery(delivery);
     if (delivery.provider !== "GITHUB") {
       return (await finishDelivery(
         delivery,
@@ -109,6 +111,41 @@ export async function handleDelivery(
 }
 
 class LeaseLost extends Error {}
+
+const jiraIssueKey = (payload: unknown) => {
+  const key = (payload as { issue?: { key?: unknown } } | null)?.issue?.key;
+  return typeof key === "string" && /^[A-Z][A-Z0-9_]*-\d+$/u.test(key) ? key : null;
+};
+
+/**
+ * Webhook Jira (PL-404, §4.5.2) : site → organisation, puis un job `jira.issue.sync` qui relit le ticket avec son
+ * historique ; la livraison passe à PROCESSED dans la même transaction que la programmation du job.
+ */
+async function handleJiraDelivery(delivery: ClaimedDelivery): Promise<DeliveryOutcome> {
+  const integration = await resolveIntegration("JIRA", delivery.externalAccountId);
+  const issueKey = jiraIssueKey(delivery.payload);
+  if (!integration || integration.status !== "ACTIVE" || !issueKey) {
+    const reason = !issueKey ? "événement sans ticket" : "site non lié ou inactif";
+    return (await finishDelivery(delivery, "IGNORED", undefined, reason))
+      ? "ignored"
+      : "lease_lost";
+  }
+  const job = await withOrgTransaction(integration.orgId, async (tx) => {
+    const id = await enqueueInTransaction(
+      tx,
+      jiraIssueSyncJob,
+      { integrationId: integration.integrationId, issueKey, capturedVia: "WEBHOOK" as const },
+      {
+        orgId: integration.orgId,
+        dedupeKey: `jira.issue.sync:${integration.integrationId}:${issueKey}`,
+      },
+    );
+    if (!(await finishDelivery(delivery, "PROCESSED", tx))) throw new LeaseLost();
+    return id;
+  });
+  if (job) await runJobNow(job, jobRegistry).catch(() => undefined);
+  return "processed";
+}
 
 /** Traite aussitôt une livraison qui vient d'arriver (route handler, par waitUntil). */
 export async function processDelivery(provider: IntegrationProvider, deliveryId: string) {

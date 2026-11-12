@@ -103,6 +103,16 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     input: { systemId: a.systemId, name: "X", title: "Y", password: "z", locale: "fr" },
     code: "NOT_FOUND",
   }),
+  // Correspondances Jira (PL-404) : un système ou une intégration de A est introuvable depuis B.
+  "integration.jira.mappings": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "integration.jira.saveMapping": () => ({
+    input: { systemId: a.systemId, purpose: "risks", jql: "labels = ai-risk" },
+    code: "NOT_FOUND",
+  }),
+  "integration.jira.previewQuery": () => ({
+    input: { integrationId: "int_de_a", jql: "labels = ai-risk" },
+    code: "NOT_FOUND",
+  }),
   // Un state de connexion Jira émis pour l'organisation A ne lie rien à B.
   "integration.jira.complete": () => ({
     input: {
