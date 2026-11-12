@@ -222,6 +222,17 @@ packages/verify/         outil de vérification open source
 - PR fusionnées : webhook et rattrapage GraphQL (`pullRequestFromGraphQL`) donnent la même preuve.
 - Fixtures : `tests/fixtures/github/<événement>/` (3 par type, anonymisées, champs sensibles présents à dessein).
 
+## Webhooks (conventions établies par PL-302)
+- Route `src/app/api/webhooks/github/route.ts` (code du §4.5.1) : HMAC SHA-256 sur le corps brut, temps constant, 503
+  sans `GITHUB_WEBHOOK_SECRET`, 202 immédiat, traitement par `waitUntil(processDelivery)`.
+- Boîte de réception `WebhookDelivery` (table système) : `src/server/system/webhooks.ts` (enregistrement idempotent,
+  prise par `FOR UPDATE SKIP LOCKED`, bail de 5 min, 8 tentatives avec attente exponentielle, message sans charge).
+- Traitement `src/server/ingest/process-delivery.ts` : installation → organisation par la fonction SQL
+  `resolve_integration` (SECURITY DEFINER, seule lecture d'`Integration` hors RLS), dépôt → `IntegrationResource`
+  (`github_repo`, identifiant numérique), normaliseur, `createEvidence` avec la charge brute, livraison PROCESSED dans
+  la même transaction. Dépôt non lié, installation inconnue ou événement non suivi : IGNORED.
+- Reprise : `/api/cron/drain` traite d'abord les livraisons en attente (`drainDeliveries`), puis la file de jobs.
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
