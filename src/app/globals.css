@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 /*
- * Jetons de la coque (PL-109, §5.2). Contrastes vérifiés au niveau WCAG 2.2 AA (texte ≥ 4,5:1) :
- * foreground / background 17,9:1 ; muted-foreground / background 7,6:1 ; primary-foreground / primary 15,4:1.
+ * Jetons de la coque (PL-109, §5.2 ; direction institutionnelle européenne, PL-406). Contrastes vérifiés au niveau
+ * WCAG 2.2 AA (texte ≥ 4,5:1) : foreground / background 17,9:1 ; muted-foreground / background 7,6:1 ;
+ * primary-foreground / primary 10,9:1 ; primary / accent 9,7:1 ; foreground / surface 16,8:1 ; link / surface 6,3:1.
+ * `--color-gold` (1,5:1 sur blanc) est purement décoratif : jamais porteur d'information ni de texte. Aucun emblème
+ * officiel de l'Union : ProofLayer n'est pas une institution.
  * Référence visuelle : Linear, GitHub — dense, sobre, aucune carte décorative.
  */
 @theme {
@@ -16,8 +19,12 @@
   --color-muted-foreground: #475569;
   --color-border: #cbd5e1;
   --color-input: #94a3b8;
-  --color-primary: #0f172a;
-  --color-primary-foreground: #f8fafc;
+  --color-primary: #003399;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #eef2fb;
+  --color-accent-foreground: #003399;
+  --color-surface: #f6f8fc;
+  --color-gold: #ffcc00;
   --color-destructive: #b91c1c;
   --color-destructive-foreground: #ffffff;
   --color-ring: #2563eb;

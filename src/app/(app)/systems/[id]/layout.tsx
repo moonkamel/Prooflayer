@@ -55,6 +55,7 @@ export default async function SystemLayout({
           <NavLink href={base} exact>
             {t("overview")}
           </NavLink>
+          <NavLink href={`${base}/dashboard`}>{t("dashboard")}</NavLink>
           <NavLink href={`${base}/controls`}>
             {system.controlCount > 0
               ? t("controlsCount", { count: system.controlCount })

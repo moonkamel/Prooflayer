@@ -68,6 +68,8 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     code: "NOT_FOUND",
   }),
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "dashboard.systemSummary": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "dashboard.coverageTimeline": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "exemption.get": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "exemption.annexViii": () => ({
     input: { systemId: a.systemId, format: "json" },
@@ -176,6 +178,7 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
 
 /** Procédures sans identifiant de ressource : elles ne portent que sur l'organisation active. */
 const ORG_SCOPED = [
+  "dashboard.orgSummary",
   "org.get",
   "org.update",
   "org.members.list",

@@ -18,10 +18,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <SkipLink />
-      <header className="border-b border-border">
+      <header className="border-b border-border bg-background">
+        {/* Filet institutionnel : bleu profond, touche d'or décorative (aucune information portée). */}
+        <div aria-hidden="true" className="flex h-1">
+          <span className="flex-1 bg-primary" />
+          <span className="w-16 bg-gold" />
+        </div>
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-2">
-          <span className="font-semibold">{t("brand")}</span>
+          <span className="font-semibold tracking-tight text-primary">{t("brand")}</span>
           <nav aria-label={t("mainNav")} className="flex flex-1 flex-wrap items-center gap-1">
+            <NavLink href="/dashboard">{t("dashboard")}</NavLink>
             <NavLink href="/systems">{t("systems")}</NavLink>
             <NavLink href="/organization">{t("organization")}</NavLink>
             {active && ADMIN_ROLES.includes(active.role) && (

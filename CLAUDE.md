@@ -407,3 +407,17 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   cours de validité → PASS (« déclarative ») ; expirée ou durée de fraîcheur dépassée → STALE ; aucune → MISSING.
 - Routeur `evidence` (`createUploadUrl`, `registerUpload`, `attest`, rôle contributor). Écran
   `/systems/[id]/controls/[controlId]/evidence`, lien « Ajouter une preuve » sur les contrôles manuels et semi-automatiques.
+
+## Dashboard (conventions établies par PL-406)
+- Fonctions pures `src/server/services/dashboard-data.ts` : `countStatuses` (non applicables à part, couverture =
+  PASS / applicables), `articleOf` / `articleOrder` (regroupement par article), `coverageTimeline` (dernier statut évalué
+  à la fin de chaque jour UTC, 90 jours), `dominantSource`, `connectorOf` (clé d'évaluateur → GITHUB ou JIRA).
+- Service `src/server/services/dashboard.ts` : `systemSummary` (une transaction `withOrgTransaction`, requêtes agrégées ;
+  « Connectez GitHub / Jira pour évaluer » si le connecteur manque et le contrôle est sans preuve), `orgSummary`.
+  Routeur `dashboard` (`orgSummary`, `systemSummary`, `coverageTimeline`), lecture, tout membre. Exigence : vue système
+  en moins de 1,5 s avec 5 000 preuves (`tests/integration/dashboard.test.ts`).
+- Écrans : `/dashboard` (vue organisation, premier lien de la navigation) et `/systems/[id]/dashboard` (écran C, onglet
+  avant « Contrôles ») : bandeau de synthèse, courbe SVG doublée d'un résumé et d'un tableau de données, explorateur
+  filtrable (recherche, statut, article, responsable, source) dont les filtres vivent dans l'adresse (`router.replace`).
+- Direction artistique : bleu institutionnel `--primary` #003399 et or `--gold` #ffcc00 purement décoratif (jamais
+  porteur d'information ni de texte) ; aucun emblème ni visuel officiel de l'Union européenne.

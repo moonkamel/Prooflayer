@@ -235,7 +235,8 @@
     "language": "Language",
     "activeOrganization": "Active organization: <strong>{name}</strong>",
     "brand": "ProofLayer",
-    "systems": "AI systems"
+    "systems": "AI systems",
+    "dashboard": "Dashboard"
   },
   "home": {
     "title": "ProofLayer",
@@ -333,7 +334,8 @@
     "controls": "Controls",
     "controlsCount": "Controls {count}",
     "exemption": "Exemption",
-    "sources": "Sources"
+    "sources": "Sources",
+    "dashboard": "Dashboard"
   },
   "designChanges": {
     "title": "Design changes",
@@ -835,5 +837,64 @@
       "classification_invalidPassword": "Incorrect password.",
       "classification_tooManyAttempts": "Too many attempts: try again in fifteen minutes."
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "orgIntro": "Evidence coverage for each monitored system. The indicator counts controls with evidence present; it always comes with the failing, stale and missing controls.",
+    "coverage": "Evidence coverage",
+    "coverageValue": "{pass} / {applicable}",
+    "coverageLabel": "{pass} controls with evidence present out of {applicable} applicable",
+    "failing": "Failing",
+    "stale": "Stale",
+    "missing": "No evidence",
+    "partial": "Partial",
+    "lastEvidence": "Latest evidence: {when}",
+    "noEvidence": "No evidence captured yet.",
+    "lastEvaluation": "Last evaluation",
+    "never": "never",
+    "trendTitle": "Coverage over 90 days",
+    "trendSummary": "Coverage went from {from} to {to} controls with evidence present over 90 days.",
+    "trendData": "Show the chart data",
+    "day": "Day",
+    "systems": "Systems",
+    "system": "System",
+    "tier": "Category",
+    "noSystems": "No monitored system. Declare a system in the registry to track its coverage.",
+    "openRegistry": "Open the registry",
+    "integrationFailing": "A connection is failing or revoked: some evidence is no longer captured.",
+    "integrationLink": "See the Organisation page",
+    "filters": "Filters",
+    "status": "Status",
+    "article": "Article",
+    "owner": "Owner",
+    "source": "Source",
+    "all": "All",
+    "allArticles": "All articles",
+    "nobody": "Unassigned",
+    "search": "Search a control",
+    "reset": "Reset filters",
+    "results": "{count, plural, =0 {No control matches the filters.} one {# control shown} other {# controls shown}}",
+    "control": "Control",
+    "evidence": "Evidence",
+    "group": "{article}: {pass} / {applicable} with evidence present",
+    "expand": "Expand {article}",
+    "collapse": "Collapse {article}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "sourceCount": "{source} · {count}",
+    "noSource": "—",
+    "connect": "Connect {provider} to evaluate",
+    "addEvidence": "Add evidence",
+    "empty": "No open control: sign the system's classification to open its controls.",
+    "sources": {
+      "GITHUB": "GitHub",
+      "JIRA": "Jira",
+      "MANUAL": "Declarative",
+      "SYSTEM": "ProofLayer",
+      "API": "API",
+      "GITLAB": "GitLab",
+      "NOTION": "Notion"
+    },
+    "loading": "Loading the dashboard…"
   }
 }
