@@ -1,0 +1,9 @@
+{
+  "description": "Aucune preuve de PR.",
+  "now": "2026-11-12T12:00:00.000Z",
+  "params": {
+    "windowDays": 90,
+    "minApprovals": 1
+  },
+  "evidence": []
+}

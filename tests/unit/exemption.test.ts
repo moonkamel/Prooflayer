@@ -33,6 +33,16 @@ describe("évaluateur AIA-06-02 (internal.exemptionDossier)", () => {
     expect(result.reasons[0]?.message.en).toMatch(/Signed exemption file/u);
   });
 
+  it("périmé : seul un dossier signé pour une classification remplacée existe", () => {
+    const result = evaluateExemptionDossier(
+      { ...signed, dossier: null, previousDossierId: "dos_0" },
+      now,
+    );
+    expect(result).toMatchObject({ status: "STALE" });
+    expect(result.reasons[0]!.code).toBe("DOSSIER_FOR_SUPERSEDED_CLASSIFICATION");
+    expect(result.evidenceIds).toContain("dos_0");
+  });
+
   it("absent : système exempté sans dossier signé", () => {
     const result = evaluateExemptionDossier({ ...signed, dossier: null }, now);
     expect(result).toMatchObject({ status: "MISSING", evidenceIds: ["cls_1"] });

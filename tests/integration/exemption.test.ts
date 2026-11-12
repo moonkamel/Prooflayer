@@ -164,7 +164,7 @@ describe("dossier d'exemption", () => {
       orderBy: { evaluatedAt: "asc" },
     });
     expect(evaluations.map((e) => e.status)).toEqual(["MISSING", "PASS"]);
-    expect(evaluations[1]?.evaluatorVersion).toBe("internal.exemptionDossier@1");
+    expect(evaluations[1]?.evaluatorVersion).toBe("internal.exemptionDossier@2");
     expect(evaluations[1]?.evidenceIds).toContain(signed.id);
 
     // Signé : immuable, dans le service comme en base.

@@ -1,0 +1,243 @@
+{
+  "description": "6 PR dont 3 ouvertes par un robot ; la n° 2 du robot n'a aucune approbation.",
+  "now": "2026-11-12T12:00:00.000Z",
+  "params": {
+    "windowDays": 90,
+    "minApprovals": 1
+  },
+  "evidence": [
+    {
+      "id": "ev_pr_0001",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-11T11:59:00.000Z",
+      "capturedAt": "2026-11-11T11:59:05.000Z",
+      "payload": {
+        "number": 1,
+        "title": "Changement 1",
+        "baseRef": "main",
+        "headSha": "h1",
+        "mergeCommitSha": "m1",
+        "mergedAt": "2026-11-11T11:59:00.000Z",
+        "author": "dependabot[bot]",
+        "mergedBy": "dependabot[bot]",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_rv_0002",
+      "kind": "github.review.submitted",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-11T10:59:00.000Z",
+      "capturedAt": "2026-11-11T10:59:05.000Z",
+      "payload": {
+        "pullNumber": 1,
+        "reviewId": 9002,
+        "state": "APPROVED",
+        "reviewer": "chloe",
+        "pullAuthor": "dependabot[bot]",
+        "commitId": "h1",
+        "submittedAt": "2026-11-11T10:59:00.000Z"
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_pr_0003",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-10T11:58:00.000Z",
+      "capturedAt": "2026-11-10T11:58:05.000Z",
+      "payload": {
+        "number": 2,
+        "title": "Changement 2",
+        "baseRef": "main",
+        "headSha": "h2",
+        "mergeCommitSha": "m2",
+        "mergedAt": "2026-11-10T11:58:00.000Z",
+        "author": "dependabot[bot]",
+        "mergedBy": "dependabot[bot]",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_pr_0005",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-09T11:57:00.000Z",
+      "capturedAt": "2026-11-09T11:57:05.000Z",
+      "payload": {
+        "number": 3,
+        "title": "Changement 3",
+        "baseRef": "main",
+        "headSha": "h3",
+        "mergeCommitSha": "m3",
+        "mergedAt": "2026-11-09T11:57:00.000Z",
+        "author": "dependabot[bot]",
+        "mergedBy": "dependabot[bot]",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_rv_0006",
+      "kind": "github.review.submitted",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-09T10:57:00.000Z",
+      "capturedAt": "2026-11-09T10:57:05.000Z",
+      "payload": {
+        "pullNumber": 3,
+        "reviewId": 9006,
+        "state": "APPROVED",
+        "reviewer": "elise",
+        "pullAuthor": "dependabot[bot]",
+        "commitId": "h3",
+        "submittedAt": "2026-11-09T10:57:00.000Z"
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_pr_0007",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-08T11:56:00.000Z",
+      "capturedAt": "2026-11-08T11:56:05.000Z",
+      "payload": {
+        "number": 4,
+        "title": "Changement 4",
+        "baseRef": "main",
+        "headSha": "h4",
+        "mergeCommitSha": "m4",
+        "mergedAt": "2026-11-08T11:56:00.000Z",
+        "author": "elise",
+        "mergedBy": "elise",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_rv_0008",
+      "kind": "github.review.submitted",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-08T10:56:00.000Z",
+      "capturedAt": "2026-11-08T10:56:05.000Z",
+      "payload": {
+        "pullNumber": 4,
+        "reviewId": 9008,
+        "state": "APPROVED",
+        "reviewer": "amina",
+        "pullAuthor": "elise",
+        "commitId": "h4",
+        "submittedAt": "2026-11-08T10:56:00.000Z"
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_pr_0009",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-07T11:55:00.000Z",
+      "capturedAt": "2026-11-07T11:55:05.000Z",
+      "payload": {
+        "number": 5,
+        "title": "Changement 5",
+        "baseRef": "main",
+        "headSha": "h5",
+        "mergeCommitSha": "m5",
+        "mergedAt": "2026-11-07T11:55:00.000Z",
+        "author": "amina",
+        "mergedBy": "amina",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_rv_0010",
+      "kind": "github.review.submitted",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-07T10:55:00.000Z",
+      "capturedAt": "2026-11-07T10:55:05.000Z",
+      "payload": {
+        "pullNumber": 5,
+        "reviewId": 9010,
+        "state": "APPROVED",
+        "reviewer": "bastien",
+        "pullAuthor": "amina",
+        "commitId": "h5",
+        "submittedAt": "2026-11-07T10:55:00.000Z"
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_pr_0011",
+      "kind": "github.pull_request.merged",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-06T11:54:00.000Z",
+      "capturedAt": "2026-11-06T11:54:05.000Z",
+      "payload": {
+        "number": 6,
+        "title": "Changement 6",
+        "baseRef": "main",
+        "headSha": "h6",
+        "mergeCommitSha": "m6",
+        "mergedAt": "2026-11-06T11:54:00.000Z",
+        "author": "bastien",
+        "mergedBy": "bastien",
+        "changedFiles": 3,
+        "labels": [],
+        "draft": false
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    },
+    {
+      "id": "ev_rv_0012",
+      "kind": "github.review.submitted",
+      "resourceId": "res_scoring_api",
+      "occurredAt": "2026-11-06T10:54:00.000Z",
+      "capturedAt": "2026-11-06T10:54:05.000Z",
+      "payload": {
+        "pullNumber": 6,
+        "reviewId": 9012,
+        "state": "APPROVED",
+        "reviewer": "chloe",
+        "pullAuthor": "bastien",
+        "commitId": "h6",
+        "submittedAt": "2026-11-06T10:54:00.000Z"
+      },
+      "declarative": false,
+      "validUntil": null,
+      "linkedByUser": false
+    }
+  ]
+}

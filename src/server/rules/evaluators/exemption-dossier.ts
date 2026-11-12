@@ -5,7 +5,7 @@
 import type { RiskTier } from "@/generated/prisma/enums";
 import type { Evaluation } from "../evaluation";
 
-export const EXEMPTION_DOSSIER_EVALUATOR_VERSION = "internal.exemptionDossier@1";
+export const EXEMPTION_DOSSIER_EVALUATOR_VERSION = "internal.exemptionDossier@2";
 
 export interface ExemptionFacts {
   /** Catégorie de la classification signée en vigueur ; null si aucune. */
@@ -21,6 +21,8 @@ export interface ExemptionFacts {
   } | null;
   /** Date de mise sur le marché ou en service déclarée sur la fiche. */
   placedOnMarketAt: Date | null;
+  /** Dossier signé pour une classification antérieure, remplacée depuis (PL-402). */
+  previousDossierId?: string | null;
 }
 
 const reason = (code: string, fr: string, en: string, evidenceIds: string[] = []) => ({
@@ -45,6 +47,21 @@ export function evaluateExemptionDossier(facts: ExemptionFacts, now: Date): Eval
   }
   const ids = facts.classificationId ? [facts.classificationId] : [];
   const dossier = facts.dossier;
+  if (!dossier && facts.previousDossierId) {
+    // Le dossier signé justifiait une classification remplacée depuis : il est périmé.
+    return {
+      status: "STALE",
+      reasons: [
+        reason(
+          "DOSSIER_FOR_SUPERSEDED_CLASSIFICATION",
+          "Le dossier signé porte sur une classification remplacée ; la classification en vigueur n'a pas de dossier.",
+          "The signed file relates to a superseded classification; the classification in force has no file.",
+          [...ids, facts.previousDossierId],
+        ),
+      ],
+      evidenceIds: [...ids, facts.previousDossierId],
+    };
+  }
   if (!dossier) {
     return {
       status: "MISSING",

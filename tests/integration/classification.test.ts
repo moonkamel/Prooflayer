@@ -8,6 +8,8 @@ import { forOrg, prisma } from "@/server/db";
 import { createCaller } from "@/server/routers/_app";
 import { classificationNote, signClassification } from "@/server/services/classification";
 import { renderClassificationNote } from "@/server/services/classification-note";
+import { jobRegistry } from "@/server/system/jobs/handlers";
+import { runJobNow } from "@/server/system/jobs/queue";
 
 const run = randomUUID().slice(0, 8);
 const A = `org_cls_a_${run}`;
@@ -50,6 +52,7 @@ afterAll(async () => {
   const client = new pg.Client({ connectionString: process.env.DIRECT_DATABASE_URL });
   await client.connect();
   try {
+    await client.query(`DELETE FROM "Job" WHERE "orgId" = ANY($1)`, [[A, B]]);
     await client.query("BEGIN");
     for (const org of [A, B]) {
       await client.query("SELECT set_config('app.purge_org', $1, TRUE)", [org]);
@@ -314,6 +317,58 @@ describe("signature (PL-204)", () => {
     expect(
       await api.system.update({ id: systemId, patch: { intendedPurpose: "Encore une autre" } }),
     ).toMatchObject({ classificationStale: true });
+  });
+
+  it("PL-402 : la signature et la fiche deviennent des preuves ; AIA-06-01 et AIA-17-03 sont évalués", async () => {
+    const { id: systemId } = await newSystem("Preuves internes");
+    // Fournisseur d'un système à haut risque : packs A, B et C (AIA-17-03 est au pack C).
+    await qualify(systemId, [...highRisk.slice(0, 6), ["developer", true]]);
+    await sign(systemId);
+    const db = forOrg(A);
+    const kinds = async () =>
+      (
+        await db.evidenceItem.findMany({
+          where: {
+            kind: { startsWith: "system." },
+            payload: { path: ["systemId"], equals: systemId },
+          },
+          orderBy: { capturedAt: "asc" },
+        })
+      ).map((e) => e.kind);
+    expect(await kinds()).toEqual([
+      "system.registry.snapshot",
+      "system.classification.signed",
+      "system.registry.snapshot",
+    ]);
+    const runQueued = async () => {
+      for (const job of await prisma.job.findMany({ where: { orgId: A, status: "QUEUED" } })) {
+        await runJobNow(job.id, jobRegistry);
+      }
+    };
+    const statusOf = async (key: string) =>
+      (
+        await db.controlInstance.findFirstOrThrow({
+          where: { systemId, definition: { key } },
+        })
+      ).status;
+    await runQueued();
+    expect(await statusOf("AIA-06-01")).toBe("PASS");
+    // Responsable du système et signataire nommés, responsable du contrôle humain absent.
+    expect(await statusOf("AIA-17-03")).toBe("PARTIAL");
+
+    await callerFor(admin).system.update({
+      id: systemId,
+      patch: { intendedPurpose: "Finalité modifiée", oversightOwnerUserId: admin },
+    });
+    await runQueued();
+    expect(await statusOf("AIA-06-01")).toBe("FAIL");
+    expect(await statusOf("AIA-17-03")).toBe("PASS");
+    const evaluation = await db.controlEvaluation.findFirstOrThrow({
+      where: { controlInstance: { systemId, definition: { key: "AIA-06-01" } } },
+      orderBy: { evaluatedAt: "desc" },
+    });
+    expect(evaluation.evaluatorVersion).toBe("internal.classificationFresh@1");
+    expect((evaluation.reasons as { code: string }[])[0]!.code).toBe("CLASSIFICATION_TO_REVIEW");
   });
 
   it("bloque la signature après cinq mots de passe refusés, même avec le bon ensuite", async () => {

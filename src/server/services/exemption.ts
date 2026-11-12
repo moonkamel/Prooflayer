@@ -182,6 +182,13 @@ export async function evaluateExemptionControl(
         where: { classificationId: classification.id, status: "SIGNED" },
       })
     : null;
+  const previous = dossier
+    ? null
+    : await tx.exemptionDossier.findFirst({
+        where: { systemId: input.systemId, status: "SIGNED" },
+        orderBy: { signedAt: "desc" },
+        select: { id: true },
+      });
   const evaluation = evaluateExemptionDossier(
     {
       tier: classification?.tier ?? null,
@@ -196,6 +203,7 @@ export async function evaluateExemptionControl(
             }
           : null,
       placedOnMarketAt: system.placedOnMarketAt,
+      previousDossierId: previous?.id ?? null,
     },
     input.at,
   );

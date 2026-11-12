@@ -57,7 +57,7 @@ const control = (overrides: Partial<EvaluableControl> = {}): EvaluableControl =>
 describe("moteur", () => {
   it("sans évaluateur livré, aucune évaluation", () => {
     expect(
-      evaluate(control({ evaluatorKey: "github.peerReview" }), [], now, EVALUATORS),
+      evaluate(control({ evaluatorKey: "jira.riskRegisterExists" }), [], now, EVALUATORS),
     ).toBeNull();
   });
 

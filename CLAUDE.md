@@ -327,3 +327,17 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   validation, le cron de chaque minute reste le filet. Signature d'une classification : contrôles du système programmés.
 - Passage quotidien : `/api/cron/daily` (vercel.json) → `scheduleDailySweep` (un `control.sweepOrg` par organisation et
   par jour). Instance non applicable ou système archivé : jamais évalué.
+
+## Évaluateurs GitHub et internes (conventions établies par PL-402)
+- Un fichier par famille dans `src/server/rules/evaluators/` (`github-peer-review`, `github-branch-protection`,
+  `github-releases`, `github-security`, `github-change-management`, `internal`), aides dans `common.ts` (`parsed`,
+  `latestBy`, `staleness`, `detailed` : 20 raisons au plus puis le décompte). Charges relues par Zod ; invalide = ignorée.
+- Instantanés : seul le dernier par dépôt (ou par chemin) compte. Péremption commune : la preuve la plus récente au-delà
+  de `freshnessDays` → STALE ; sans durée de fraîcheur, pas de péremption inventée.
+- Tests : au moins succès, échec, périmé, absent par évaluateur (`tests/unit/evaluators.test.ts`) ; AIA-15-02 sur les
+  jeux figés de `tests/fixtures/rules/aia-15-02/` (régénérés par `generate.mjs`).
+- Preuves `system.*` émises par ProofLayer (`src/server/services/system-evidence.ts`) : `system.classification.signed`
+  à la signature, `system.registry.snapshot` après chaque écriture de fiche et à la signature (une preuve par état).
+  Elles portent `payload.systemId` : le moteur les rattache aux contrôles de ce système.
+- AIA-06-02 reste évalué à la signature (faits de ProofLayer, version `internal.exemptionDossier@2`), hors registre.
+- `createEvidence` ne lit stockage et clé maîtresse que pour une charge brute à chiffrer.
