@@ -18,12 +18,15 @@ export function JiraMappingForm(props: {
   purpose: JiraPurpose;
   jql: string | null;
   defaultJql: string;
+  acceptanceField: string | null;
   canEdit: boolean;
 }) {
   const t = useTranslations("sources.jira");
   const tc = useTranslations("common");
   const router = useRouter();
   const id = useId();
+  const fieldId = useId();
+  const [field, setField] = useState(props.acceptanceField ?? "");
   const [jql, setJql] = useState(props.jql ?? props.defaultJql);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
   const [pending, start] = useTransition();
@@ -34,7 +37,9 @@ export function JiraMappingForm(props: {
       text:
         error instanceof TRPCClientError && error.message === "integration.jira.invalidJql"
           ? t("invalidJql")
-          : tc("genericError"),
+          : error instanceof TRPCClientError && error.message === "integration.jira.invalidField"
+            ? t("invalidField")
+            : tc("genericError"),
     });
   const preview = () =>
     start(async () => {
@@ -55,6 +60,8 @@ export function JiraMappingForm(props: {
           systemId: props.systemId,
           purpose: props.purpose,
           jql,
+          // Registre des risques : champ portant l'acceptation du risque résiduel (AIA-09-03), vide pour aucun.
+          ...(props.purpose === "risks" ? { acceptanceField: field.trim() || null } : {}),
         });
         setMessage({ tone: "info", text: t("saved", { count }) });
         router.refresh();
@@ -78,6 +85,20 @@ export function JiraMappingForm(props: {
         readOnly={!props.canEdit}
         className="font-mono"
       />
+      {props.purpose === "risks" && (
+        <>
+          <Label htmlFor={fieldId}>{t("acceptanceField")}</Label>
+          <p className="text-sm text-muted-foreground">{t("acceptanceHelp")}</p>
+          <Input
+            id={fieldId}
+            value={field}
+            onChange={(e) => setField(e.target.value)}
+            maxLength={64}
+            readOnly={!props.canEdit}
+            className="font-mono"
+          />
+        </>
+      )}
       {props.canEdit && (
         <div className="flex gap-2">
           <Button

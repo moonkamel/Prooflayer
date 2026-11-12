@@ -387,3 +387,8 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Webhook `/api/webhooks/jira/[cloudId]` : JWT HS256 signé avec `JIRA_CLIENT_SECRET` (hypothèse du §4.5.2),
   identifiant `X-Atlassian-Webhook-Identifier`, livraison → job `jira.issue.sync`.
 - Écran : onglet « Sources » de la fiche système (quatre correspondances, prévisualisation, enregistrement admin).
+- Évaluateurs Jira `src/server/rules/evaluators/jira.ts` (AIA-09-01, 09-02, 09-03, 20-01, 72-02, 73-01) : dernier
+  instantané de chaque ticket de la finalité, tickets sortis ignorés. Conventions : risque élevé = priorité Highest ou
+  High ; acceptation = champ configuré sur la correspondance (absent → PARTIAL) ; incident grave = étiquette
+  `serious-incident`, délai Art. 73 réduit par `incident-death` (10 j) ou `incident-critical-infrastructure` /
+  `incident-widespread` (2 j), notification = passage à un statut « Notifié » / « Notified », compté depuis la création.

@@ -20,6 +20,7 @@ import { jobRegistry } from "@/server/system/jobs/handlers";
 import { jiraJobDependencies, jiraReconcileJob } from "@/server/system/jobs/jira";
 import { enqueue, runJobNow } from "@/server/system/jobs/queue";
 import type { OrgContext } from "@/server/services/organization";
+import { LIBRARY_VERSION } from "@/server/rules/library";
 
 const run = randomUUID().slice(0, 8);
 const A = `org_jsync_${run}`;
@@ -182,6 +183,13 @@ beforeAll(async () => {
       },
     })
   ).id;
+  // Contrôles Jira du système (PL-404, évaluateurs) : évalués de bout en bout après la synchronisation.
+  const definitions = await prisma.controlDefinition.findMany({
+    where: { key: { in: ["AIA-09-01", "AIA-20-01"] }, libraryVersion: LIBRARY_VERSION },
+  });
+  for (const d of definitions) {
+    await forOrg(A).controlInstance.create({ data: { orgId: A, systemId, definitionId: d.id } });
+  }
 });
 
 afterAll(async () => {

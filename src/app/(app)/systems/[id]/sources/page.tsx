@@ -45,6 +45,7 @@ export default async function SystemSourcesPage({ params }: Params) {
               purpose={m.purpose}
               jql={m.jql}
               defaultJql={m.defaultJql}
+              acceptanceField={m.acceptanceField}
               canEdit={canEdit && jira.integration!.status === "ACTIVE"}
             />
           ))}

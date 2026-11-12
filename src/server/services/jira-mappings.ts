@@ -59,6 +59,9 @@ export async function jiraMappings(ctx: OrgContext, input: { systemId: string })
         defaultJql: DEFAULT_JQL[purpose],
         jql:
           row && row.systemLinks.length > 0 ? (row.config as unknown as MappingConfig).jql : null,
+        acceptanceField: row
+          ? ((row.config as unknown as MappingConfig).acceptanceField ?? null)
+          : null,
         resourceId: row?.id ?? null,
       };
     }),
