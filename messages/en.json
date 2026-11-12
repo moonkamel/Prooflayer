@@ -191,7 +191,8 @@
     "classification_saveAnswers": "Classification questionnaire answered",
     "classification_compute": "Classification computed",
     "classification_sign": "Classification signed",
-    "classification_signRefused": "Signature refused: incorrect password"
+    "classification_signRefused": "Signature refused: incorrect password",
+    "control_instantiate": "System controls opened"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -303,7 +304,9 @@
     "noModels": "No model listed.",
     "noCategories": "No category listed.",
     "qualify": "Qualify this system",
-    "review": "Review the classification"
+    "review": "Review the classification",
+    "controls": "Controls",
+    "controlsCount": "Controls {count}"
   },
   "designChanges": {
     "title": "Design changes",
@@ -612,6 +615,23 @@
     "start": "Start the questionnaire",
     "inForce": "Signed version in force",
     "draftInProgress": "A requalification is in progress. The signed version below stays in force until the next signature.",
-    "readOnly": "Only an owner or an admin can qualify a system."
+    "readOnly": "Only an owner or an admin can qualify a system.",
+    "controls": "{count, plural, =0 {No applicable control} one {# applicable control} other {# applicable controls}}, {automated} of them evaluated automatically"
+  },
+  "controls": {
+    "title": "Controls",
+    "intro": "The controls opened by the signed classification. Each control awaits evidence; their evaluation arrives with the connectors.",
+    "empty": "No control opened. Controls open when the classification is signed.",
+    "summary": "{count, plural, one {# applicable control} other {# applicable controls}}, {automated} of them evaluated automatically.",
+    "control": "Control",
+    "article": "Article",
+    "evaluation": "Evaluation",
+    "status": "Status",
+    "automation": {
+      "AUTOMATED": "Automatic",
+      "SEMI_AUTOMATED": "Semi-automatic",
+      "MANUAL": "Manual"
+    },
+    "byReclassification": "Set aside by the last reclassification"
   }
 }

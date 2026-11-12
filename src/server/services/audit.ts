@@ -24,6 +24,7 @@ export const AUDIT_ACTIONS = [
   "classification.compute",
   "classification.sign",
   "classification.signRefused",
+  "control.instantiate",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

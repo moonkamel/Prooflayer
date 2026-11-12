@@ -11,6 +11,7 @@ import { TRPCClientError } from "@trpc/client";
 import type { AiActRole, RiskTier } from "@/generated/prisma/enums";
 import type { ClassifiedTier } from "@/server/classify/engine";
 import { implicationsOf, traceLines } from "@/server/classify/explain";
+import { applicableControls } from "@/server/rules/library";
 import { type QuestionId, type Responses } from "@/server/classify/questionnaire";
 import { regulationUrl } from "@/lib/regulation";
 import { trpc } from "@/lib/trpc";
@@ -50,6 +51,8 @@ export function ClassificationResult({
   const uid = classification.id;
   const tier = result.tier as ClassifiedTier;
   const implications = implicationsOf(tier, result.annexIIIPoints);
+  // Contrôles que la signature ouvrira (ou a ouverts) : même règle que l'instanciation (PL-207).
+  const controls = applicableControls(tier, result.role as AiActRole);
   const responses: Responses = classification.responses;
   const day = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: "long", timeZone: "UTC" });
@@ -143,6 +146,14 @@ export function ClassificationResult({
           </p>
         ) : (
           <p>{t("noObligation")}</p>
+        )}
+        {tier !== "PROHIBITED" && (
+          <p data-testid="result-controls">
+            {t("controls", {
+              count: controls.length,
+              automated: controls.filter((c) => c.automation === "AUTOMATED").length,
+            })}
+          </p>
         )}
         {implications.assessment && (
           <p>

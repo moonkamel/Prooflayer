@@ -9,6 +9,7 @@ rmSync(E2E_OUTBOX_DIR, { recursive: true, force: true });
 
 export default defineConfig({
   testDir: "tests/e2e",
+  globalSetup: "./tests/publish-control-library.ts",
   // Les parcours d'authentification partagent la limite de débit par IP de Better Auth : un seul worker.
   workers: 1,
   forbidOnly: !!process.env.CI,
