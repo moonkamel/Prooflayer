@@ -1,0 +1,43 @@
+{
+  "id": "10201",
+  "key": "AIR-40",
+  "fields": {
+    "summary": "Refus massif de candidatures après la release 2.3",
+    "description": "Texte libre avec des données personnelles : jean.dupont@example.com",
+    "project": { "key": "AIR" },
+    "issuetype": { "name": "AI Incident" },
+    "status": { "name": "Terminé", "statusCategory": { "key": "done" } },
+    "priority": { "name": "Highest" },
+    "labels": ["serious-incident"],
+    "assignee": null,
+    "resolution": { "name": "Corrigé" },
+    "resolutiondate": "2026-10-12T16:00:00.000+0200",
+    "created": "2026-10-01T08:00:00.000+0200",
+    "updated": "2026-10-12T16:00:00.000+0200",
+    "issuelinks": [
+      { "type": { "name": "Corrective action" }, "outwardIssue": { "key": "ENG-412" } }
+    ]
+  },
+  "changelog": {
+    "histories": [
+      {
+        "id": "30001",
+        "created": "2026-10-01T09:00:00.000+0200",
+        "author": { "accountId": "5f0000000000000000000004" },
+        "items": [{ "field": "status", "fromString": "Ouvert", "toString": "Analyse" }]
+      },
+      {
+        "id": "30002",
+        "created": "2026-10-09T11:00:00.000+0200",
+        "author": { "accountId": "5f0000000000000000000004" },
+        "items": [{ "field": "status", "fromString": "Analyse", "toString": "Notifié" }]
+      },
+      {
+        "id": "30003",
+        "created": "2026-10-12T16:00:00.000+0200",
+        "author": null,
+        "items": [{ "field": "status", "fromString": "Notifié", "toString": "Terminé" }]
+      }
+    ]
+  }
+}

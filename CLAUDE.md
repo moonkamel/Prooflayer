@@ -370,3 +370,20 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   `/api/integrations/jira/callback` (sans logique) ; résultat affiché sur `/organization?jira=<clé>` (liste fermée,
   `src/lib/integration-status.ts`). Variables `JIRA_CLIENT_ID`, `JIRA_CLIENT_SECRET`, `BETTER_AUTH_URL`.
 - Tests : Atlassian simulé (`tests/integration/jira-integration.test.ts`), dont deux rafraîchissements concurrents.
+
+## Synchronisation Jira (conventions établies par PL-404)
+- Normaliseurs purs `src/server/connectors/jira/normalizers.ts` : `jira.issue.snapshot` (une preuve par jour et par état,
+  `inMapping: false` à la sortie de correspondance) et `jira.issue.transitioned` (un changement de statut). Liste
+  blanche : jamais description, commentaire, nom ni email ; identifiants de compte Atlassian seulement (`actor`).
+  Fixtures `tests/fixtures/jira/issue/`.
+- Correspondances : `IntegrationResource` `jira_query` (`externalId` `{systemId}:{purpose}`, config `{ jql, purpose,
+  systemId, acceptanceField }`) reliée au système par `SystemResourceLink` ; finalités `risks`, `incidents`,
+  `monitoring_reviews`, `release_validations` (`JIRA_PURPOSES`). Service `src/server/services/jira-mappings.ts`.
+- `src/server/services/jira-sync.ts` : `syncIssue` (ticket relu avec `expand=changelog`, appartenance testée par
+  `key = X AND (<jql>)`), `reconcile` (incrémentale `updated >= "-20m"` ou complète), `ensureWebhook` (un webhook par
+  site, `project IN (…)` des projets utiles, prolongé à moins de 7 jours de l'expiration). Réseau avant écriture.
+- Jobs `jira.issue.sync`, `jira.reconcile`, `jira.webhook.ensure` (`src/server/system/jobs/jira.ts`,
+  `jiraJobDependencies` remplaçable par les tests). Cron `/api/cron/jira` toutes les 15 minutes ; complet chaque jour.
+- Webhook `/api/webhooks/jira/[cloudId]` : JWT HS256 signé avec `JIRA_CLIENT_SECRET` (hypothèse du §4.5.2),
+  identifiant `X-Atlassian-Webhook-Identifier`, livraison → job `jira.issue.sync`.
+- Écran : onglet « Sources » de la fiche système (quatre correspondances, prévisualisation, enregistrement admin).

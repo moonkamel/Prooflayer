@@ -253,18 +253,48 @@ export async function jiraAccessToken(
   return { accessToken: outcome.accessToken, cloudId: outcome.cloudId };
 }
 
-/** Appel en lecture à l'API Jira Cloud d'une intégration : hôte Atlassian fixe, chemin contrôlé. */
-export async function jiraGet<T>(
+/** Réponse d'erreur de l'API Jira, sans corps (il peut contenir des données de tickets). */
+export class JiraApiError extends Error {
+  constructor(readonly status: number) {
+    super(`Jira : HTTP ${status}`);
+    this.name = "JiraApiError";
+  }
+}
+
+/**
+ * Appel à l'API Jira Cloud d'une intégration : hôte Atlassian fixe, chemin contrôlé. Lecture seule, sauf la gestion du
+ * webhook de l'application (portée manage:jira-webhook). Ne pas appeler pendant qu'une transaction tient la ligne
+ * `Integration` : le rafraîchissement du jeton la verrouille.
+ */
+export async function jiraRequest<T>(
+  orgId: string,
+  integrationId: string,
+  method: "GET" | "POST" | "PUT" | "DELETE",
+  path: string,
+  deps: Pick<JiraDependencies, "fetch" | "master" | "now" | "client">,
+  body?: unknown,
+): Promise<T> {
+  const { accessToken, cloudId } = await jiraAccessToken(orgId, integrationId, deps);
+  const response = await deps.fetch(jiraApiUrl(cloudId, path), {
+    method,
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      accept: "application/json",
+      ...(body === undefined ? {} : { "content-type": "application/json" }),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (!response.ok) throw new JiraApiError(response.status);
+  if (response.status === 204) return undefined as T;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+/** Appel en lecture à l'API Jira Cloud d'une intégration. */
+export const jiraGet = <T>(
   orgId: string,
   integrationId: string,
   path: string,
   deps: Pick<JiraDependencies, "fetch" | "master" | "now" | "client">,
-): Promise<T> {
-  const { accessToken, cloudId } = await jiraAccessToken(orgId, integrationId, deps);
-  const response = await deps.fetch(jiraApiUrl(cloudId, path), {
-    headers: { authorization: `Bearer ${accessToken}`, accept: "application/json" },
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!response.ok) throw new Error(`Jira : HTTP ${response.status}`);
-  return (await response.json()) as T;
-}
+) => jiraRequest<T>(orgId, integrationId, "GET", path, deps);

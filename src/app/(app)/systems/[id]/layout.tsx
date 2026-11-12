@@ -1,5 +1,5 @@
 // Fiche système (§5.3, écran B) : en-tête d'identité et navigation latérale par onglet.
-// Onglets : Vue, Contrôles (PL-207), Changements, Historique. Preuves, Sources et Packs arrivent avec leurs tickets.
+// Onglets : Vue, Contrôles (PL-207), Sources (PL-404), Changements, Historique. Preuves et Packs arrivent avec leurs tickets.
 import type { ReactNode } from "react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { NavLink } from "@/components/shell/nav-link";
@@ -63,6 +63,7 @@ export default async function SystemLayout({
           {system.riskTier === "HIGH_RISK_EXEMPT_ART6_3" && (
             <NavLink href={`${base}/exemption`}>{t("exemption")}</NavLink>
           )}
+          <NavLink href={`${base}/sources`}>{t("sources")}</NavLink>
           <NavLink href={`${base}/changes`}>{t("changes")}</NavLink>
           <NavLink href={`${base}/history`}>{t("history")}</NavLink>
         </nav>

@@ -212,7 +212,8 @@
     "exemption_save": "Exemption file saved",
     "exemption_sign": "Exemption file signed",
     "exemption_signRefused": "Exemption file signature refused: incorrect password",
-    "integration_connect": "Integration connected"
+    "integration_connect": "Integration connected",
+    "integration_mapping": "Jira mapping saved"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -328,7 +329,8 @@
     "review": "Review the classification",
     "controls": "Controls",
     "controlsCount": "Controls {count}",
-    "exemption": "Exemption"
+    "exemption": "Exemption",
+    "sources": "Sources"
   },
   "designChanges": {
     "title": "Design changes",
@@ -773,5 +775,29 @@
     "noPurpose": "Not provided (public classifier)",
     "emailSubject": "AI Act classification note: {name}",
     "emailBody": "Hello,\n\nPlease find attached the classification note produced by the ProofLayer public classifier. It is indicative and does not bind ProofLayer.\n\nThe ProofLayer team"
+  },
+  "sources": {
+    "title": "Sources",
+    "jira": {
+      "title": "Jira",
+      "notConnected": "Jira is not connected to your organisation.",
+      "connectLink": "Connect Jira from the Organisation page.",
+      "site": "Jira site: {name}",
+      "inactive": "The Jira connection is revoked or failing: reconnect it from the Organisation page.",
+      "help": "Each mapping designates, with a JQL query, the issues that serve as evidence for this system. Only these issues are read.",
+      "purposes": {
+        "risks": "Risk register",
+        "incidents": "AI incidents",
+        "monitoring_reviews": "Monitoring reviews",
+        "release_validations": "Release validations"
+      },
+      "active": "Mapping saved.",
+      "notSaved": "Not saved yet: default query suggested.",
+      "preview": "Preview",
+      "save": "Save",
+      "count": "{count, plural, =0 {No issue matches.} one {# issue matches.} other {# issues match.}}",
+      "saved": "Mapping saved ({count, plural, =0 {no issue} one {# issue} other {# issues}}): backfill in progress.",
+      "invalidJql": "Jira rejects this JQL query. Check its syntax."
+    }
   }
 }
