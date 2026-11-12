@@ -3,6 +3,7 @@
 // vers la question et l'article), implications, actions. Variantes : exemption (Art. 6(4), 49(2)) et pratique
 // interdite (pas de signature). Signature dans une fenêtre : nom, fonction, déclaration, mot de passe (PL-204).
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -16,7 +17,7 @@ import { type QuestionId, type Responses } from "@/server/classify/questionnaire
 import { regulationUrl } from "@/lib/regulation";
 import { trpc } from "@/lib/trpc";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -93,9 +94,16 @@ export function ClassificationResult({
         </Alert>
       )}
       {tier === "HIGH_RISK_EXEMPT_ART6_3" && (
-        <Alert>
-          <strong>{t("exemptTitle")}</strong> {t("exemptBody")}
-        </Alert>
+        <div className="space-y-2">
+          <Alert>
+            <strong>{t("exemptTitle")}</strong> {t("exemptBody")}
+          </Alert>
+          {classification.status === "SIGNED" && (
+            <Link href={`/systems/${systemId}/exemption`} className={buttonVariants()}>
+              {t("generateDossier")}
+            </Link>
+          )}
+        </div>
       )}
 
       <section aria-labelledby={`why-title-${uid}`} className="space-y-2">

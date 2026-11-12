@@ -18,6 +18,11 @@ import {
 import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { instantiateControls } from "./controls";
+import { assertSignAttemptsLeft, recordSignRefusal, type SignDependencies } from "./sign-guard";
+
+export type { SignDependencies } from "./sign-guard";
+export { SIGN_ATTEMPT_WINDOW_MS, SIGN_MAX_REFUSALS } from "./sign-guard";
+import { evaluateExemptionControl } from "./exemption";
 import { ServiceError } from "./errors";
 import type { OrgContext } from "./organization";
 
@@ -248,15 +253,6 @@ export function signatureStatement(locale: string): string {
   return (locale === "en" ? en : fr).classificationResult.statement;
 }
 
-/** Après ce nombre de mots de passe refusés dans la fenêtre, la signature est bloquée pour l'utilisateur. */
-export const SIGN_MAX_REFUSALS = 5;
-export const SIGN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
-
-export interface SignDependencies {
-  /** Vérifie le mot de passe de l'utilisateur courant (Better Auth, verifyPassword). */
-  verifyPassword: (password: string) => Promise<boolean>;
-}
-
 /**
  * Signature (§3.2 E1, §5.3 écran A) : nom, fonction, déclaration, confirmation par mot de passe. Dans une même
  * transaction : la classification signée précédente passe à SUPERSEDED, le brouillon devient SIGNED, la fiche
@@ -273,20 +269,13 @@ export async function signClassification(
     throw new ServiceError("BAD_REQUEST", "classification.notComputed");
   if (draft.tier === "PROHIBITED")
     throw new ServiceError("BAD_REQUEST", "classification.prohibited");
-  // Confirmation par mot de passe, à essais limités (§4.7) : une session volée ne permet pas de deviner le mot de
-  // passe à force d'essais. Chaque refus est journalisé, sans le mot de passe.
-  const refusals = await dbOf(ctx).auditLog.count({
-    where: {
-      action: "classification.signRefused",
-      actorId: ctx.userId,
-      createdAt: { gte: new Date(Date.now() - SIGN_ATTEMPT_WINDOW_MS) },
-    },
-  });
-  if (refusals >= SIGN_MAX_REFUSALS) {
-    throw new ServiceError("TOO_MANY_REQUESTS", "classification.tooManyAttempts");
-  }
+  await assertSignAttemptsLeft(ctx);
   if (!(await deps.verifyPassword(input.password))) {
-    await record(ctx, "classification.signRefused", draft.id, { systemId: draft.systemId });
+    await recordSignRefusal(ctx, {
+      systemId: draft.systemId,
+      target: "classification",
+      targetId: draft.id,
+    });
     throw new ServiceError("FORBIDDEN", "classification.invalidPassword");
   }
   const statement = signatureStatement(input.locale);
@@ -328,6 +317,12 @@ export async function signClassification(
       systemId: draft.systemId,
       tier: draft.tier,
       role: draft.role,
+    });
+    // AIA-06-02 : un système exempté sans dossier signé est « preuve absente » ; un système non exempté, non concerné.
+    await evaluateExemptionControl(tx, {
+      orgId: ctx.orgId,
+      systemId: draft.systemId,
+      at: signedAt,
     });
     return { superseded: previous.map((p) => p.id), roleBefore: system.role, controls };
   });

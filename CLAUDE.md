@@ -179,6 +179,16 @@ packages/verify/         outil de vérification open source
   Rien n'est supprimé ; une non-applicabilité posée par un administrateur n'est jamais levée automatiquement.
 - Routeur `control` : `listBySystem` (lecture, tout membre). Écran : `/systems/[id]/controls`.
 
+## Dossier d'exemption (conventions établies par PL-205)
+- Table `ExemptionDossier` (un dossier par classification signée exemptée, `classificationId` unique), RLS, trigger
+  `exemption_dossier_guard` (immuable une fois signé). Service `src/server/services/exemption.ts`, routeur `exemption`
+  (`get`, `save`, `sign`, `document`, `annexViii`). Écran `/systems/[id]/exemption` (onglet visible si exempté).
+- Signature : même confirmation que la classification ; essais limités partagés (`src/server/services/sign-guard.ts`).
+- Champs de l'Annexe VIII section B : `src/server/services/annex-viii.ts` (pur, 9 points, exports CSV et JSON).
+- Évaluations : `recordEvaluation` (`src/server/services/controls.ts`) écrit `ControlEvaluation` et le statut de
+  l'instance. Évaluateurs purs dans `src/server/rules/evaluators/` (`Evaluation` de `src/server/rules/evaluation.ts`).
+  AIA-06-02 (`internal.exemptionDossier`) est évalué à chaque signature de classification ou de dossier.
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure

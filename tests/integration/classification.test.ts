@@ -432,7 +432,11 @@ describe("contrôles ouverts à la signature (PL-207)", () => {
     const list = await controls(systemId);
     expect(list).toHaveLength(37);
     expect(list.filter((c) => c.automation === "AUTOMATED")).toHaveLength(19);
-    expect(new Set(list.map((c) => c.status))).toEqual(new Set(["MISSING"]));
+    // En attente de preuve, sauf AIA-06-02, évalué dès la signature : non concerné hors exemption (PL-205).
+    expect(new Set(list.filter((c) => c.key !== "AIA-06-02").map((c) => c.status))).toEqual(
+      new Set(["MISSING"]),
+    );
+    expect(list.find((c) => c.key === "AIA-06-02")?.status).toBe("NOT_APPLICABLE");
     expect(list[0]).toMatchObject({ key: "AIA-04-01", pack: "A", notApplicable: false });
     expect((await callerFor(admin).system.get({ id: systemId })).controlCount).toBe(37);
     const entry = await forOrg(A).auditLog.findFirst({
@@ -483,9 +487,11 @@ describe("contrôles ouverts à la signature (PL-207)", () => {
     await api.saveAnswers({ systemId, questionId: "profiling", value: true });
     await api.compute({ systemId });
     expect((await sign(systemId)).controls).toMatchObject({ created: 0, reactivated: 31 });
-    expect(
-      (await controls(systemId)).every((c) => !c.notApplicable && c.status === "MISSING"),
-    ).toBe(true);
+    const reopened = await controls(systemId);
+    expect(reopened.every((c) => !c.notApplicable)).toBe(true);
+    expect(reopened.filter((c) => c.key !== "AIA-06-02").every((c) => c.status === "MISSING")).toBe(
+      true,
+    );
   });
 
   it("les contrôles d'une organisation sont invisibles d'une autre", async () => {

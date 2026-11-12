@@ -192,7 +192,10 @@
     "classification_compute": "Calcul d'une classification",
     "classification_sign": "Signature d'une classification",
     "classification_signRefused": "Signature refusée : mot de passe incorrect",
-    "control_instantiate": "Ouverture des contrôles d'un système"
+    "control_instantiate": "Ouverture des contrôles d'un système",
+    "exemption_save": "Enregistrement d'un dossier d'exemption",
+    "exemption_sign": "Signature d'un dossier d'exemption",
+    "exemption_signRefused": "Signature de dossier refusée : mot de passe incorrect"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -306,7 +309,8 @@
     "qualify": "Qualifier ce système",
     "review": "Revoir la classification",
     "controls": "Contrôles",
-    "controlsCount": "Contrôles {count}"
+    "controlsCount": "Contrôles {count}",
+    "exemption": "Exemption"
   },
   "designChanges": {
     "title": "Modifications de conception",
@@ -616,7 +620,8 @@
     "inForce": "Version signée en vigueur",
     "draftInProgress": "Une requalification est en cours. La version signée ci-dessous reste en vigueur jusqu'à la prochaine signature.",
     "readOnly": "Seuls un owner ou un admin peuvent qualifier un système.",
-    "controls": "{count, plural, =0 {Aucun contrôle applicable} one {# contrôle applicable} other {# contrôles applicables}}, dont {automated} évaluables automatiquement"
+    "controls": "{count, plural, =0 {Aucun contrôle applicable} one {# contrôle applicable} other {# contrôles applicables}}, dont {automated} évaluables automatiquement",
+    "generateDossier": "Générer le dossier d'exemption"
   },
   "controls": {
     "title": "Contrôles",
@@ -633,5 +638,97 @@
       "MANUAL": "Manuelle"
     },
     "byReclassification": "Écarté par la dernière reclassification"
+  },
+  "exemption": {
+    "title": "Dossier d'exemption",
+    "intro": "L'Art. 6(4) impose de documenter, avant la mise sur le marché ou la mise en service, l'évaluation qui écarte le haut risque. Ce dossier en garde la trace et fournit les informations à enregistrer dans la base de données de l'UE (Art. 49(2), Annexe VIII section B).",
+    "notApplicable": "Ce système n'a pas de classification signée qui l'exempte au titre de l'Art. 6(3). Le dossier ne s'applique qu'à une telle classification.",
+    "classificationRef": "Classification signée le {date} : Annexe III, point {points} ; condition de l'Art. 6(3) retenue : {conditions}.",
+    "assessment": "Évaluation (Art. 6(4))",
+    "conditionJustification": "Justification de la condition retenue",
+    "conditionHint": "Expliquez en quoi le système se limite à cette tâche et n'influence pas substantiellement la décision.",
+    "profilingJustification": "Motivation de l'absence de profilage",
+    "profilingHint": "Expliquez pourquoi le système n'évalue aucun aspect personnel des personnes physiques.",
+    "registration": "Informations d'enregistrement (Annexe VIII section B)",
+    "providerName": "Fournisseur : nom",
+    "providerAddress": "Fournisseur : adresse",
+    "providerContact": "Fournisseur : coordonnées de contact",
+    "submitter": "Personne qui enregistre pour le compte du fournisseur (facultatif)",
+    "representative": "Mandataire (facultatif)",
+    "tradeName": "Nom commercial du système",
+    "memberStates": "États membres où le système est mis sur le marché, mis en service ou mis à disposition",
+    "save": "Enregistrer le brouillon",
+    "saved": "Dossier enregistré.",
+    "sign": "Signer le dossier",
+    "signIntro": "La signature fige ce dossier. Une nouvelle classification exemptée appellera un nouveau dossier.",
+    "statement": "J'atteste l'exactitude des informations de ce dossier et de l'évaluation qu'il documente.",
+    "signedBy": "Dossier signé le {date} par {name}, {title}.",
+    "draft": "Brouillon non signé",
+    "document": "Dossier en PDF",
+    "exportCsv": "Annexe VIII B en CSV",
+    "exportJson": "Annexe VIII B en JSON",
+    "control": "Contrôle AIA-06-02",
+    "signedReadOnly": "Ce dossier est signé : il n'est plus modifiable.",
+    "notExempt": "Ce système n'est plus exempté : le dossier ne peut pas être modifié.",
+    "annexB": {
+      "title": "Annexe VIII section B",
+      "provider": "Nom, adresse et coordonnées du fournisseur",
+      "submitter": "Personne qui enregistre pour le compte du fournisseur",
+      "representative": "Mandataire",
+      "tradeName": "Nom commercial et référence du système",
+      "intendedPurpose": "Finalité prévue",
+      "conditions": "Conditions de l'Art. 6(3) retenues",
+      "grounds": "Motifs de l'exemption",
+      "status": "Statut du système",
+      "memberStates": "États membres",
+      "statusValues": {
+        "notYetPlaced": "Pas encore mis sur le marché ni en service",
+        "onMarket": "Sur le marché ou en service",
+        "noLongerOnMarket": "Plus sur le marché ni en service"
+      },
+      "none": "Néant",
+      "point": "{point}. {label}"
+    },
+    "pdf": {
+      "title": "Dossier d'exemption — Art. 6(3) et 6(4)",
+      "system": "Système",
+      "classification": "Classification",
+      "assessment": "Évaluation documentée",
+      "signature": "Signature",
+      "placedOnMarket": "Mise sur le marché ou en service déclarée : {date}",
+      "notPlaced": "Mise sur le marché ou en service : non déclarée",
+      "method": "Document établi avec ProofLayer à partir de la classification signée (règles {version}). Il engage le signataire, pas ProofLayer.",
+      "page": "Page {page} sur {pages}",
+      "generatedAt": "Document généré le {date}"
+    }
+  },
+  "countries": {
+    "AT": "Autriche",
+    "BE": "Belgique",
+    "BG": "Bulgarie",
+    "CY": "Chypre",
+    "CZ": "Tchéquie",
+    "DE": "Allemagne",
+    "DK": "Danemark",
+    "EE": "Estonie",
+    "ES": "Espagne",
+    "FI": "Finlande",
+    "FR": "France",
+    "GR": "Grèce",
+    "HR": "Croatie",
+    "HU": "Hongrie",
+    "IE": "Irlande",
+    "IT": "Italie",
+    "LT": "Lituanie",
+    "LU": "Luxembourg",
+    "LV": "Lettonie",
+    "MT": "Malte",
+    "NL": "Pays-Bas",
+    "PL": "Pologne",
+    "PT": "Portugal",
+    "RO": "Roumanie",
+    "SE": "Suède",
+    "SI": "Slovénie",
+    "SK": "Slovaquie"
   }
 }

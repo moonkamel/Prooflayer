@@ -58,6 +58,33 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     code: "NOT_FOUND",
   }),
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "exemption.get": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "exemption.annexViii": () => ({
+    input: { systemId: a.systemId, format: "json" },
+    code: "NOT_FOUND",
+  }),
+  "exemption.document": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "exemption.save": () => ({
+    input: {
+      systemId: a.systemId,
+      fields: {
+        conditionJustification: "x",
+        profilingJustification: "x",
+        providerName: "x",
+        providerAddress: "x",
+        providerContact: "x",
+        submitter: null,
+        representative: null,
+        tradeName: "x",
+        memberStates: [],
+      },
+    },
+    code: "NOT_FOUND",
+  }),
+  "exemption.sign": () => ({
+    input: { systemId: a.systemId, name: "X", title: "Y", password: "z", locale: "fr" },
+    code: "NOT_FOUND",
+  }),
   "classification.current": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "classification.history": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "classification.note": () => ({
