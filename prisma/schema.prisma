@@ -210,6 +210,7 @@ model AiSystem {
   controlInstances     ControlInstance[]
   resourceLinks        SystemResourceLink[]
   auditPacks           AuditPack[]
+  exemptionDossiers    ExemptionDossier[] // PL-205
 
   @@unique([orgId, slug])
   @@index([orgId, riskTier])
@@ -241,8 +242,44 @@ model Classification {
   signatureStatement String?
   createdAt          DateTime             @default(now())
   system             AiSystem             @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  exemptionDossier   ExemptionDossier? // PL-205
 
   @@index([orgId, systemId, createdAt(sort: Desc)])
+}
+
+// PL-205 : dossier d'exemption de l'Art. 6(3), exigé par l'Art. 6(4) ; ses champs alimentent l'Annexe VIII section B
+// (enregistrement de l'Art. 49(2)). Un dossier par classification signée ; immuable une fois signé.
+enum DossierStatus {
+  DRAFT
+  SIGNED
+}
+
+model ExemptionDossier {
+  id                     String         @id @default(cuid())
+  orgId                  String
+  systemId               String
+  classificationId       String         @unique
+  status                 DossierStatus  @default(DRAFT)
+  conditionJustification String // justification de la condition retenue, rédigée par l'utilisateur
+  profilingJustification String // motivation de l'absence de profilage
+  providerName           String // Annexe VIII B(1)
+  providerAddress        String
+  providerContact        String
+  submitter              String? // Annexe VIII B(2) : personne qui enregistre pour le compte du fournisseur
+  representative         String? // Annexe VIII B(3) : mandataire
+  tradeName              String // Annexe VIII B(4)
+  memberStates           String[] // Annexe VIII B(9) : codes pays de l'UE
+  signedByUserId         String?
+  signedByName           String?
+  signedByTitle          String?
+  signedAt               DateTime?
+  signatureStatement     String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  system                 AiSystem       @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  classification         Classification @relation(fields: [classificationId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, systemId])
 }
 
 model DesignChange {

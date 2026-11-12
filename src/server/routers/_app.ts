@@ -2,6 +2,7 @@ import { createCallerFactory, router } from "@/server/trpc";
 import { auditRouter } from "./audit";
 import { classificationRouter } from "./classification";
 import { controlRouter } from "./control";
+import { exemptionRouter } from "./exemption";
 import { orgRouter } from "./org";
 import { systemRouter } from "./system";
 
@@ -11,6 +12,7 @@ export const appRouter = router({
   system: systemRouter,
   classification: classificationRouter,
   control: controlRouter,
+  exemption: exemptionRouter,
 });
 
 export type AppRouter = typeof appRouter;

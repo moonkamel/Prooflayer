@@ -5,6 +5,7 @@ import type { OrgTransaction } from "@/server/db";
 import type { AiActRole, RiskTier } from "@/generated/prisma/enums";
 import { LIBRARY_VERSION } from "@/server/rules/library";
 import { NA_BY_RECLASSIFICATION, planInstances } from "@/server/rules/instantiate";
+import type { Evaluation } from "@/server/rules/evaluation";
 import { ServiceError } from "./errors";
 import type { OrgContext } from "./organization";
 
@@ -107,4 +108,48 @@ export async function listControlsBySystem(ctx: OrgContext, input: { systemId: s
       lastEvaluatedAt: r.lastEvaluatedAt?.toISOString() ?? null,
     }))
     .sort((a, b) => a.key.localeCompare(b.key));
+}
+
+/**
+ * Inscrit une évaluation d'un contrôle du système (§3.2 E6 : « chaque évaluation est historisée avec les identifiants
+ * des preuves utilisées et la version de l'évaluateur ») et reporte son statut sur l'instance. Sans instance du
+ * contrôle (système non signé), rien n'est inscrit. Une instance écartée (non applicable) garde son statut.
+ */
+export async function recordEvaluation(
+  tx: OrgTransaction,
+  input: {
+    orgId: string;
+    systemId: string;
+    controlKey: string;
+    evaluatorVersion: string;
+    evaluation: Evaluation;
+    at: Date;
+  },
+): Promise<boolean> {
+  const instance = await tx.controlInstance.findFirst({
+    where: {
+      systemId: input.systemId,
+      definition: { key: input.controlKey, libraryVersion: LIBRARY_VERSION },
+    },
+  });
+  if (!instance) return false;
+  await tx.controlEvaluation.create({
+    data: {
+      orgId: input.orgId,
+      controlInstanceId: instance.id,
+      status: input.evaluation.status,
+      reasons: input.evaluation.reasons as unknown as object,
+      evidenceIds: input.evaluation.evidenceIds,
+      evaluatorVersion: input.evaluatorVersion,
+      evaluatedAt: input.at,
+    },
+  });
+  await tx.controlInstance.update({
+    where: { id: instance.id },
+    data: {
+      ...(instance.notApplicable ? {} : { status: input.evaluation.status }),
+      lastEvaluatedAt: input.at,
+    },
+  });
+  return true;
 }

@@ -60,6 +60,9 @@ export default async function SystemLayout({
               ? t("controlsCount", { count: system.controlCount })
               : t("controls")}
           </NavLink>
+          {system.riskTier === "HIGH_RISK_EXEMPT_ART6_3" && (
+            <NavLink href={`${base}/exemption`}>{t("exemption")}</NavLink>
+          )}
           <NavLink href={`${base}/changes`}>{t("changes")}</NavLink>
           <NavLink href={`${base}/history`}>{t("history")}</NavLink>
         </nav>

@@ -192,7 +192,10 @@
     "classification_compute": "Classification computed",
     "classification_sign": "Classification signed",
     "classification_signRefused": "Signature refused: incorrect password",
-    "control_instantiate": "System controls opened"
+    "control_instantiate": "System controls opened",
+    "exemption_save": "Exemption file saved",
+    "exemption_sign": "Exemption file signed",
+    "exemption_signRefused": "Exemption file signature refused: incorrect password"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -306,7 +309,8 @@
     "qualify": "Qualify this system",
     "review": "Review the classification",
     "controls": "Controls",
-    "controlsCount": "Controls {count}"
+    "controlsCount": "Controls {count}",
+    "exemption": "Exemption"
   },
   "designChanges": {
     "title": "Design changes",
@@ -616,7 +620,8 @@
     "inForce": "Signed version in force",
     "draftInProgress": "A requalification is in progress. The signed version below stays in force until the next signature.",
     "readOnly": "Only an owner or an admin can qualify a system.",
-    "controls": "{count, plural, =0 {No applicable control} one {# applicable control} other {# applicable controls}}, {automated} of them evaluated automatically"
+    "controls": "{count, plural, =0 {No applicable control} one {# applicable control} other {# applicable controls}}, {automated} of them evaluated automatically",
+    "generateDossier": "Generate the exemption file"
   },
   "controls": {
     "title": "Controls",
@@ -633,5 +638,97 @@
       "MANUAL": "Manual"
     },
     "byReclassification": "Set aside by the last reclassification"
+  },
+  "exemption": {
+    "title": "Exemption file",
+    "intro": "Art. 6(4) requires documenting, before placing on the market or putting into service, the assessment that rules out high risk. This file keeps that record and provides the information to register in the EU database (Art. 49(2), Annex VIII section B).",
+    "notApplicable": "This system has no signed classification exempting it under Art. 6(3). The file only applies to such a classification.",
+    "classificationRef": "Classification signed on {date}: Annex III, point {points}; Art. 6(3) condition relied on: {conditions}.",
+    "assessment": "Assessment (Art. 6(4))",
+    "conditionJustification": "Justification of the condition relied on",
+    "conditionHint": "Explain how the system is limited to this task and does not materially influence the decision.",
+    "profilingJustification": "Reasons for the absence of profiling",
+    "profilingHint": "Explain why the system does not evaluate any personal aspect of natural persons.",
+    "registration": "Registration information (Annex VIII section B)",
+    "providerName": "Provider: name",
+    "providerAddress": "Provider: address",
+    "providerContact": "Provider: contact details",
+    "submitter": "Person registering on behalf of the provider (optional)",
+    "representative": "Authorised representative (optional)",
+    "tradeName": "System trade name",
+    "memberStates": "Member States where the system is placed on the market, put into service or made available",
+    "save": "Save draft",
+    "saved": "File saved.",
+    "sign": "Sign the file",
+    "signIntro": "Signing freezes this file. A new exempted classification will call for a new file.",
+    "statement": "I certify that the information in this file and the assessment it documents are accurate.",
+    "signedBy": "File signed on {date} by {name}, {title}.",
+    "draft": "Unsigned draft",
+    "document": "PDF file",
+    "exportCsv": "Annex VIII B as CSV",
+    "exportJson": "Annex VIII B as JSON",
+    "control": "Control AIA-06-02",
+    "signedReadOnly": "This file is signed and can no longer be edited.",
+    "notExempt": "This system is no longer exempted: the file cannot be edited.",
+    "annexB": {
+      "title": "Annex VIII section B",
+      "provider": "Provider name, address and contact details",
+      "submitter": "Person registering on behalf of the provider",
+      "representative": "Authorised representative",
+      "tradeName": "Trade name and system reference",
+      "intendedPurpose": "Intended purpose",
+      "conditions": "Art. 6(3) conditions relied on",
+      "grounds": "Grounds for the exemption",
+      "status": "System status",
+      "memberStates": "Member States",
+      "statusValues": {
+        "notYetPlaced": "Not yet placed on the market or put into service",
+        "onMarket": "On the market or in service",
+        "noLongerOnMarket": "No longer on the market or in service"
+      },
+      "none": "None",
+      "point": "{point}. {label}"
+    },
+    "pdf": {
+      "title": "Exemption file — Art. 6(3) and 6(4)",
+      "system": "System",
+      "classification": "Classification",
+      "assessment": "Documented assessment",
+      "signature": "Signature",
+      "placedOnMarket": "Declared placing on the market or putting into service: {date}",
+      "notPlaced": "Placing on the market or putting into service: not declared",
+      "method": "Document produced with ProofLayer from the signed classification (rules {version}). It binds the signatory, not ProofLayer.",
+      "page": "Page {page} of {pages}",
+      "generatedAt": "Document generated on {date}"
+    }
+  },
+  "countries": {
+    "AT": "Austria",
+    "BE": "Belgium",
+    "BG": "Bulgaria",
+    "CY": "Cyprus",
+    "CZ": "Czechia",
+    "DE": "Germany",
+    "DK": "Denmark",
+    "EE": "Estonia",
+    "ES": "Spain",
+    "FI": "Finland",
+    "FR": "France",
+    "GR": "Greece",
+    "HR": "Croatia",
+    "HU": "Hungary",
+    "IE": "Ireland",
+    "IT": "Italy",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "LV": "Latvia",
+    "MT": "Malta",
+    "NL": "Netherlands",
+    "PL": "Poland",
+    "PT": "Portugal",
+    "RO": "Romania",
+    "SE": "Sweden",
+    "SI": "Slovenia",
+    "SK": "Slovakia"
   }
 }

@@ -51,6 +51,23 @@ const fixtures: [model: string, table: string, build: (org: string, tag?: string
     }),
   ],
   [
+    "exemptionDossier",
+    "ExemptionDossier",
+    (o, t = "") => ({
+      id: id(o, "exd", t),
+      orgId: o,
+      systemId: id(o, "sys"),
+      classificationId: id(o, "cls"),
+      conditionJustification: "C",
+      profilingJustification: "P",
+      providerName: "N",
+      providerAddress: "A",
+      providerContact: "C",
+      tradeName: "T",
+      memberStates: [],
+    }),
+  ],
+  [
     "designChange",
     "DesignChange",
     (o, t = "") => ({
