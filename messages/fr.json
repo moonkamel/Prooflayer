@@ -235,7 +235,8 @@
     "language": "Langue",
     "activeOrganization": "Organisation active : <strong>{name}</strong>",
     "brand": "ProofLayer",
-    "systems": "Systèmes d'IA"
+    "systems": "Systèmes d'IA",
+    "dashboard": "Tableau de bord"
   },
   "home": {
     "title": "ProofLayer",
@@ -333,7 +334,8 @@
     "controls": "Contrôles",
     "controlsCount": "Contrôles {count}",
     "exemption": "Exemption",
-    "sources": "Sources"
+    "sources": "Sources",
+    "dashboard": "Tableau de bord"
   },
   "designChanges": {
     "title": "Modifications de conception",
@@ -835,5 +837,64 @@
       "classification_invalidPassword": "Mot de passe incorrect.",
       "classification_tooManyAttempts": "Trop d'essais : réessayez dans un quart d'heure."
     }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "orgIntro": "Couverture de preuve de chaque système surveillé. L'indicateur compte les contrôles dont la preuve est présente ; il est toujours accompagné des contrôles en échec, périmés et sans preuve.",
+    "coverage": "Couverture de preuve",
+    "coverageValue": "{pass} / {applicable}",
+    "coverageLabel": "{pass} contrôles avec preuve présente sur {applicable} applicables",
+    "failing": "En échec",
+    "stale": "Périmés",
+    "missing": "Sans preuve",
+    "partial": "Partiels",
+    "lastEvidence": "Dernière preuve : {when}",
+    "noEvidence": "Aucune preuve capturée pour l'instant.",
+    "lastEvaluation": "Dernière évaluation",
+    "never": "jamais",
+    "trendTitle": "Couverture sur 90 jours",
+    "trendSummary": "Couverture passée de {from} à {to} contrôles avec preuve présente en 90 jours.",
+    "trendData": "Voir les données de la courbe",
+    "day": "Jour",
+    "systems": "Systèmes",
+    "system": "Système",
+    "tier": "Catégorie",
+    "noSystems": "Aucun système surveillé. Déclarez un système dans le registre pour suivre sa couverture.",
+    "openRegistry": "Ouvrir le registre",
+    "integrationFailing": "Une connexion est en erreur ou révoquée : certaines preuves ne sont plus capturées.",
+    "integrationLink": "Voir la page Organisation",
+    "filters": "Filtres",
+    "status": "Statut",
+    "article": "Article",
+    "owner": "Responsable",
+    "source": "Source",
+    "all": "Tous",
+    "allArticles": "Tous les articles",
+    "nobody": "Non assigné",
+    "search": "Rechercher un contrôle",
+    "reset": "Réinitialiser les filtres",
+    "results": "{count, plural, =0 {Aucun contrôle ne correspond aux filtres.} one {# contrôle affiché} other {# contrôles affichés}}",
+    "control": "Contrôle",
+    "evidence": "Preuves",
+    "group": "{article} : {pass} / {applicable} avec preuve présente",
+    "expand": "Déplier {article}",
+    "collapse": "Replier {article}",
+    "expandAll": "Tout déplier",
+    "collapseAll": "Tout replier",
+    "sourceCount": "{source} · {count}",
+    "noSource": "—",
+    "connect": "Connectez {provider} pour évaluer",
+    "addEvidence": "Ajouter une preuve",
+    "empty": "Aucun contrôle ouvert : signez la classification du système pour ouvrir ses contrôles.",
+    "sources": {
+      "GITHUB": "GitHub",
+      "JIRA": "Jira",
+      "MANUAL": "Déclaratif",
+      "SYSTEM": "ProofLayer",
+      "API": "API",
+      "GITLAB": "GitLab",
+      "NOTION": "Notion"
+    },
+    "loading": "Chargement du tableau de bord…"
   }
 }

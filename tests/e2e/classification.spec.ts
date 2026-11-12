@@ -152,7 +152,20 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await attestation.getByLabel("Mot de passe").fill(E2E_PASSWORD);
   await attestation.getByRole("button", { name: "Signer l'attestation" }).click();
   await expect(page).toHaveURL(/\/controls$/u);
-  await page.goto(page.url().replace(/\/controls$/u, "/classification"));
+
+  // Dashboard (PL-406) : 37 contrôles, filtres reflétés dans l'adresse et conservés au rechargement.
+  await page.goto(page.url().replace(/\/controls$/u, "/dashboard"));
+  await expect(page.getByTestId("dashboard-control")).toHaveCount(37);
+  await expect(page.getByTestId("results")).toHaveText("37 contrôles affichés");
+  await page.getByLabel("Rechercher un contrôle").fill("AIA-15-02");
+  await expect(page.getByTestId("dashboard-control")).toHaveCount(1);
+  await expect(page).toHaveURL(/[?&]q=AIA-15-02/u);
+  await page.reload();
+  await expect(page.getByTestId("dashboard-control")).toHaveCount(1);
+  await expectNoViolations(page, "dashboard filtré");
+  await page.getByRole("button", { name: "Réinitialiser les filtres" }).click();
+  await expect(page.getByTestId("dashboard-control")).toHaveCount(37);
+  await page.goto(page.url().replace(/\/dashboard.*$/u, "/classification"));
 
   // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
   await page.getByRole("button", { name: "Requalifier le système" }).click();
