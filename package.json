@@ -22,6 +22,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "controls:sync": "tsx scripts/sync-controls.ts",
     "db:check": "tsx scripts/db-check.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },

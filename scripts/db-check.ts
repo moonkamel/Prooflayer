@@ -110,6 +110,13 @@ async function verifyAppRole(): Promise<void> {
     `${APP_ROLE} ne supprime pas dans EvidenceItem`,
   );
   check(!(await privilege("AuditLog", "UPDATE")), `${APP_ROLE} ne modifie pas AuditLog`);
+  check(
+    (await privilege("ControlDefinition", "SELECT")) &&
+      !(await privilege("ControlDefinition", "INSERT")) &&
+      !(await privilege("ControlDefinition", "UPDATE")) &&
+      !(await privilege("ControlDefinition", "DELETE")),
+    `${APP_ROLE} lit ControlDefinition sans l'écrire`,
+  );
   check(!(await privilege("AuditLog", "DELETE")), `${APP_ROLE} ne supprime pas dans AuditLog`);
 }
 

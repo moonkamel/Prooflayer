@@ -156,6 +156,18 @@ packages/verify/         outil de vérification open source
 - Note PDF : `@react-pdf/renderer`, `src/server/services/classification-note.tsx`, route
   `/api/systems/[id]/classifications/[cid]/note?lang=fr|en`. Textes : `classificationResult.note`.
 
+## Bibliothèque de contrôles (conventions établies par PL-206)
+- `src/server/rules/library/` : `schema.ts` (Zod), un fichier par pack (`pack-a.ts`, `pack-b.ts`, `pack-c.ts`),
+  `index.ts` (`LIBRARY_VERSION`, `CONTROL_LIBRARY`, `applicableControls(tier, role)`). 37 contrôles MVP du §12.3, dont
+  19 automatisés ; textes fr et en dans le fichier du pack. Pack A : tous les rôles et toutes les catégories signables ;
+  packs B et C : fournisseur à haut risque.
+- `src/server/rules/evaluator-keys.ts` : toute `evaluatorKey` y est déclarée avec le ticket qui livre l'évaluateur.
+- Types de preuves : liste `EVIDENCE_KINDS` de `schema.ts` (GitHub et Jira du cahier des charges ; `manual.*` et
+  `system.*` introduits ici). Durées de fraîcheur et seuils : seulement ceux que le §12.3 énonce.
+- Publication : `pnpm controls:sync` (rôle de migration, idempotent, à chaque déploiement). `ControlDefinition` est en
+  lecture seule pour le rôle applicatif. Un contrôle retiré est marqué `deprecatedAt`, jamais supprimé.
+- Toute évolution du référentiel publie une nouvelle `LIBRARY_VERSION`.
+
 ## Étanchéité par procédure (convention établie par l'audit du sprint 2)
 - `tests/integration/cross-org.test.ts` (§4.7) : chaque procédure tRPC y est classée, soit avec une entrée désignant
   une ressource d'une autre organisation (refus attendu), soit comme portée par l'organisation active. Une procédure
