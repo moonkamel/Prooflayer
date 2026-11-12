@@ -4,6 +4,10 @@
 import { withOrgTransaction } from "@/server/db";
 import { normalizeWebhook } from "@/server/connectors/github/normalizers";
 import { createEvidence, type EvidenceDependencies } from "@/server/services/evidence";
+import { scheduleEvaluations } from "@/server/services/evaluation";
+import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
+import { jobRegistry } from "@/server/system/jobs/handlers";
+import { runJobNow } from "@/server/system/jobs/queue";
 import {
   claimDeliveries,
   failDelivery,
@@ -64,8 +68,9 @@ export async function handleDelivery(
             capturedVia: "WEBHOOK",
           })
         : [];
+      const created: { id: string; kind: string; resourceId: string | null }[] = [];
       for (const item of evidence) {
-        await createEvidence(
+        const result = await createEvidence(
           tx,
           integration.orgId,
           { ...item, raw: delivery.payload },
@@ -73,7 +78,11 @@ export async function handleDelivery(
             ? { store: deps.store, master: deps.master, now: deps.now ?? (() => new Date()) }
             : undefined,
         );
+        if (result.created)
+          created.push({ id: result.id, kind: item.kind, resourceId: item.resourceId ?? null });
       }
+      // Réévaluation incrémentale (PL-401) : jobs control.evaluate dans la même transaction que les preuves.
+      const jobs = await scheduleEvaluations(tx, integration.orgId, created, scheduleEvaluation);
       await tx.integration.update({
         where: { id: integration.integrationId },
         data: { lastEventAt: new Date() },
@@ -86,9 +95,11 @@ export async function handleDelivery(
         resource ? (evidence.length > 0 ? undefined : "événement non suivi") : "dépôt non lié",
       );
       if (!finished) throw new LeaseLost();
-      return status === "PROCESSED" ? "processed" : "ignored";
+      return { outcome: status === "PROCESSED" ? "processed" : "ignored", jobs } as const;
     });
-    return outcome;
+    // Évaluation aussitôt après la validation (moins de 5 secondes, §3.2 E6) ; sinon le cron la reprend.
+    for (const id of outcome.jobs) await runJobNow(id, jobRegistry).catch(() => undefined);
+    return outcome.outcome;
   } catch (error) {
     if (error instanceof LeaseLost) return "lease_lost";
     // Jamais la charge dans le message : seulement le type d'erreur et son message.

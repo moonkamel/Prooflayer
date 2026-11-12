@@ -18,6 +18,8 @@ import {
 import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { instantiateControls } from "./controls";
+import { scheduleOrgSweep } from "./evaluation";
+import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
 import { assertSignAttemptsLeft, recordSignRefusal, type SignDependencies } from "./sign-guard";
 
 export type { SignDependencies } from "./sign-guard";
@@ -324,6 +326,8 @@ export async function signClassification(
       systemId: draft.systemId,
       at: signedAt,
     });
+    // Les autres contrôles évaluables sont jugés sur les preuves déjà présentes (PL-401), par la file de jobs.
+    await scheduleOrgSweep(tx, ctx.orgId, scheduleEvaluation, draft.systemId);
     return { superseded: previous.map((p) => p.id), roleBefore: system.role, controls };
   });
 

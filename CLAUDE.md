@@ -310,3 +310,20 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   - 12.3 Catalogue des contrôles
   - 12.4 Bibliographie réglementaire
   - 12.5 Vingt questions ouvertes à trancher avec les design partners
+
+## Moteur d'évaluation (conventions établies par PL-401)
+- `src/server/rules/engine.ts` (pur) : `evaluate(definition, evidence[], now, registry)` retient les preuves des types
+  acceptés puis appelle l'évaluateur ; `null` si l'évaluateur n'est pas livré. Aides : `reason`, `isStale`
+  (fraîcheur ou `validUntil`), `newestFirst`, `windowStart`.
+- Registre `src/server/rules/evaluators/index.ts` (`EVALUATORS`) : clé → `{ version, evaluate }`. Un évaluateur livré y
+  entre avec son ticket ; sa version (`clé@n`) est historisée avec chaque évaluation.
+- `src/server/services/evaluation.ts` : `scheduleEvaluations` (preuves nouvelles → contrôles qui acceptent leur type, sur
+  les systèmes liés à leur ressource ou rattachés par `EvidenceLink`), `evaluateInstance` (historise `ControlEvaluation`,
+  statut de l'instance, liens `EvidenceLink` « rule » vers les preuves retenues), `scheduleOrgSweep`.
+- Jobs `control.evaluate` (clé `control.evaluate:{instanceId}`) et `control.sweepOrg` (`src/server/system/jobs/
+  control-evaluate.ts`). `enqueueInTransaction` : programmé dans la transaction des preuves ; dédupliqué tant qu'il
+  attend, réarmé sinon (une tentative en cours perd son jeton et s'annule).
+- Toute création de preuve appelle `scheduleEvaluations` dans sa transaction ; le webhook exécute aussitôt les jobs après
+  validation, le cron de chaque minute reste le filet. Signature d'une classification : contrôles du système programmés.
+- Passage quotidien : `/api/cron/daily` (vercel.json) → `scheduleDailySweep` (un `control.sweepOrg` par organisation et
+  par jour). Instance non applicable ou système archivé : jamais évalué.
