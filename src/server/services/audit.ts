@@ -28,6 +28,7 @@ export const AUDIT_ACTIONS = [
   "exemption.save",
   "exemption.sign",
   "exemption.signRefused",
+  "integration.connect",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

@@ -7,6 +7,8 @@ import { randomUUID } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { signState } from "@/server/connectors/jira/oauth";
+import { generateKey } from "@/server/crypto/envelope";
 import { forOrg, prisma } from "@/server/db";
 import { appRouter, createCaller } from "@/server/routers/_app";
 
@@ -101,6 +103,14 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     input: { systemId: a.systemId, name: "X", title: "Y", password: "z", locale: "fr" },
     code: "NOT_FOUND",
   }),
+  // Un state de connexion Jira émis pour l'organisation A ne lie rien à B.
+  "integration.jira.complete": () => ({
+    input: {
+      code: "code",
+      state: signState({ orgId: A, userId: ownerA }, process.env.BETTER_AUTH_SECRET!, new Date()),
+    },
+    code: "BAD_REQUEST",
+  }),
 };
 
 /** Procédures sans identifiant de ressource : elles ne portent que sur l'organisation active. */
@@ -114,6 +124,7 @@ const ORG_SCOPED = [
   "audit.export",
   "system.list",
   "system.export",
+  "integration.jira.authorizeUrl",
 ];
 
 const paths = Object.keys(appRouter._def.procedures as unknown as Record<string, unknown>);
@@ -126,6 +137,13 @@ function call(caller: ReturnType<typeof callerFor>, path: string, input: unknown
 }
 
 beforeAll(async () => {
+  // Application OAuth Jira factice : la procédure va jusqu'à la vérification du state.
+  process.env.JIRA_CLIENT_ID ??= "client-test";
+  process.env.JIRA_CLIENT_SECRET ??= "secret-test";
+  process.env.BETTER_AUTH_URL ??= "http://localhost:3000";
+  process.env.PROOFLAYER_MASTER_KEY ??= generateKey().toString("base64");
+  // Le job CI `db` ne définit pas de secret d'authentification : un secret propre à ce test signe le state.
+  process.env.BETTER_AUTH_SECRET ??= "cross-org-test-secret-0123456789-0123456789";
   for (const [org, user] of [
     [A, ownerA],
     [B, ownerB],

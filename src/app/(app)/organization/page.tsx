@@ -11,14 +11,21 @@ import {
   RevokeInvitationButton,
 } from "./organization-controls";
 import { Table, TableCell } from "@/components/ui/table";
+import { Alert } from "@/components/ui/alert";
+import { parseJiraStatus } from "@/lib/integration-status";
 
 /** Titre du document (WCAG 2.4.2), complété par « · ProofLayer » (gabarit de src/app/layout.tsx). */
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("organization"))("title") };
 }
 
-export default async function OrganizationPage() {
+export default async function OrganizationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ jira?: string }>;
+}) {
   await requireSession();
+  const jiraStatus = parseJiraStatus((await searchParams).jira);
   const api = await serverCaller();
   const org = await api.org.get();
   const members = await api.org.members.list();
@@ -69,6 +76,19 @@ export default async function OrganizationPage() {
           <section aria-labelledby="invite-title">
             <h2 id="invite-title">{t("inviteTitle")}</h2>
             <InviteForm options={roleOptions} />
+          </section>
+          {/* Connexion Jira (PL-403) ; la page Intégrations complète arrive avec PL-308. */}
+          <section aria-labelledby="jira-title">
+            <h2 id="jira-title">{t("jira.title")}</h2>
+            {jiraStatus && (
+              <Alert tone={jiraStatus === "connected" ? undefined : "error"}>
+                {t(`jira.status.${jiraStatus}`)}
+              </Alert>
+            )}
+            <p>{t("jira.description")}</p>
+            <a href="/api/integrations/jira/start" data-testid="jira-connect">
+              {t("jira.connect")}
+            </a>
           </section>
           <section aria-labelledby="invitations-title">
             <h2 id="invitations-title">{t("invitationsTitle")}</h2>
