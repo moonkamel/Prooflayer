@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { renderAuthEmail, sendAuthEmail } from "@/server/email/auth-emails";
 import {
+  BrevoTransport,
   createEmailTransport,
   EmailNotConfiguredError,
   OutboxTransport,
@@ -90,5 +91,61 @@ describe("emails d'authentification", () => {
     expect(first.to).toBe("a@b.example");
     expect(first.text).toContain(URL_FIXTURE);
     expect(Number.isNaN(Date.parse(first.sentAt))).toBe(false);
+  });
+});
+
+describe("BrevoTransport (PL-108)", () => {
+  it("exige la clé et l'expéditeur", () => {
+    expect(() => createEmailTransport({ EMAIL_TRANSPORT: "brevo" })).toThrow(
+      EmailNotConfiguredError,
+    );
+    expect(
+      createEmailTransport({
+        EMAIL_TRANSPORT: "brevo",
+        BREVO_API_KEY: "k",
+        EMAIL_FROM: "no-reply@x.eu",
+      }),
+    ).toBeInstanceOf(BrevoTransport);
+  });
+
+  it("appelle l'API v3 avec la clé en en-tête, le texte et les pièces jointes", async () => {
+    const calls: { url: string; init: RequestInit }[] = [];
+    const fake = (async (url: string, init: RequestInit) => {
+      calls.push({ url, init });
+      return new Response("{}", { status: 201 });
+    }) as unknown as typeof fetch;
+    const transport = new BrevoTransport(
+      { apiKey: "cle-test", from: "no-reply@x.eu", fromName: "ProofLayer" },
+      fake,
+    );
+    await transport.send({
+      to: "clara@talvio.eu",
+      subject: "Note",
+      text: "Bonjour",
+      attachments: [
+        { filename: "note.pdf", contentType: "application/pdf", contentBase64: "JVBERi0=" },
+      ],
+    });
+    expect(calls[0]!.url).toBe("https://api.brevo.com/v3/smtp/email");
+    expect((calls[0]!.init.headers as Record<string, string>)["api-key"]).toBe("cle-test");
+    expect(JSON.parse(calls[0]!.init.body as string)).toEqual({
+      sender: { email: "no-reply@x.eu", name: "ProofLayer" },
+      to: [{ email: "clara@talvio.eu" }],
+      subject: "Note",
+      textContent: "Bonjour",
+      attachment: [{ name: "note.pdf", content: "JVBERi0=" }],
+    });
+  });
+
+  it("un refus lève une erreur qui ne contient ni la réponse ni le destinataire", async () => {
+    const fake = (async () =>
+      new Response('{"message":"clara@talvio.eu invalid"}', {
+        status: 400,
+      })) as unknown as typeof fetch;
+    const transport = new BrevoTransport({ apiKey: "k", from: "a@b.eu", fromName: "P" }, fake);
+    const error = await transport
+      .send({ to: "clara@talvio.eu", subject: "s", text: "t" })
+      .catch((e: Error) => e);
+    expect((error as Error).message).toBe("Brevo : envoi refusé (HTTP 400)");
   });
 });

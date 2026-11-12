@@ -341,3 +341,19 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   Elles portent `payload.systemId` : le moteur les rattache aux contrôles de ce système.
 - AIA-06-02 reste évalué à la signature (faits de ProofLayer, version `internal.exemptionDossier@2`), hors registre.
 - `createEvidence` ne lit stockage et clé maîtresse que pour une charge brute à chiffrer.
+
+## Déploiement et observabilité (conventions établies par PL-108)
+- Vercel (projet `prooflayer`, équipe « Tarik's projects ») : `vercel.json` épingle les fonctions à `fra1` ; Node 22.
+  Build Vercel : `scripts/vercel-build.sh` (client Prisma ; en production seulement, `prisma migrate deploy` puis
+  `pnpm controls:sync` si `DIRECT_DATABASE_URL` est fourni). Les prévisualisations ne touchent jamais au schéma.
+- Variables : non secrètes posées sur le projet ; secrètes (`DATABASE_URL`, `DIRECT_DATABASE_URL`, `BETTER_AUTH_SECRET`,
+  `CRON_SECRET`, `PROOFLAYER_MASTER_KEY`, `BREVO_API_KEY`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`) saisies par le
+  fondateur en type « sensitive », distinctes par environnement. Jamais de secret dans le dépôt ni dans la conversation.
+- En-têtes : `src/lib/security-headers.ts` (purs) ; CSP à nonce par requête dans `src/proxy.ts` (pages dynamiques), en-têtes
+  fixes (HSTS préchargé, `X-Frame-Options`, etc.) dans `next.config.ts`. Une origine externe nouvelle s'ajoute à la CSP.
+- Emails : transport `brevo` (`BREVO_API_KEY`, `EMAIL_FROM`) ; erreur sans corps de réponse ni destinataire.
+- Stockage objet : `OBJECT_STORE=s3` (Supabase Storage, bucket privé `prooflayer`, clés S3 dédiées, jamais la clé de service).
+- Sentry : organisation en région UE, `src/instrumentation.ts` et `src/instrumentation-client.ts`, options et nettoyage
+  dans `src/lib/sentry-scrub.ts` (`sendDefaultPii: false`, ni utilisateur, ni en-têtes, ni corps, ni variables locales ;
+  emails et jetons masqués). Inactif sans `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`.
+- Santé : `GET /api/health` (200 si la base répond, 503 sinon), pour la surveillance de disponibilité.

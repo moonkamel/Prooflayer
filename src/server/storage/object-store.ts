@@ -2,6 +2,13 @@
 // chiffrés par organisation avant écriture. Le magasin « local » (fichiers) sert au développement et aux tests ; le
 // magasin S3 de Supabase est branché avec le déploiement (PL-108), et le magasin local y est refusé.
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  NoSuchKey,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { dirname, join, normalize } from "node:path";
 
 export interface ObjectStore {
@@ -44,6 +51,46 @@ export class LocalObjectStore implements ObjectStore {
   }
 }
 
+/**
+ * Supabase Storage par son API S3 (§4.2), bucket privé, accès par clés S3 propres au stockage (jamais la clé de
+ * service). Les objets sont déjà chiffrés par organisation avant l'écriture.
+ */
+export class S3ObjectStore implements ObjectStore {
+  constructor(
+    private readonly client: Pick<S3Client, "send">,
+    private readonly bucket: string,
+  ) {}
+
+  async put(key: string, data: Uint8Array) {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: checkKey(key),
+        Body: data,
+        ContentType: "application/octet-stream",
+      }),
+    );
+  }
+
+  async get(key: string) {
+    try {
+      const out = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucket, Key: checkKey(key) }),
+      );
+      return out.Body ? Buffer.from(await out.Body.transformToByteArray()) : null;
+    } catch (error) {
+      if (error instanceof NoSuchKey || (error as { name?: string }).name === "NoSuchKey") {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async delete(key: string) {
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: checkKey(key) }));
+  }
+}
+
 export function createObjectStore(
   env: Record<string, string | undefined> = process.env,
 ): ObjectStore {
@@ -53,6 +100,27 @@ export function createObjectStore(
       throw new Error("Stockage objet local interdit en production (Supabase Storage : PL-108)");
     }
     return new LocalObjectStore(env.OBJECT_STORE_DIR ?? ".objects");
+  }
+  if (kind === "s3") {
+    const required = [
+      "S3_ENDPOINT",
+      "S3_REGION",
+      "S3_BUCKET",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY",
+    ] as const;
+    const absent = required.filter((name) => !env[name]);
+    if (absent.length > 0) throw new Error(`Stockage objet S3 : ${absent.join(", ")} manquant(s)`);
+    const client = new S3Client({
+      endpoint: env.S3_ENDPOINT,
+      region: env.S3_REGION,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: env.S3_SECRET_ACCESS_KEY!,
+      },
+    });
+    return new S3ObjectStore(client, env.S3_BUCKET!);
   }
   throw new Error(`Stockage objet inconnu : ${kind}`);
 }
