@@ -7,6 +7,9 @@ import type { OrgTransaction } from "@/server/db";
 import { EVALUATORS, implementedEvaluatorKeys } from "@/server/rules/evaluators";
 import { evaluate, type EvidenceRecord, type EvaluatorRegistry } from "@/server/rules/engine";
 import type { Evaluation } from "@/server/rules/evaluation";
+import type { ControlStatus } from "@/generated/prisma/enums";
+import { scheduleNotificationEmail } from "@/server/system/jobs/notifications";
+import { notifyRegression } from "./notifications";
 
 export const EVALUATION_JOB = "control.evaluate";
 export const evaluationDedupeKey = (controlInstanceId: string) =>
@@ -161,7 +164,7 @@ export async function writeEvaluation(
   tx: OrgTransaction,
   input: {
     orgId: string;
-    instance: { id: string; notApplicable: boolean };
+    instance: { id: string; notApplicable: boolean; status: ControlStatus };
     evaluatorVersion: string;
     evaluation: Evaluation;
     at: Date;
@@ -186,6 +189,19 @@ export async function writeEvaluation(
       lastEvaluatedAt: input.at,
     },
   });
+  // Régression PASS → FAIL : alerte immédiate au responsable (PL-408, §3.2 E12).
+  if (!input.instance.notApplicable) {
+    await notifyRegression(
+      tx,
+      {
+        orgId: input.orgId,
+        controlInstanceId: input.instance.id,
+        previous: input.instance.status,
+        evaluation: input.evaluation,
+      },
+      scheduleNotificationEmail,
+    );
+  }
 }
 
 export type EvaluateOutcome =

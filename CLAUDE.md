@@ -435,3 +435,21 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   n'entre jamais au journal d'audit (identifiant et longueur seulement).
 - Écran D : `/systems/[id]/controls/[controlId]` (`?page=`), accessible depuis l'onglet Contrôles et le dashboard.
   Libellés des types de preuves : `evidenceKinds.<type avec _>` dans `messages/{fr,en}.json`.
+
+## Alertes par email (conventions établies par PL-408)
+- Fonctions pures `src/server/services/notifications-data.ts` : `isRegression` (PASS → FAIL seulement), `digestForUser`
+  (owner et admin : tout ; contributor et auditor : contrôles et systèmes dont ils sont responsables, jamais les
+  connecteurs ; vide → `null`, aucun email), `expiryWindow` (14 jours, §3.2 E5), `digestRunAt` (05:47 UTC).
+  Emails : `src/server/email/notification-emails.ts` (langue du destinataire, `emails.controlFailed` et `emails.digest`,
+  liens `BETTER_AUTH_URL`, jamais de charge de preuve).
+- Régression : `writeEvaluation` appelle `notifyRegression` dans la transaction de l'évaluation → `Notification`
+  `control.failed` pour le responsable du contrôle, à défaut celui du système, et job `notification.email`
+  (`src/server/system/jobs/notifications.ts`, idempotent par `emailedAt` ; rien si le contrôle n'est plus en échec, si
+  la préférence est coupée ou si le destinataire n'est plus membre).
+- Résumé : `/api/cron/daily` → `scheduleDailyDigests` (`src/server/system/notification-schedule.ts`), un job
+  `notification.digest` par utilisateur et par jour (clé datée, sans orgId) ; `sendDailyDigest` parcourt ses
+  organisations en positionnant `app.org_id` dans la transaction du job, envoie un seul email et marque chaque
+  organisation reprise d'une `Notification` `digest.daily` (`payload.day`), qui empêche un second envoi le même jour.
+- Préférences : table `NotificationPreference` (orgId, userId ; RLS ; sans ligne, tout est actif). Routeur
+  `notification` (`list`, `markRead`, `preferences.get`, `preferences.set`, tout membre). Écran `/notifications`
+  (préférences, dernières alertes), lien de la navigation et du pied de chaque email.

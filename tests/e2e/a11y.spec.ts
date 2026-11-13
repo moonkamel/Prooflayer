@@ -34,7 +34,14 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
   await page.context().clearCookies();
 
   await createWorkspace(page, uniqueEmail("a11y-owner"), "Accessible SAS");
-  for (const path of ["/dashboard", "/account", "/organization", "/audit", "/systems"]) {
+  for (const path of [
+    "/dashboard",
+    "/notifications",
+    "/account",
+    "/organization",
+    "/audit",
+    "/systems",
+  ]) {
     await page.goto(path);
     await expectNoViolations(page, path);
   }

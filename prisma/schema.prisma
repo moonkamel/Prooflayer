@@ -98,24 +98,25 @@ model TwoFactor {
 }
 
 model Organization {
-  id            String            @id
-  name          String
-  slug          String            @unique
-  logo          String?
-  metadata      String?
-  country       String            @default("FR")
-  employeeBand  String? // "50-249", "250-749" : détermine le statut PME / SMC
-  createdAt     DateTime          @default(now())
-  members       Member[]
-  invitations   Invitation[]
-  systems       AiSystem[]
-  integrations  Integration[]
-  evidenceItems EvidenceItem[]
-  sealBatches   SealBatch[]
-  auditPacks    AuditPack[]
-  apiKeys       ApiKey[]
-  subscription  Subscription?
-  encryptionKey OrgEncryptionKey?
+  id                      String                   @id
+  name                    String
+  slug                    String                   @unique
+  logo                    String?
+  metadata                String?
+  country                 String                   @default("FR")
+  employeeBand            String? // "50-249", "250-749" : détermine le statut PME / SMC
+  createdAt               DateTime                 @default(now())
+  members                 Member[]
+  invitations             Invitation[]
+  systems                 AiSystem[]
+  integrations            Integration[]
+  evidenceItems           EvidenceItem[]
+  sealBatches             SealBatch[]
+  auditPacks              AuditPack[]
+  apiKeys                 ApiKey[]
+  notificationPreferences NotificationPreference[]
+  subscription            Subscription?
+  encryptionKey           OrgEncryptionKey?
 }
 
 enum OrgRole {
@@ -285,7 +286,7 @@ model ExemptionDossier {
 // PL-208 : demande de note du classifieur public (§7.2, canal 2). Table système, sans organisation : ProofLayer en
 // est responsable de traitement (prospection, §8.2). Ni RLS ni accès par le rôle applicatif hors src/server/system/.
 model PublicLead {
-  id             String     @id @default(cuid())
+  id             String    @id @default(cuid())
   email          String
   emailDomain    String
   contactConsent Boolean // consentement explicite à être recontacté, case non cochée par défaut
@@ -299,7 +300,7 @@ model PublicLead {
   role           AiActRole
   ipHash         String // HMAC de l'adresse IP : limitation de débit sans conserver l'adresse
   noteSentAt     DateTime?
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime  @default(now())
 
   @@index([email, createdAt])
   @@index([ipHash, createdAt])
@@ -449,18 +450,18 @@ model Integration {
 }
 
 model IntegrationResource {
-  id            String               @id @default(cuid())
-  orgId         String
-  integrationId String
-  kind          String // "github_repo", "jira_query"
-  externalId    String
-  name          String
-  config        Json // { defaultBranch, trackedPaths } ou { jql, purpose }
-  syncCursor    String?
+  id             String               @id @default(cuid())
+  orgId          String
+  integrationId  String
+  kind           String // "github_repo", "jira_query"
+  externalId     String
+  name           String
+  config         Json // { defaultBranch, trackedPaths } ou { jql, purpose }
+  syncCursor     String?
   lastSnapshotAt DateTime?
-  integration   Integration          @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  systemLinks   SystemResourceLink[]
-  evidenceItems EvidenceItem[]
+  integration    Integration          @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  systemLinks    SystemResourceLink[]
+  evidenceItems  EvidenceItem[]
 
   @@unique([integrationId, kind, externalId])
   @@index([orgId])
@@ -685,16 +686,16 @@ model AuditPack {
 
 // Journal d'audit applicatif, en ajout seul.
 model AuditLog {
-  id          String   @id @default(cuid())
-  orgId       String
-  actorType   String // "user", "system", "api_key"
-  actorId     String?
-  action      String // "classification.sign", "integration.connect", "evidence.redact"
-  targetType  String
-  targetId    String
-  metadata    Json
-  ipAddress   String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  orgId      String
+  actorType  String // "user", "system", "api_key"
+  actorId    String?
+  action     String // "classification.sign", "integration.connect", "evidence.redact"
+  targetType String
+  targetId   String
+  metadata   Json
+  ipAddress  String?
+  createdAt  DateTime @default(now())
 
   @@index([orgId, createdAt(sort: Desc)])
   @@index([orgId, targetType, targetId])
@@ -713,16 +714,29 @@ model Notification {
   @@index([orgId, userId, readAt])
 }
 
+// Préférences de notification (PL-408, §3.2 E12) : sans ligne, les deux envois sont actifs.
+model NotificationPreference {
+  id                 String       @id @default(cuid())
+  orgId              String
+  userId             String
+  controlFailedEmail Boolean      @default(true)
+  dailyDigestEmail   Boolean      @default(true)
+  updatedAt          DateTime     @updatedAt
+  org                Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+}
+
 model RegulatoryUpdate {
-  id                 String   @id @default(cuid())
-  publishedAt        DateTime @default(now())
-  effectiveDate      DateTime?
-  title              Json // { fr, en }
-  summary            Json
-  sourceUrl          String
+  id                  String    @id @default(cuid())
+  publishedAt         DateTime  @default(now())
+  effectiveDate       DateTime?
+  title               Json // { fr, en }
+  summary             Json
+  sourceUrl           String
   impactedControlKeys String[]
-  severity           String // "info", "action_required"
-  libraryVersion     String? // version de bibliothèque qui intègre le changement
+  severity            String // "info", "action_required"
+  libraryVersion      String? // version de bibliothèque qui intègre le changement
 }
 
 enum Plan {
