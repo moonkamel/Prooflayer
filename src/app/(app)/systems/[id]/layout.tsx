@@ -65,6 +65,7 @@ export default async function SystemLayout({
             <NavLink href={`${base}/exemption`}>{t("exemption")}</NavLink>
           )}
           <NavLink href={`${base}/sources`}>{t("sources")}</NavLink>
+          <NavLink href={`${base}/packs`}>{t("packs")}</NavLink>
           <NavLink href={`${base}/changes`}>{t("changes")}</NavLink>
           <NavLink href={`${base}/history`}>{t("history")}</NavLink>
         </nav>

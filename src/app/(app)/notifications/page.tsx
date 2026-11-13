@@ -57,12 +57,14 @@ export default async function NotificationsPage() {
                 <p className="font-medium">
                   {n.type === "control.failed"
                     ? t("controlFailed", { key: str(n.payload.controlKey) })
-                    : t("digestDaily", {
-                        day: str(n.payload.day),
-                        expiring: num(n.payload.expiring),
-                        integrations: num(n.payload.integrations),
-                        stale: num(n.payload.staleClassifications),
-                      })}
+                    : n.type === "pack.ready"
+                      ? t("packReady", { system: str(n.payload.systemName) })
+                      : t("digestDaily", {
+                          day: str(n.payload.day),
+                          expiring: num(n.payload.expiring),
+                          integrations: num(n.payload.integrations),
+                          stale: num(n.payload.staleClassifications),
+                        })}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("when", {
@@ -74,6 +76,11 @@ export default async function NotificationsPage() {
                   {!n.read && <span> · {t("unread")}</span>}
                   {n.emailed && <span> · {t("emailed")}</span>}
                 </p>
+                {n.type === "pack.ready" && (
+                  <p className="mt-1 text-sm">
+                    <Link href={`/systems/${str(n.payload.systemId)}/packs`}>{t("openPacks")}</Link>
+                  </p>
+                )}
                 {n.type === "control.failed" && (
                   <p className="mt-1 text-sm">
                     <Link

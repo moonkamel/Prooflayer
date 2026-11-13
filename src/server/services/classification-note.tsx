@@ -24,7 +24,8 @@ const styles = StyleSheet.create({
   article: { color: "#4b5563" },
   concludes: { fontFamily: "Helvetica-Bold" },
   box: { borderWidth: 1, borderColor: "#d1d5db", padding: 8, marginTop: 4 },
-  footer: { position: "absolute", bottom: 24, left: 48, right: 48, fontSize: 8, color: "#6b7280" },
+  // Placé par le haut (A4 : 841,89 pt) : avec `bottom`, react-pdf n'affiche pas un pied qui hérite d'un lineHeight.
+  footer: { position: "absolute", top: 810, left: 48, right: 48, fontSize: 8, color: "#6b7280" },
 });
 
 export async function renderClassificationNote(

@@ -133,3 +133,33 @@ export async function renderDigestEmail(data: DigestEmail): Promise<EmailMessage
     ].join("\n\n"),
   };
 }
+
+export interface PackReadyEmail {
+  to: string;
+  name: string;
+  locale?: unknown;
+  baseUrl: string;
+  organization: string;
+  system: { id: string; name: string };
+  evidenceCount: number;
+}
+
+/** Pack d'audit prêt (PL-504). */
+export async function renderPackReadyEmail(data: PackReadyEmail): Promise<EmailMessage> {
+  const locale = localeOf(data.locale);
+  const t = createTranslator({
+    locale,
+    messages: await loadMessages(locale),
+    namespace: "emails.packReady",
+  });
+  const params = { name: data.name, system: data.system.name, organization: data.organization };
+  return {
+    to: data.to,
+    subject: t("subject", params),
+    text: [
+      t("intro", { ...params, count: data.evidenceCount }),
+      t("open", { url: link(data.baseUrl, `/systems/${data.system.id}/packs`) }),
+      t("verify"),
+    ].join("\n\n"),
+  };
+}

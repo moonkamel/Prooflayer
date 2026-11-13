@@ -15,7 +15,7 @@ export const ALERT_MAX_REASONS = 5;
 export const DIGEST_HOUR_UTC = 5;
 export const DIGEST_MINUTE_UTC = 47;
 
-export const NOTIFICATION_TYPES = ["control.failed", "digest.daily"] as const;
+export const NOTIFICATION_TYPES = ["control.failed", "digest.daily", "pack.ready"] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
 /** Email immédiat au responsable « quand un contrôle passe de PASS à FAIL » (§3.2 E12). */
