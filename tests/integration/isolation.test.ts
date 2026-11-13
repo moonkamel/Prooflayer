@@ -269,7 +269,7 @@ beforeAll(async () => {
 });
 
 /**
- * AuditLog (PL-106) et EvidenceItem (PL-304) sont en ajout seul : seule la purge d'une organisation, app.purge_org
+ * AuditLog (PL-106), EvidenceItem (PL-304) et SealBatch (PL-501) sont en ajout seul : seule la purge d'une organisation, app.purge_org
  * positionné dans la transaction, les vide.
  */
 async function purgeAppendOnly(orgId: string) {
@@ -280,6 +280,7 @@ async function purgeAppendOnly(orgId: string) {
     await client.query(`SELECT set_config('app.purge_org', $1, true)`, [orgId]);
     await client.query(`DELETE FROM "AuditLog" WHERE "orgId" = $1`, [orgId]);
     await client.query(`DELETE FROM "EvidenceItem" WHERE "orgId" = $1`, [orgId]);
+    await client.query(`DELETE FROM "SealBatch" WHERE "orgId" = $1`, [orgId]);
     await client.query("COMMIT");
   } finally {
     await client.end();
@@ -290,7 +291,7 @@ afterAll(async () => {
   for (const org of [A, B]) await purgeAppendOnly(org);
   const tables = fixtures
     .map(([, table]) => table)
-    .filter((table) => table !== "AuditLog" && table !== "EvidenceItem")
+    .filter((table) => !["AuditLog", "EvidenceItem", "SealBatch"].includes(table))
     .reverse();
   for (const table of tables) {
     await asMigrationRole(`DELETE FROM "${table}" WHERE "orgId" LIKE $1`, [`org_iso_%_${run}%`]);

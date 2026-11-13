@@ -453,3 +453,17 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Préférences : table `NotificationPreference` (orgId, userId ; RLS ; sans ligne, tout est actif). Routeur
   `notification` (`list`, `markRead`, `preferences.get`, `preferences.set`, tout membre). Écran `/notifications`
   (préférences, dernières alertes), lien de la navigation et du pied de chaque email.
+
+## Scellement par lots (conventions établies par PL-501)
+- `src/server/seal/batch.ts` (pur) : `sortForSealing` (capturedAt puis identifiant), `batchHeader` / `batchHash`
+  (`SHA-256(JCS({ v, org, seq, leafCount, merkleRoot, prevBatchHash, sealedAt }))`, empreintes en hexadécimal, date ISO
+  à la milliseconde, `ZERO_HASH` pour seq = 1), `chainBreak` (continuité de la chaîne, §4.6.3 étape 3).
+- `verifyInclusion` exige un chemin consommé en entier (RFC 9162 §2.1.3.2). Propriétés exhaustives sur 1 à 257 feuilles :
+  `tests/unit/merkle-properties.test.ts`.
+- `sealOrg(tx, orgId, now)` (`src/server/services/seal.ts`) : verrou consultatif de transaction par organisation
+  (`pg_advisory_xact_lock(hashtextextended('seal:' || orgId, 0))`), 5 000 feuilles au plus par lot, lot et rattachement
+  (`sealBatchId`, `leafIndex`) écrits dans la même transaction, tout annulé si une preuve manque.
+- Job `seal.org` (`src/server/system/jobs/seal.ts`, orgId, clé `seal.org:{orgId}:{AAAA-MM-JJTHH}`), cron `/api/cron/seal`
+  à la minute 3 de chaque heure (`scheduleHourlySealing`).
+- En base : `evidence_guard` fige `leafIndex` avec le lot (posés ensemble) ; `seal_batch_guard` rend `SealBatch` en
+  ajout seul (seuls `anchorId` et `anchorLeafIndex` se posent, une fois ; suppression seulement sous `app.purge_org`).

@@ -44,7 +44,12 @@ export function verifyInclusion(
   root: Uint8Array,
 ): boolean {
   const recompute = (i: number, n: number, path: Uint8Array[]): Buffer => {
-    if (n === 1) return Buffer.from(leaf);
+    // PL-501 : le chemin doit être consommé en entier (RFC 9162 §2.1.3.2). Le code du §4.6.2 ignorait les nœuds en
+    // trop au bas du chemin : une preuve malléable, refusée ici.
+    if (n === 1) {
+      if (path.length !== 0) throw new Error("preuve trop longue");
+      return Buffer.from(leaf);
+    }
     const k = split(n);
     const sibling = path[path.length - 1];
     if (!sibling) throw new Error("preuve trop courte");
