@@ -486,3 +486,19 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Job `seal.anchor` (sans orgId, `anchorDependencies` remplaçable par les tests), cron `/api/cron/anchor` toutes les 6 h
   (`scheduleAnchoring`, fenêtre `AAAA-MM-JJTHH`), à la demande `requestAnchorNow` (export, PL-504). `Anchor` en ajout seul.
 - Test réel : `TSA_LIVE=1` (en local derrière le proxy : `NODE_USE_ENV_PROXY=1`).
+
+## Preuve d'inclusion et revérification quotidienne (conventions établies par PL-503)
+- `src/server/seal/chain.ts` (pur) : `buildProof` / `verifyProof` (feuille → racine du lot → batchHash → racine de
+  l'ancre → anchorHash → jeton ; `anchor: null` tant que le lot attend), `leafIssues` (contentSha256 sur la charge,
+  leafHash sur sel et enveloppe, sauf effacement), `batchIssues` (racine, nombre de feuilles, empreinte, chaînage),
+  `anchorIssues`. `storedBatchHeader` / `storedAnchorHeader` relisent un en-tête stocké.
+- `Anchor.batchHashes` : feuilles de l'ancre conservées sur l'ancre (une purge d'organisation ne rend pas invérifiables
+  les ancres partagées) ; écrites à la création par `anchorPendingBatches`.
+- `evidence.proof` (`src/server/services/evidence-proof.ts`, lecture, tout membre) ; JSON téléchargeable
+  `/api/evidence/[id]/proof` (sans logique). Écran D : colonne « Scellement » (empreinte abrégée, lot, ancre, date du jeton).
+- Revérification : `/api/cron/verify` chaque jour (03:41 UTC) → `scheduleChainVerification` (`seal-schedule.ts`) : job
+  `seal.verifyOrg` par organisation (`verifyOrgChain`, `src/server/services/chain-verification.ts`, dont le rattachement
+  lot → feuille de l'ancre) et job `seal.verifyAnchors` (`src/server/system/chain-verification.ts`, jetons revérifiés
+  contre la racine du prestataire nommé sur l'ancre). Anomalie : alerte `seal.integrityFailure` (codes, numéros, jamais
+  de contenu).
+- Tests : corruption simulée sous le rôle propriétaire avec `SET session_replication_role = replica` (session seule).

@@ -1,15 +1,19 @@
 // Routeur `evidence` (§4.4.2, rôle contributor en écriture). PL-405 : `createUploadUrl`, `registerUpload`, `attest`.
-// list, get, proof et redact arrivent avec le scellement (sprint 5) et l'effacement. Aucune
+// PL-503 : `proof` (lecture, tout membre). list, get et redact arrivent avec le pack (PL-504) et l'effacement (PL-507). Aucune
 // logique ici : src/server/services/manual-evidence.ts.
 import { z } from "zod";
+import { evidenceProof } from "@/server/services/evidence-proof";
 import * as manual from "@/server/services/manual-evidence";
 import { passwordVerifier } from "@/server/services/session";
-import { router, writeProcedure } from "@/server/trpc";
+import { orgProcedure, router, writeProcedure } from "@/server/trpc";
 
 const controls = z.array(z.string().min(1).max(128)).min(1).max(20);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/u);
 
 export const evidenceRouter = router({
+  proof: orgProcedure
+    .input(z.object({ evidenceId: z.string().min(1).max(128) }))
+    .query(({ ctx, input }) => evidenceProof(ctx, input)),
   createUploadUrl: writeProcedure
     .input(
       z.object({

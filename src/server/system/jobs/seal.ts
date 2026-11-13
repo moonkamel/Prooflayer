@@ -2,7 +2,9 @@
 // SEAL_MAX_LEAVES au plus (plusieurs lots si un rattrapage en a laissé davantage). Job porteur de l'orgId (RLS).
 import { z } from "zod";
 import { SEAL_MAX_LEAVES, sealOrg } from "@/server/services/seal";
+import { verifyOrgChain } from "@/server/services/chain-verification";
 import { anchorPendingBatches, defaultTimestamper, type Timestamper } from "../anchoring";
+import { reportIntegrity, verifyAnchors } from "../chain-verification";
 import { defineJob } from "./registry";
 
 /** Lots au plus par exécution : la tentative reste loin du bail de 5 minutes. */
@@ -36,3 +38,26 @@ export const anchorDependencies: { timestamper: () => Timestamper } = {
   timestamper: defaultTimestamper,
 };
 const anchorTimestamper = () => anchorDependencies.timestamper();
+
+/** Job `seal.verifyOrg` (orgId, RLS) : revérification quotidienne de la chaîne d'une organisation. */
+export const sealVerifyOrgJob = defineJob({
+  type: "seal.verifyOrg",
+  schema: z.object({ day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u) }),
+  timeoutMs: 240_000,
+  handle: async (_payload, ctx) => {
+    if (!ctx.job.orgId) throw new Error("seal.verifyOrg sans organisation");
+    const { issues } = await verifyOrgChain(ctx.tx, ctx.job.orgId);
+    reportIntegrity(`org:${ctx.job.orgId}`, issues);
+  },
+});
+
+/** Job `seal.verifyAnchors` (sans orgId) : revérification quotidienne des ancres et de leurs jetons. */
+export const sealVerifyAnchorsJob = defineJob({
+  type: "seal.verifyAnchors",
+  schema: z.object({ day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u) }),
+  timeoutMs: 240_000,
+  handle: async (_payload, ctx) => {
+    const { issues } = await verifyAnchors(ctx.tx);
+    reportIntegrity("anchors", issues);
+  },
+});

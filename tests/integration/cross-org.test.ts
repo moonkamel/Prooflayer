@@ -69,6 +69,7 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
   }),
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "control.get": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
+  "evidence.proof": () => ({ input: { evidenceId: "ev_de_A_inexistante" }, code: "NOT_FOUND" }),
   "control.evaluations": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
   "control.assignOwner": () => ({
     input: { controlId: a.controlInstanceId, ownerUserId: null },

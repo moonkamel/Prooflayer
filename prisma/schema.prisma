@@ -640,6 +640,8 @@ model Anchor {
   tsaPolicyOid   String
   tsaToken       Bytes // TimeStampToken DER, RFC 3161
   tsaGenTime     DateTime
+  /// Feuilles de l'ancre : batchHash des lots, dans l'ordre d'anchorLeafIndex (PL-503).
+  batchHashes    Bytes[]     @default([])
   createdAt      DateTime    @default(now())
   batches        SealBatch[]
 }

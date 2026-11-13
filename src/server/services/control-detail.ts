@@ -103,6 +103,14 @@ export async function getControl(
             declarative: true,
             validUntil: true,
             redactedAt: true,
+            leafHash: true,
+            sealBatch: {
+              select: {
+                seq: true,
+                sealedAt: true,
+                anchor: { select: { seq: true, tsaGenTime: true, tsaName: true } },
+              },
+            },
           },
         })
       : [];
@@ -181,6 +189,20 @@ export async function getControl(
           redacted: e.redactedAt !== null,
           faulty: e.faulty,
           linkedByUser: (linkedBy.get(e.id) ?? "rule") !== "rule",
+          // Scellement (PL-503, §5.3 écran D) : empreinte, lot, ancre, date du jeton.
+          seal: {
+            leafHash: Buffer.from(e.leafHash).toString("hex"),
+            batch: e.sealBatch
+              ? { seq: e.sealBatch.seq, sealedAt: e.sealBatch.sealedAt.toISOString() }
+              : null,
+            anchor: e.sealBatch?.anchor
+              ? {
+                  seq: e.sealBatch.anchor.seq,
+                  timestampedAt: e.sealBatch.anchor.tsaGenTime.toISOString(),
+                  tsaName: e.sealBatch.anchor.tsaName,
+                }
+              : null,
+          },
         })),
     },
     comments: data.comments.map((c) => ({
