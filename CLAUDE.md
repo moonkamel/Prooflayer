@@ -467,3 +467,22 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   à la minute 3 de chaque heure (`scheduleHourlySealing`).
 - En base : `evidence_guard` fige `leafIndex` avec le lot (posés ensemble) ; `seal_batch_guard` rend `SealBatch` en
   ajout seul (seuls `anchorId` et `anchorLeafIndex` se posent, une fois ; suppression seulement sous `app.purge_org`).
+
+## Ancrage et horodatage RFC 3161 (conventions établies par PL-502)
+- `src/server/seal/tsa.ts` (pkijs, asn1js) : `requestTimestamp(digest, config, trustAnchors, fetch?)` (version 1, SHA-256,
+  nonce de 8 octets, certReq ; refus si statut ≠ granted/grantedWithMods, empreinte, nonce ou politique différents,
+  signature CMS invalide, chaîne inconnue, signataire sans id-kp-timeStamping), `verifyTimestamp` (sans réseau,
+  asynchrone : WebCrypto). Erreur typée `TsaError` (`retryable` pour délai, réseau, HTTP). Seule l'empreinte part.
+- pkijs exige les données d'origine pour un TSTInfo : l'empreinte est vérifiée par nous, puis `eContentType` est passé à
+  id-data pour que pkijs vérifie messageDigest, signature et chaîne (l'attribut signé contentType reste contrôlé).
+- `src/server/seal/tsa-config.ts` : `tsaSetup(env)` ; hors production sans configuration, freetsa.org (racine épinglée,
+  non qualifié) ; en production, `TSA_URL` + `TSA_TRUST_PEM` obligatoires (`TSA_NAME`, `TSA_POLICY_OID`, `TSA_QUALIFIED`,
+  secrets `TSA_USER` / `TSA_PASSWORD`), sinon refus d'ancrer. Fixture réelle : `tests/fixtures/tsa/` (openssl ts -verify).
+- `src/server/seal/anchor.ts` (pur) : batchHash triés par octets, `anchorHeader` / `anchorHash`
+  (`SHA-256(JCS({ v, seq, merkleRoot, batchCount, prevAnchorHash }))`), `anchorOverdue` (6 h + 2 h).
+- `src/server/system/anchoring.ts` : `anchorPendingBatches` (verrou `seal:anchor`, fonctions SQL `SECURITY DEFINER`
+  `pending_batches_for_anchor` et `attach_batches_to_anchor`, horodatage puis ancre et rattachement en une transaction ;
+  échec : rien d'écrit, alerte `seal.anchorOverdue` via `raiseOperationalAlert`, `src/server/system/alerts.ts`).
+- Job `seal.anchor` (sans orgId, `anchorDependencies` remplaçable par les tests), cron `/api/cron/anchor` toutes les 6 h
+  (`scheduleAnchoring`, fenêtre `AAAA-MM-JJTHH`), à la demande `requestAnchorNow` (export, PL-504). `Anchor` en ajout seul.
+- Test réel : `TSA_LIVE=1` (en local derrière le proxy : `NODE_USE_ENV_PROXY=1`).
