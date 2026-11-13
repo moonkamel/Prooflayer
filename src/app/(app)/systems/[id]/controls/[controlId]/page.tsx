@@ -1,10 +1,10 @@
-// Écran D (§5.3) : détail d'un contrôle et de ses preuves (PL-407), sans la partie scellement (sprint 5). En-tête,
+// Écran D (§5.3) : détail d'un contrôle et de ses preuves (PL-407), complété du scellement (PL-503). En-tête,
 // dernière évaluation et ses raisons, frise de 12 semaines, preuves (fautives en tête) avec lien vers la source,
 // preuve attendue si le contrôle est sans preuve ; responsable, non-applicabilité justifiée, commentaires.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink, TriangleAlert } from "lucide-react";
+import { Clock, ExternalLink, ShieldCheck, TriangleAlert } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { TRPCError } from "@trpc/server";
 import { STATUS_STYLES, StatusBadge } from "@/components/status-badge";
@@ -198,6 +198,7 @@ export default async function ControlDetailPage({ params, searchParams }: Params
                   <TableHead scope="col">{t("kind")}</TableHead>
                   <TableHead scope="col">{t("occurredAt")}</TableHead>
                   <TableHead scope="col">{t("source")}</TableHead>
+                  <TableHead scope="col">{t("seal")}</TableHead>
                 </tr>
               </thead>
               <tbody>
@@ -238,6 +239,45 @@ export default async function ControlDetailPage({ params, searchParams }: Params
                         </a>
                       ) : (
                         t(`sources.${e.source as "GITHUB"}`)
+                      )}
+                    </TableCell>
+                    <TableCell data-testid="evidence-seal">
+                      <p className="flex items-center gap-1 text-sm">
+                        {e.seal.anchor ? (
+                          <ShieldCheck
+                            aria-hidden="true"
+                            className="size-4"
+                            style={{ color: STATUS_STYLES.PASS.fg }}
+                          />
+                        ) : (
+                          <Clock aria-hidden="true" className="size-4 text-muted-foreground" />
+                        )}
+                        {e.seal.anchor
+                          ? t("sealAnchored", { date: dateTime(e.seal.anchor.timestampedAt) })
+                          : e.seal.batch
+                            ? t("sealPendingAnchor")
+                            : t("sealPending")}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <span>
+                          {t("sealHash", {
+                            hash: `${e.seal.leafHash.slice(0, 4)}…${e.seal.leafHash.slice(-4)}`,
+                          })}
+                        </span>
+                        {e.seal.batch && (
+                          <span> · {t("sealBatch", { seq: e.seal.batch.seq })}</span>
+                        )}
+                        {e.seal.anchor && (
+                          <span> · {t("sealAnchor", { seq: e.seal.anchor.seq })}</span>
+                        )}
+                      </p>
+                      {e.seal.batch && (
+                        <p className="text-xs">
+                          <a href={`/api/evidence/${e.id}/proof`} download>
+                            {t("downloadProof")}
+                            <span className="sr-only"> · {e.summary}</span>
+                          </a>
+                        </p>
                       )}
                     </TableCell>
                   </tr>

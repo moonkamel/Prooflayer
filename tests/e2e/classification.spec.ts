@@ -153,6 +153,15 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await attestation.getByRole("button", { name: "Signer l'attestation" }).click();
   await expect(page).toHaveURL(/\/controls$/u);
 
+  // Écran D complété (PL-503) : la preuve déclarative attend son scellement horaire.
+  await page
+    .getByRole("link", { name: /AIA-05-01/u })
+    .first()
+    .click();
+  await expect(page.getByTestId("evidence-seal")).toContainText("En attente de scellement");
+  await expectNoViolations(page, "détail d'un contrôle avec preuve");
+  await page.goBack();
+
   // Dashboard (PL-406) : 37 contrôles, filtres reflétés dans l'adresse et conservés au rechargement.
   await page.goto(page.url().replace(/\/controls$/u, "/dashboard"));
   await expect(page.getByTestId("dashboard-control")).toHaveCount(37);

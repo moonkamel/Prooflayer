@@ -102,6 +102,7 @@ export async function anchorPendingBatches(
       tsaPolicyOid: stamp.policyOid,
       tsaToken: new Uint8Array(stamp.token),
       tsaGenTime: stamp.genTime,
+      batchHashes: batches.map((b) => new Uint8Array(b.batchHash)),
     },
     select: { id: true },
   });

@@ -2,7 +2,8 @@
 // (inactif sans DSN) et au journal, avec un code et des détails sans donnée client (décomptes, dates, codes d'erreur).
 import * as Sentry from "@sentry/nextjs";
 
-export type OperationalAlert = "seal.anchorOverdue" | "seal.tsaNotConfigured";
+export type OperationalAlert =
+  "seal.anchorOverdue" | "seal.tsaNotConfigured" | "seal.integrityFailure";
 
 export function raiseOperationalAlert(
   code: OperationalAlert,

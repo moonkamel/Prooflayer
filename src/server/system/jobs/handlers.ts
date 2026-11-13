@@ -4,7 +4,7 @@ import { controlEvaluateJob, controlSweepOrgJob } from "./control-evaluate";
 import { jiraIssueSyncJob, jiraReconcileJob, jiraWebhookEnsureJob } from "./jira";
 import { notificationDigestJob, notificationEmailJob } from "./notifications";
 import { publicClassifierNoteJob } from "./public-classifier-note";
-import { sealAnchorJob, sealOrgJob } from "./seal";
+import { sealAnchorJob, sealOrgJob, sealVerifyAnchorsJob, sealVerifyOrgJob } from "./seal";
 import { JobRegistry } from "./registry";
 
 export const jobRegistry = new JobRegistry()
@@ -17,4 +17,6 @@ export const jobRegistry = new JobRegistry()
   .register(notificationEmailJob)
   .register(notificationDigestJob)
   .register(sealOrgJob)
-  .register(sealAnchorJob);
+  .register(sealAnchorJob)
+  .register(sealVerifyOrgJob)
+  .register(sealVerifyAnchorsJob);

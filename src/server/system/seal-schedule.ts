@@ -3,7 +3,7 @@
 import { prisma } from "@/server/db";
 import { checkAnchorBacklog } from "./anchoring";
 import { jobRegistry } from "./jobs/handlers";
-import { sealAnchorJob, sealOrgJob } from "./jobs/seal";
+import { sealAnchorJob, sealOrgJob, sealVerifyAnchorsJob, sealVerifyOrgJob } from "./jobs/seal";
 import { enqueue } from "./jobs/queue";
 
 export const sealHour = (now: Date) => now.toISOString().slice(0, 13);
@@ -50,4 +50,25 @@ export async function requestAnchorNow(now: Date = new Date()) {
       runNow: { registry: jobRegistry },
     },
   );
+}
+
+/** Cron quotidien `/api/cron/verify` : un job par organisation et un job pour les ancres, dédupliqués par jour. */
+export async function scheduleChainVerification(now: Date = new Date()) {
+  const day = now.toISOString().slice(0, 10);
+  const orgs = await prisma.organization.findMany({ select: { id: true }, orderBy: { id: "asc" } });
+  let scheduled = 0;
+  for (const { id } of orgs) {
+    const r = await enqueue(
+      sealVerifyOrgJob,
+      { day },
+      { orgId: id, dedupeKey: `seal.verifyOrg:${id}:${day}` },
+    );
+    if (!r.deduplicated) scheduled += 1;
+  }
+  const anchors = await enqueue(
+    sealVerifyAnchorsJob,
+    { day },
+    { dedupeKey: `seal.verifyAnchors:${day}` },
+  );
+  return { day, organizations: orgs.length, scheduled, anchors: !anchors.deduplicated };
 }
