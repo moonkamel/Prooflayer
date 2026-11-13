@@ -106,6 +106,33 @@
     "invitation": {
       "subject": "Invitation à rejoindre {organization} sur ProofLayer",
       "body": "Bonjour,\n\n{inviter} vous invite à rejoindre {organization} sur ProofLayer, avec le rôle « {role} ».\n\nPour accepter, ouvrez ce lien, valable 7 jours :\n{url}\n\nSi vous ne connaissez pas cette personne, ignorez cet email."
+    },
+    "controlFailed": {
+      "subject": "[ProofLayer] {key} en échec · {system}",
+      "intro": "Bonjour {name},\n\nLe contrôle {key} « {title} » du système {system} ({organization}) est passé en échec. La dernière évaluation trouvait la preuve présente.",
+      "reasons": "Raisons de l'évaluation :",
+      "moreReasons": "- … et {count, plural, one {# autre raison} other {# autres raisons}}",
+      "open": "Voir le contrôle et ses preuves :\n{url}",
+      "footer": "Vous recevez cet email parce que vous êtes responsable de ce contrôle ou de ce système. Préférences de notification :\n{url}"
+    },
+    "digest": {
+      "subject": "[ProofLayer] Résumé du jour",
+      "intro": "Bonjour {name},\n\nVoici ce qui demande votre attention aujourd'hui.",
+      "expiring": "{count, plural, one {Une preuve expire} other {# preuves expirent}} dans les 14 jours :",
+      "expiringLine": "{key} · {system} : « {evidence} », valable jusqu'au {date}\n  {url}",
+      "integrations": "{count, plural, one {Un connecteur est} other {# connecteurs sont}} en erreur : certaines preuves ne sont plus capturées.",
+      "integrationLine": "{provider} : {status}",
+      "integrationsLink": "Reconnecter depuis la page Organisation : {url}",
+      "integrationStatus": {
+        "ERROR": "en erreur",
+        "REVOKED": "révoqué",
+        "SUSPENDED": "suspendu",
+        "ACTIVE": "actif"
+      },
+      "stale": "{count, plural, one {Une classification est} other {# classifications sont}} à revoir après une modification de la fiche :",
+      "staleLine": "{system}\n  {url}",
+      "more": "- … et {count} de plus",
+      "footer": "Un seul résumé par jour, envoyé seulement s'il y a quelque chose à signaler. Préférences de notification :\n{url}"
     }
   },
   "roles": {
@@ -212,6 +239,7 @@
     "control_assign": "Assignation du responsable d'un contrôle",
     "control_setNotApplicable": "Applicabilité d'un contrôle",
     "control_comment": "Commentaire sur un contrôle",
+    "notification_preferences": "Préférences de notification",
     "exemption_save": "Enregistrement d'un dossier d'exemption",
     "exemption_sign": "Signature d'un dossier d'exemption",
     "exemption_signRefused": "Signature de dossier refusée : mot de passe incorrect",
@@ -239,7 +267,8 @@
     "activeOrganization": "Organisation active : <strong>{name}</strong>",
     "brand": "ProofLayer",
     "systems": "Systèmes d'IA",
-    "dashboard": "Tableau de bord"
+    "dashboard": "Tableau de bord",
+    "notifications": "Alertes"
   },
   "home": {
     "title": "ProofLayer",
@@ -999,5 +1028,24 @@
     "system_exemption_signed": "Dossier d'exemption signé (ProofLayer)",
     "system_registry_snapshot": "Fiche du registre (ProofLayer)",
     "system_pack_generated": "Pack d'audit généré (ProofLayer)"
+  },
+  "notifications": {
+    "title": "Alertes",
+    "intro": "Les alertes de l'organisation {organization} qui vous concernent, et la façon dont vous les recevez.",
+    "preferences": "Préférences d'envoi",
+    "preferencesIntro": "Ces préférences valent pour cette organisation. Les alertes restent visibles ici même si leur email est désactivé.",
+    "controlFailedEmail": "Email immédiat quand un contrôle dont je suis responsable passe de « OK » à « En échec »",
+    "dailyDigestEmail": "Résumé quotidien : preuves expirant sous 14 jours, connecteurs en erreur, classifications à revoir",
+    "save": "Enregistrer",
+    "saved": "Préférences enregistrées.",
+    "recent": "Dernières alertes",
+    "empty": "Aucune alerte pour le moment.",
+    "markRead": "Tout marquer comme lu",
+    "unread": "Non lue",
+    "emailed": "Envoyée par email",
+    "controlFailed": "{key} est passé en échec",
+    "digestDaily": "Résumé du {day} : {expiring} preuves expirant bientôt, {integrations} connecteurs en erreur, {stale} classifications à revoir",
+    "openControl": "Voir le contrôle",
+    "when": "Le {date}"
   }
 }

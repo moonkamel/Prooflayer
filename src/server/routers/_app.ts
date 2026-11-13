@@ -6,6 +6,7 @@ import { dashboardRouter } from "./dashboard";
 import { evidenceRouter } from "./evidence";
 import { exemptionRouter } from "./exemption";
 import { integrationRouter } from "./integration";
+import { notificationRouter } from "./notification";
 import { orgRouter } from "./org";
 import { systemRouter } from "./system";
 
@@ -19,6 +20,7 @@ export const appRouter = router({
   integration: integrationRouter,
   evidence: evidenceRouter,
   dashboard: dashboardRouter,
+  notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

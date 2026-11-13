@@ -106,6 +106,33 @@
     "invitation": {
       "subject": "Invitation to join {organization} on ProofLayer",
       "body": "Hello,\n\n{inviter} invites you to join {organization} on ProofLayer, with the role \"{role}\".\n\nTo accept, open this link, valid for 7 days:\n{url}\n\nIf you do not know this person, ignore this email."
+    },
+    "controlFailed": {
+      "subject": "[ProofLayer] {key} failing · {system}",
+      "intro": "Hello {name},\n\nControl {key} “{title}” of system {system} ({organization}) is now failing. The previous evaluation found the evidence present.",
+      "reasons": "Evaluation reasons:",
+      "moreReasons": "- … and {count, plural, one {# more reason} other {# more reasons}}",
+      "open": "View the control and its evidence:\n{url}",
+      "footer": "You receive this email because you own this control or this system. Notification preferences:\n{url}"
+    },
+    "digest": {
+      "subject": "[ProofLayer] Daily summary",
+      "intro": "Hello {name},\n\nHere is what needs your attention today.",
+      "expiring": "{count, plural, one {One item of evidence expires} other {# items of evidence expire}} within 14 days:",
+      "expiringLine": "{key} · {system}: “{evidence}”, valid until {date}\n  {url}",
+      "integrations": "{count, plural, one {One connector is} other {# connectors are}} failing: some evidence is no longer captured.",
+      "integrationLine": "{provider}: {status}",
+      "integrationsLink": "Reconnect from the Organization page: {url}",
+      "integrationStatus": {
+        "ERROR": "in error",
+        "REVOKED": "revoked",
+        "SUSPENDED": "suspended",
+        "ACTIVE": "active"
+      },
+      "stale": "{count, plural, one {One classification needs} other {# classifications need}} review after a change to the record:",
+      "staleLine": "{system}\n  {url}",
+      "more": "- … and {count} more",
+      "footer": "One summary per day at most, sent only when there is something to report. Notification preferences:\n{url}"
     }
   },
   "roles": {
@@ -212,6 +239,7 @@
     "control_assign": "Control owner assigned",
     "control_setNotApplicable": "Control applicability changed",
     "control_comment": "Comment on a control",
+    "notification_preferences": "Notification preferences",
     "exemption_save": "Exemption file saved",
     "exemption_sign": "Exemption file signed",
     "exemption_signRefused": "Exemption file signature refused: incorrect password",
@@ -239,7 +267,8 @@
     "activeOrganization": "Active organization: <strong>{name}</strong>",
     "brand": "ProofLayer",
     "systems": "AI systems",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "notifications": "Alerts"
   },
   "home": {
     "title": "ProofLayer",
@@ -999,5 +1028,24 @@
     "system_exemption_signed": "Signed exemption file (ProofLayer)",
     "system_registry_snapshot": "Registry record (ProofLayer)",
     "system_pack_generated": "Generated audit pack (ProofLayer)"
+  },
+  "notifications": {
+    "title": "Alerts",
+    "intro": "Alerts from {organization} that concern you, and how you receive them.",
+    "preferences": "Delivery preferences",
+    "preferencesIntro": "These preferences apply to this organization. Alerts remain visible here even when their email is turned off.",
+    "controlFailedEmail": "Immediate email when a control I own goes from “OK” to “Failing”",
+    "dailyDigestEmail": "Daily summary: evidence expiring within 14 days, failing connectors, classifications to review",
+    "save": "Save",
+    "saved": "Preferences saved.",
+    "recent": "Recent alerts",
+    "empty": "No alerts yet.",
+    "markRead": "Mark all as read",
+    "unread": "Unread",
+    "emailed": "Sent by email",
+    "controlFailed": "{key} is now failing",
+    "digestDaily": "Summary of {day}: {expiring} items of evidence expiring soon, {integrations} failing connectors, {stale} classifications to review",
+    "openControl": "View the control",
+    "when": "On {date}"
   }
 }

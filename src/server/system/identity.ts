@@ -98,3 +98,11 @@ export async function usersByIds(ids: readonly string[]) {
   });
   return new Map(users.map((u) => [u.id, { name: u.name, email: u.email }]));
 }
+
+/** Destinataire d'une alerte (PL-408) : adresse, nom et langue de l'utilisateur. */
+export function userContact(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, name: true, locale: true },
+  });
+}

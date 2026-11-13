@@ -196,6 +196,10 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
 
 /** Procédures sans identifiant de ressource : elles ne portent que sur l'organisation active. */
 const ORG_SCOPED = [
+  "notification.list",
+  "notification.markRead",
+  "notification.preferences.get",
+  "notification.preferences.set",
   "dashboard.orgSummary",
   "org.get",
   "org.update",

@@ -206,6 +206,11 @@ const fixtures: [model: string, table: string, build: (org: string, tag?: string
     "Notification",
     (o, t = "") => ({ id: id(o, "ntf", t), orgId: o, userId: "u", type: "test", payload: {} }),
   ],
+  [
+    "notificationPreference",
+    "NotificationPreference",
+    (o, t = "") => ({ id: id(o, "npf", t), orgId: o, userId: `u${t}` }),
+  ],
   ["subscription", "Subscription", (o, t = "") => ({ id: id(o, "sub", t), orgId: `${o}${t}` })],
   [
     "apiKey",
