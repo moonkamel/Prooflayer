@@ -260,7 +260,8 @@
     "evidence_redact": "Evidence erased",
     "billing_checkout": "Subscription started",
     "billing_portal": "Billing portal opened",
-    "billing_subscriptionSynced": "Subscription updated"
+    "billing_subscriptionSynced": "Subscription updated",
+    "system_monitor": "System monitoring changed"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -281,7 +282,13 @@
     "brand": "ProofLayer",
     "systems": "AI systems",
     "dashboard": "Dashboard",
-    "notifications": "Alerts"
+    "notifications": "Alerts",
+    "readOnly": {
+      "trialExpired": "Trial ended: the workspace is read-only and capture is suspended. Existing packs can still be exported.",
+      "pastDue": "Payment failed: the workspace is read-only and capture is suspended.",
+      "canceled": "Subscription ended: the workspace is read-only and capture is suspended. Existing packs can still be exported."
+    },
+    "readOnlyLink": "View subscription"
   },
   "home": {
     "title": "ProofLayer",
@@ -343,7 +350,9 @@
     "ownerNotMember": "The owner must be a member of the organization.",
     "conflict": "The record was changed in the meantime. Reload the page and try again.",
     "archivedError": "This record is archived and can no longer be edited.",
-    "forbidden": "Your role does not allow editing the register."
+    "forbidden": "Your role does not allow editing the register.",
+    "monitoredLimit": "Monitored system limit reached for your plan.",
+    "readOnly": "The workspace is read-only: settle the subscription to resume."
   },
   "system": {
     "sections": "Record sections",
@@ -381,7 +390,12 @@
     "exemption": "Exemption",
     "sources": "Sources",
     "dashboard": "Dashboard",
-    "packs": "Packs"
+    "packs": "Packs",
+    "monitored": "Monitored system: its controls are evaluated on each new evidence item.",
+    "notMonitored": "Unmonitored system: it stays in the register, but its controls are not evaluated. Your plan sets the number of monitored systems.",
+    "startMonitoring": "Monitor this system",
+    "stopMonitoring": "Stop monitoring",
+    "seePlans": "See plans"
   },
   "designChanges": {
     "title": "Design changes",
@@ -1404,7 +1418,6 @@
       "pastDue": "Payment failed: the workspace is read-only until {date}. Update your payment method.",
       "canceled": "Subscription ended: the workspace is read-only until {date}. Existing packs can still be exported."
     },
-    "systemsLimit": "Up to {count, plural, one {# monitored system} other {# monitored systems}}.",
     "portal": "Manage subscription and invoices",
     "offersTitle": "Choose a plan",
     "prices": {
@@ -1431,6 +1444,8 @@
       "noCustomer": "No Stripe subscription is linked yet.",
       "generic": "Something went wrong. Try again in a moment."
     },
-    "nav": "Subscription"
+    "nav": "Subscription",
+    "monitoredCount": "{count, plural, =0 {No monitored system} one {# monitored system} other {# monitored systems}} out of {limit} allowed.",
+    "overLimit": "More monitored systems than your plan allows: none is removed, but no other can be added."
   }
 }

@@ -18,6 +18,7 @@ import {
 import type { ReasoningStep } from "@/server/classify/engine";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { instantiateControls } from "./controls";
+import { monitoringCapacity } from "./entitlements";
 import { scheduleOrgSweep } from "./evaluation";
 import { recordClassificationSigned, recordRegistrySnapshot } from "./system-evidence";
 import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
@@ -283,57 +284,71 @@ export async function signClassification(
   }
   const statement = signatureStatement(input.locale);
   const signedAt = new Date();
-  const { superseded, roleBefore, controls } = await withOrgTransaction(ctx.orgId, async (tx) => {
-    const previous = await tx.classification.findMany({
-      where: { systemId: draft.systemId, status: "SIGNED" },
-      select: { id: true },
-    });
-    await tx.classification.updateMany({
-      where: { systemId: draft.systemId, status: "SIGNED" },
-      data: { status: "SUPERSEDED" },
-    });
-    const { count } = await tx.classification.updateMany({
-      where: { id: draft.id, status: "DRAFT", tier: draft.tier },
-      data: {
-        status: "SIGNED",
-        signedByUserId: ctx.userId,
-        signedByName: input.name,
-        signedByTitle: input.title,
-        signedAt,
-        signatureStatement: statement,
-      },
-    });
-    if (count === 0) throw new ServiceError("CONFLICT", "classification.notDraft");
-    const system = await tx.aiSystem.findUniqueOrThrow({ where: { id: draft.systemId } });
-    await tx.aiSystem.update({
-      where: { id: draft.systemId },
-      data: {
-        riskTier: draft.tier,
-        annexIIIPoints: draft.annexIIIPoints,
+  const { superseded, roleBefore, controls, monitored } = await withOrgTransaction(
+    ctx.orgId,
+    async (tx) => {
+      const previous = await tx.classification.findMany({
+        where: { systemId: draft.systemId, status: "SIGNED" },
+        select: { id: true },
+      });
+      await tx.classification.updateMany({
+        where: { systemId: draft.systemId, status: "SIGNED" },
+        data: { status: "SUPERSEDED" },
+      });
+      const { count } = await tx.classification.updateMany({
+        where: { id: draft.id, status: "DRAFT", tier: draft.tier },
+        data: {
+          status: "SIGNED",
+          signedByUserId: ctx.userId,
+          signedByName: input.name,
+          signedByTitle: input.title,
+          signedAt,
+          signatureStatement: statement,
+        },
+      });
+      if (count === 0) throw new ServiceError("CONFLICT", "classification.notDraft");
+      const system = await tx.aiSystem.findUniqueOrThrow({ where: { id: draft.systemId } });
+      await tx.aiSystem.update({
+        where: { id: draft.systemId },
+        data: {
+          riskTier: draft.tier,
+          annexIIIPoints: draft.annexIIIPoints,
+          role: draft.role,
+          classificationStale: false,
+        },
+      });
+      // Contrôles ouverts dans la même transaction : la classification signée ne va pas sans eux (PL-207).
+      const controls = await instantiateControls(tx, {
+        orgId: ctx.orgId,
+        systemId: draft.systemId,
+        tier: draft.tier,
         role: draft.role,
-        classificationStale: false,
-      },
-    });
-    // Contrôles ouverts dans la même transaction : la classification signée ne va pas sans eux (PL-207).
-    const controls = await instantiateControls(tx, {
-      orgId: ctx.orgId,
-      systemId: draft.systemId,
-      tier: draft.tier,
-      role: draft.role,
-    });
-    // AIA-06-02 : un système exempté sans dossier signé est « preuve absente » ; un système non exempté, non concerné.
-    await evaluateExemptionControl(tx, {
-      orgId: ctx.orgId,
-      systemId: draft.systemId,
-      at: signedAt,
-    });
-    // Preuves émises par ProofLayer (PL-402) : la signature et l'état de la fiche qui en résulte.
-    await recordClassificationSigned(tx, ctx.orgId, draft.id);
-    await recordRegistrySnapshot(tx, ctx.orgId, draft.systemId, signedAt);
-    // Les autres contrôles évaluables sont jugés sur les preuves déjà présentes (PL-401), par la file de jobs.
-    await scheduleOrgSweep(tx, ctx.orgId, scheduleEvaluation, draft.systemId);
-    return { superseded: previous.map((p) => p.id), roleBefore: system.role, controls };
-  });
+      });
+      // PL-602 : le système signé passe sous surveillance si le plan le permet ; sinon il reste au registre, non surveillé,
+      // avec proposition de changement de plan (§3.2 E11). La classification, elle, n'est jamais limitée.
+      const monitored = system.monitored || (await monitoringCapacity(tx, ctx.orgId)).available;
+      if (monitored && !system.monitored) {
+        await tx.aiSystem.update({ where: { id: draft.systemId }, data: { monitored: true } });
+      }
+      // AIA-06-02 : un système exempté sans dossier signé est « preuve absente » ; un système non exempté, non concerné.
+      await evaluateExemptionControl(tx, {
+        orgId: ctx.orgId,
+        systemId: draft.systemId,
+        at: signedAt,
+      });
+      // Preuves émises par ProofLayer (PL-402) : la signature et l'état de la fiche qui en résulte.
+      await recordClassificationSigned(tx, ctx.orgId, draft.id);
+      await recordRegistrySnapshot(tx, ctx.orgId, draft.systemId, signedAt);
+      // Les autres contrôles évaluables sont jugés sur les preuves déjà présentes (PL-401), par la file de jobs.
+      await scheduleOrgSweep(tx, ctx.orgId, scheduleEvaluation, draft.systemId);
+      return {
+        superseded: previous.map((p) => p.id),
+        roleBefore: system.role,
+        controls,
+        monitored,
+      };
+    },
+  );
 
   await record(ctx, "classification.sign", draft.id, {
     systemId: draft.systemId,
@@ -373,7 +388,7 @@ export async function signClassification(
       },
     );
   }
-  return { id: draft.id, signedAt: signedAt.toISOString(), controls };
+  return { id: draft.id, signedAt: signedAt.toISOString(), controls, monitored };
 }
 
 /** Versions signées et remplacées du système, de la plus récente à la plus ancienne (§4.4.2 `history`). */

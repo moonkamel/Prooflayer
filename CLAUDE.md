@@ -589,3 +589,18 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   fournisseur STRIPE (`event.id`, déjà vu → 200), seuls type et identifiants conservés ; `handleStripeDelivery` dans
   `process-delivery.ts`, erreur Stripe → nouvel essai. Routeur `billing` (`get` tout membre ; `checkout`, `portal` owner).
 - Écran `/organization/billing` (lien depuis `/organization`), retour de Checkout `?checkout=success|cancel`.
+
+## Limites de plan et lecture seule (conventions établies par PL-602)
+- `src/server/services/entitlements.ts` : `accessFor` (sans abonnement enregistré : aucun blocage), `isReadOnly`,
+  `monitoringCapacity` / `assertCanMonitor` (CONFLICT `billing.monitoredLimit`), `assertCanLinkRepository` (Starter :
+  10 dépôts, CONFLICT `billing.repositoryLimit` ; à appeler par la sélection des dépôts de PL-303).
+- Système surveillé (`AiSystem.monitored`) : posé à la signature si la limite le permet (`signClassification` renvoie
+  `monitored`), sinon le système reste au registre non surveillé ; `system.setMonitored` (admin, verrou
+  `monitor:{orgId}`, journal `system.monitor`). Seuls les systèmes surveillés sont évalués (`evaluableWhere`,
+  `evaluateInstance`). Rien n'est retiré au dépassement (changement de plan à la baisse compris).
+- Lecture seule (essai expiré, impayé, résilié) : `orgProcedure` refuse toute mutation dont le chemin est bloqué
+  (`blockedWhenReadOnly` : system, classification, control, evidence, exemption, integration, pack.create), FORBIDDEN
+  `billing.readOnly` ; lectures, exports, téléchargement des packs, facturation, organisation, notifications restent
+  ouverts. Capture suspendue : livraisons GitHub et Jira IGNORED « capture suspendue », jobs Jira sautés. Bandeau dans
+  la coque (`shell.readOnly`).
+- Tests : les systèmes créés directement en base par les tests d'intégration portent `monitored: true`.

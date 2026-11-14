@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
 import { AI_ACT_ROLES, SYSTEM_STATUSES, type SystemField } from "@/server/services/system-registry";
-import { ArchiveSystemButton, EditableField } from "../system-controls";
+import { ArchiveSystemButton, EditableField, MonitorSystemButton } from "../system-controls";
 import { Alert } from "@/components/ui/alert";
 import { StartClassificationButton } from "./classification/result";
 import { loadSystem } from "./load";
@@ -41,6 +41,12 @@ export default async function SystemOverviewPage({ params }: Params) {
   return (
     <>
       {system.archivedAt && <Alert>{t("archivedNotice", { date: day(system.archivedAt) })}</Alert>}
+      {!system.archivedAt && system.riskTier !== "UNCLASSIFIED" && (
+        <div className="space-y-2" data-testid="monitoring">
+          <Alert>{t(system.monitored ? "monitored" : "notMonitored")}</Alert>
+          {editable && <MonitorSystemButton systemId={system.id} monitored={system.monitored} />}
+        </div>
+      )}
       {system.riskTier === "UNCLASSIFIED" && (
         <div className="space-y-2">
           <Alert>{t("unclassified")}</Alert>

@@ -260,7 +260,8 @@
     "evidence_redact": "Effacement d'une preuve",
     "billing_checkout": "Souscription lancée",
     "billing_portal": "Ouverture du portail de facturation",
-    "billing_subscriptionSynced": "Abonnement mis à jour"
+    "billing_subscriptionSynced": "Abonnement mis à jour",
+    "system_monitor": "Surveillance d'un système"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -281,7 +282,13 @@
     "brand": "ProofLayer",
     "systems": "Systèmes d'IA",
     "dashboard": "Tableau de bord",
-    "notifications": "Alertes"
+    "notifications": "Alertes",
+    "readOnly": {
+      "trialExpired": "Essai terminé : l'espace est en lecture seule et la capture est suspendue. Les packs existants restent exportables.",
+      "pastDue": "Paiement en échec : l'espace est en lecture seule et la capture est suspendue.",
+      "canceled": "Abonnement terminé : l'espace est en lecture seule et la capture est suspendue. Les packs existants restent exportables."
+    },
+    "readOnlyLink": "Voir l'abonnement"
   },
   "home": {
     "title": "ProofLayer",
@@ -343,7 +350,9 @@
     "ownerNotMember": "Le responsable doit être membre de l'organisation.",
     "conflict": "La fiche a été modifiée entre-temps. Rechargez la page puis recommencez.",
     "archivedError": "Cette fiche est archivée : elle n'est plus modifiable.",
-    "forbidden": "Votre rôle ne permet pas de modifier le registre."
+    "forbidden": "Votre rôle ne permet pas de modifier le registre.",
+    "monitoredLimit": "Limite de systèmes surveillés atteinte pour votre plan.",
+    "readOnly": "L'espace est en lecture seule : régularisez l'abonnement pour reprendre."
   },
   "system": {
     "sections": "Sections de la fiche",
@@ -381,7 +390,12 @@
     "exemption": "Exemption",
     "sources": "Sources",
     "dashboard": "Tableau de bord",
-    "packs": "Packs"
+    "packs": "Packs",
+    "monitored": "Système surveillé : ses contrôles sont évalués à chaque nouvelle preuve.",
+    "notMonitored": "Système non surveillé : il reste au registre, mais ses contrôles ne sont pas évalués. Votre plan fixe le nombre de systèmes surveillés.",
+    "startMonitoring": "Surveiller ce système",
+    "stopMonitoring": "Arrêter la surveillance",
+    "seePlans": "Voir les formules"
   },
   "designChanges": {
     "title": "Modifications de conception",
@@ -1406,7 +1420,6 @@
       "pastDue": "Paiement en échec : l'espace est en lecture seule jusqu'au {date}. Mettez à jour votre moyen de paiement.",
       "canceled": "Abonnement terminé : l'espace est en lecture seule jusqu'au {date}. Les packs existants restent exportables."
     },
-    "systemsLimit": "{count, plural, one {# système surveillé} other {# systèmes surveillés}} au plus.",
     "portal": "Gérer l'abonnement et les factures",
     "offersTitle": "Choisir une formule",
     "prices": {
@@ -1433,6 +1446,8 @@
       "noCustomer": "Aucun abonnement Stripe n'est encore lié.",
       "generic": "Une erreur est survenue. Réessayez dans un instant."
     },
-    "nav": "Abonnement"
+    "nav": "Abonnement",
+    "monitoredCount": "{count, plural, =0 {Aucun système surveillé} one {# système surveillé} other {# systèmes surveillés}} sur {limit} permis.",
+    "overLimit": "Plus de systèmes surveillés que n'en permet votre plan : aucun n'est retiré, mais aucun autre ne peut être ajouté."
   }
 }

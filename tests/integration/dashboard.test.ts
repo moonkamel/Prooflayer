@@ -32,6 +32,7 @@ beforeAll(async () => {
   systemId = (
     await db.aiSystem.create({
       data: {
+        monitored: true,
         orgId: A,
         name: "Score",
         slug: `score-${run}`,
@@ -44,6 +45,7 @@ beforeAll(async () => {
   emptySystemId = (
     await db.aiSystem.create({
       data: {
+        monitored: true,
         orgId: A,
         name: "Assistant",
         slug: `assistant-${run}`,

@@ -106,7 +106,12 @@ function serializeAccess(a: Access) {
 /** `billing.get` : abonnement, accès et formules proposées. Lecture : tout membre. */
 export async function getBilling(ctx: OrgContext, deps = billingDependencies.get()) {
   const now = deps.now();
-  const sub = await withOrgTransaction(ctx.orgId, (tx) => currentSubscription(tx, ctx.orgId, now));
+  const { sub, monitoredCount } = await withOrgTransaction(ctx.orgId, async (tx) => ({
+    sub: await currentSubscription(tx, ctx.orgId, now),
+    monitoredCount: await tx.aiSystem.count({
+      where: { orgId: ctx.orgId, monitored: true, archivedAt: null },
+    }),
+  }));
   const config = stripeConfigured() ? deps.config() : { byOffer: new Map(), byPrice: new Map() };
   return {
     plan: sub.plan,
@@ -116,6 +121,7 @@ export async function getBilling(ctx: OrgContext, deps = billingDependencies.get
     currentPeriodEnd: sub.currentPeriodEnd?.toISOString() ?? null,
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
     monitoredSystemsLimit: sub.monitoredSystemsLimit,
+    monitoredCount,
     hasCustomer: Boolean(sub.stripeCustomerId),
     access: serializeAccess(accessOf(sub, now)),
     offers: OFFERS.filter((o) => priceFor(config, o.plan, o.interval)),

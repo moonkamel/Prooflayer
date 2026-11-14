@@ -10,6 +10,7 @@ import { jobRegistry } from "@/server/system/jobs/handlers";
 import { enqueueInTransaction, runJobNow } from "@/server/system/jobs/queue";
 import { jiraIssueSyncJob } from "@/server/system/jobs/jira";
 import { syncSubscriptionFromEvent } from "@/server/services/billing";
+import { isReadOnly } from "@/server/services/entitlements";
 import {
   claimDeliveries,
   failDelivery,
@@ -51,6 +52,12 @@ export async function handleDelivery(
         undefined,
         "installation non liée ou inactive",
       ))
+        ? "ignored"
+        : "lease_lost";
+    }
+    // PL-602 : essai expiré ou impayé → capture suspendue (§3.2 E11) ; la livraison est consignée, sans preuve.
+    if (await isReadOnly(integration.orgId)) {
+      return (await finishDelivery(delivery, "IGNORED", undefined, "capture suspendue"))
         ? "ignored"
         : "lease_lost";
     }
@@ -126,8 +133,13 @@ const jiraIssueKey = (payload: unknown) => {
 async function handleJiraDelivery(delivery: ClaimedDelivery): Promise<DeliveryOutcome> {
   const integration = await resolveIntegration("JIRA", delivery.externalAccountId);
   const issueKey = jiraIssueKey(delivery.payload);
-  if (!integration || integration.status !== "ACTIVE" || !issueKey) {
-    const reason = !issueKey ? "événement sans ticket" : "site non lié ou inactif";
+  const suspended = integration ? await isReadOnly(integration.orgId) : false;
+  if (!integration || integration.status !== "ACTIVE" || !issueKey || suspended) {
+    const reason = !issueKey
+      ? "événement sans ticket"
+      : suspended
+        ? "capture suspendue"
+        : "site non lié ou inactif";
     return (await finishDelivery(delivery, "IGNORED", undefined, reason))
       ? "ignored"
       : "lease_lost";

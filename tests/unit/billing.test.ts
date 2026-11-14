@@ -205,3 +205,39 @@ describe("événements suivis", () => {
     ).toBeNull();
   });
 });
+
+describe("droits du plan (PL-602)", () => {
+  it("lecture seule : écritures métier bloquées, facturation, organisation et notifications ouvertes", async () => {
+    const { blockedWhenReadOnly } = await import("@/server/services/billing-data");
+    for (const path of [
+      "system.create",
+      "system.setMonitored",
+      "classification.sign",
+      "control.comment",
+      "evidence.registerUpload",
+      "exemption.save",
+      "integration.jira.complete",
+      "pack.create",
+    ]) {
+      expect(blockedWhenReadOnly(path), path).toBe(true);
+    }
+    for (const path of [
+      "billing.checkout",
+      "billing.portal",
+      "org.update",
+      "notification.markRead",
+      "pack.download",
+    ]) {
+      expect(blockedWhenReadOnly(path), path).toBe(false);
+    }
+  });
+
+  it("limites : systèmes surveillés et dépôts (illimité : null)", async () => {
+    const { canLinkRepository, canMonitorAnother } = await import("@/server/services/billing-data");
+    expect(canMonitorAnother(0, 1)).toBe(true);
+    expect(canMonitorAnother(1, 1)).toBe(false);
+    expect(canLinkRepository(9, 10)).toBe(true);
+    expect(canLinkRepository(10, 10)).toBe(false);
+    expect(canLinkRepository(500, null)).toBe(true);
+  });
+});

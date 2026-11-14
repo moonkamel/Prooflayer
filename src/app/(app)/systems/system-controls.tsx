@@ -2,6 +2,7 @@
 // Registre des systèmes d'IA (PL-201) : création en 3 champs, export, édition en place de la fiche,
 // modifications de conception. Chaque écriture passe par le routeur `system` ; la page est ensuite rafraîchie.
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
@@ -26,6 +27,8 @@ function useErrorMessage() {
       if (error.message === "system.ownerNotMember") return t("ownerNotMember");
       if (error.message === "system.conflict") return t("conflict");
       if (error.message === "system.archived") return t("archivedError");
+      if (error.message === "billing.monitoredLimit") return t("monitoredLimit");
+      if (error.message === "billing.readOnly") return t("readOnly");
       if (error.data?.code === "FORBIDDEN") return t("forbidden");
     }
     return tc("genericError");
@@ -370,6 +373,37 @@ export function ArchiveSystemButton({ systemId }: { systemId: string }) {
         {t("archive")}
       </Button>
       {error && <Alert tone="error">{error}</Alert>}
+    </div>
+  );
+}
+
+/** Surveillance (PL-602) : seuls les systèmes surveillés sont évalués et comptent dans la limite du plan. */
+export function MonitorSystemButton({
+  systemId,
+  monitored,
+}: {
+  systemId: string;
+  monitored: boolean;
+}) {
+  const t = useTranslations("system");
+  const { pending, error, run } = useAction();
+  return (
+    <div className="space-y-2">
+      <Button
+        variant={monitored ? "outline" : "default"}
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          run(() => trpc.system.setMonitored.mutate({ id: systemId, monitored: !monitored }))
+        }
+      >
+        {t(monitored ? "stopMonitoring" : "startMonitoring")}
+      </Button>
+      {error && (
+        <Alert tone="error">
+          {error} <Link href="/organization/billing">{t("seePlans")}</Link>
+        </Alert>
+      )}
     </div>
   );
 }

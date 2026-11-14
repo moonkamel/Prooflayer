@@ -6,6 +6,9 @@ import { withOrgTransaction, type forOrg } from "@/server/db";
 import { findMembership, usersByIds } from "@/server/system/identity";
 import { audit, clientIp, type AuditAction } from "./audit";
 import { ServiceError } from "./errors";
+import { assertCanMonitor } from "./entitlements";
+import { scheduleOrgSweep } from "./evaluation";
+import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
 import { recordRegistrySnapshot } from "./system-evidence";
 import type { OrgContext } from "./organization";
 import {
@@ -273,6 +276,33 @@ export async function archiveSystem(ctx: OrgContext, input: { id: string }) {
     },
   );
   await snapshotRegistry(ctx, current.id);
+}
+
+/**
+ * Surveillance d'un système (PL-602) : seuls les systèmes surveillés sont évalués et comptent dans la limite du plan.
+ * Au-delà de la limite, la mise sous surveillance est refusée avec proposition de plan ; l'arrêt libère une place.
+ */
+export async function setSystemMonitored(
+  ctx: OrgContext,
+  input: { id: string; monitored: boolean },
+) {
+  const current = await findSystem(ctx, input.id);
+  if (current.archivedAt) throw new ServiceError("CONFLICT", "system.archived");
+  if (current.monitored === input.monitored) return { monitored: current.monitored };
+  await withOrgTransaction(ctx.orgId, async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('monitor:' || ${ctx.orgId}, 0))`;
+    if (input.monitored) await assertCanMonitor(tx, ctx.orgId);
+    await tx.aiSystem.update({ where: { id: current.id }, data: { monitored: input.monitored } });
+    // Remis sous surveillance : ses contrôles sont jugés sur les preuves déjà présentes.
+    if (input.monitored) await scheduleOrgSweep(tx, ctx.orgId, scheduleEvaluation, current.id);
+  });
+  await record(
+    ctx,
+    "system.monitor",
+    { type: SYSTEM_TARGET, id: current.id },
+    { changes: [{ field: "monitored", before: current.monitored, after: input.monitored }] },
+  );
+  return { monitored: input.monitored };
 }
 
 /** Historique de la fiche : création, modifications champ par champ, archivage. Du plus récent au plus ancien. */

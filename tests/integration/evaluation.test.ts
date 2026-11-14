@@ -95,6 +95,7 @@ beforeAll(async () => {
   ] as const) {
     await db.aiSystem.create({
       data: {
+        monitored: true,
         id,
         orgId: A,
         name: id,

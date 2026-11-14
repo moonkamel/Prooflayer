@@ -57,7 +57,13 @@ export default async function BillingPage({
                 : t("renewsOn", { date: date(billing.currentPeriodEnd) })
               : t(`readOnly.${access.reason}`, { date: date(access.until ?? null) })}
         </p>
-        <p>{t("systemsLimit", { count: billing.monitoredSystemsLimit })}</p>
+        <p data-testid="billing-monitored">
+          {t("monitoredCount", {
+            count: billing.monitoredCount,
+            limit: billing.monitoredSystemsLimit,
+          })}
+        </p>
+        {billing.monitoredCount > billing.monitoredSystemsLimit && <Alert>{t("overLimit")}</Alert>}
         {isOwner && billing.hasCustomer && <PortalButton />}
       </section>
 

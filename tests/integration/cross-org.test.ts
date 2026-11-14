@@ -55,6 +55,7 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
     code: "NOT_FOUND",
   }),
   "system.archive": () => ({ input: { id: a.systemId }, code: "NOT_FOUND" }),
+  "system.setMonitored": () => ({ input: { id: a.systemId, monitored: true }, code: "NOT_FOUND" }),
   // Le responsable désigné appartient à A : une référence vers une autre organisation est refusée.
   "system.create": () => ({
     input: { name: "Croisé", intendedPurpose: "Test", ownerUserId: ownerA },

@@ -36,6 +36,10 @@ async function newSystem(name: string) {
 beforeAll(async () => {
   for (const org of [A, B]) {
     await prisma.organization.create({ data: { id: org, name: org, slug: org } });
+    // Plusieurs systèmes signés par organisation : plan Growth, 5 systèmes surveillés (PL-602).
+    await forOrg(org).subscription.create({
+      data: { orgId: org, plan: "GROWTH", status: "active", monitoredSystemsLimit: 5 },
+    });
   }
   for (const [id, org] of [
     [admin, A],
