@@ -120,6 +120,10 @@ beforeAll(async () => {
        VALUES ('cev_' || $2 || '_pass', $1, $3, 'PASS', '[]', '{}', 'test@1', now() - interval '2 days')`,
       [A, run, id("AIA-15-02")],
     );
+    // Statistiques à jour après l'insertion massive, comme l'autovacuum le fait en production.
+    await client.query(
+      `ANALYZE "EvidenceItem", "EvidenceLink", "ControlEvaluation", "ControlInstance"`,
+    );
   } finally {
     await client.end();
   }
