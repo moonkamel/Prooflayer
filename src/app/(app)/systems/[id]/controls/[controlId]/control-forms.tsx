@@ -1,7 +1,7 @@
 "use client";
 
 // Actions de l'écran D (PL-407) : responsable du contrôle (contributor), non-applicabilité justifiée (admin),
-// commentaire (contributor). Après chaque écriture, la page serveur est relue (router.refresh).
+// commentaire (contributor) ; effacement d'une preuve (admin, PL-507). Après chaque écriture, la page serveur est relue (router.refresh).
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
@@ -19,6 +19,8 @@ const KNOWN_ERRORS = [
   "control.naByReclassification",
   "control.commentEmpty",
   "system.archived",
+  "evidence.alreadyRedacted",
+  "evidence.notFound",
 ] as const;
 
 function useAction() {
@@ -200,5 +202,65 @@ export function CommentForm({ controlId }: { controlId: string }) {
       </Button>
       {message && <Alert tone={message.tone}>{message.text}</Alert>}
     </form>
+  );
+}
+
+const REDACTION_REASONS = ["data_subject_request", "data_minimisation", "other"] as const;
+
+/** Effacement d'une preuve (admin) : motif dans une liste fermée, confirmation explicite, définitif. */
+export function RedactEvidenceForm({
+  evidenceId,
+  summary,
+}: {
+  evidenceId: string;
+  summary: string;
+}) {
+  const { t, pending, message, run } = useAction();
+  const reasonId = useId();
+  const confirmId = useId();
+  const [reason, setReason] = useState<(typeof REDACTION_REASONS)[number]>("data_subject_request");
+  const [confirmed, setConfirmed] = useState(false);
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    run(() => trpc.evidence.redact.mutate({ evidenceId, reason }), t("redact.done"));
+  };
+  return (
+    <details className="mt-1 text-sm" data-testid="redact-evidence">
+      <summary className="cursor-pointer text-destructive underline">
+        {t("redact.open")}
+        <span className="sr-only"> · {t("redact.forEvidence", { summary })}</span>
+      </summary>
+      <form onSubmit={submit} className="mt-2 space-y-2 rounded-md border border-border p-3">
+        <p className="font-medium">{t("redact.title")}</p>
+        <p className="text-muted-foreground">{t("redact.intro")}</p>
+        <Label htmlFor={reasonId}>{t("redact.reason")}</Label>
+        <Select
+          id={reasonId}
+          value={reason}
+          disabled={pending}
+          onChange={(e) => setReason(e.target.value as (typeof REDACTION_REASONS)[number])}
+        >
+          {REDACTION_REASONS.map((r) => (
+            <option key={r} value={r}>
+              {t(`redact.reasons.${r}`)}
+            </option>
+          ))}
+        </Select>
+        <p className="flex items-start gap-2">
+          <input
+            id={confirmId}
+            type="checkbox"
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="mt-1"
+          />
+          <Label htmlFor={confirmId}>{t("redact.confirm")}</Label>
+        </p>
+        <Button type="submit" variant="destructive" disabled={pending || !confirmed}>
+          {t("redact.submit")}
+        </Button>
+        {message && <Alert tone={message.tone}>{message.text}</Alert>}
+      </form>
+    </details>
   );
 }

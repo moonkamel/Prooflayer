@@ -255,7 +255,8 @@
     "integration_mapping": "Jira mapping saved",
     "evidence_upload": "Manual evidence uploaded",
     "evidence_attest": "Attestation signed",
-    "evidence_attestRefused": "Attestation refused: incorrect password"
+    "evidence_attestRefused": "Attestation refused: incorrect password",
+    "evidence_redact": "Evidence erased"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1026,7 +1027,24 @@
       "control_justificationRequired": "A justification of at least 20 characters is required.",
       "control_naByReclassification": "This control was set aside by the reclassification: it follows the system's classification.",
       "control_commentEmpty": "The comment is empty.",
-      "system_archived": "The system is archived: its record is read-only."
+      "system_archived": "The system is archived: its record is read-only.",
+      "evidence_alreadyRedacted": "This evidence is already erased.",
+      "evidence_notFound": "Evidence not found."
+    },
+    "redact": {
+      "open": "Erase",
+      "title": "Erase this evidence",
+      "intro": "The payload, actor and salt are deleted, as are the raw payload and the attachment. The sealed hash remains: the batch and other evidence stay verifiable. Erasure is final.",
+      "reason": "Reason",
+      "reasons": {
+        "data_subject_request": "Erasure request from a data subject (GDPR, Art. 17)",
+        "data_minimisation": "Data minimisation",
+        "other": "Other reason"
+      },
+      "confirm": "I understand that erasure is final.",
+      "submit": "Erase permanently",
+      "done": "Evidence erased.",
+      "forEvidence": "Erase evidence: {summary}"
     }
   },
   "evidenceKinds": {

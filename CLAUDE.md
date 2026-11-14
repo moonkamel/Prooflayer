@@ -550,3 +550,15 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   avertissement (la déclaration incombe au fournisseur tiers). Titre légal « Déclaration UE de conformité » conservé.
 - Rubriques établies d'après le règlement 2024/1689 (le cahier ne les énumère pas) : relecture par l'avocat partenaire.
 - Textes : `packTemplates` dans messages/{fr,en}.json ; libellés par `templateLabels(locale)` (`template-labels.ts`).
+
+## Effacement d'une preuve (conventions établies par PL-507)
+- `src/server/services/evidence-redaction.ts` : `redactEvidence` (routeur `evidence.redact`, admin) : ligne verrouillée
+  (`FOR UPDATE`), charge brute et pièce jointe supprimées du stockage d'abord (idempotent), puis payload, actor, salt,
+  `rawObjectKey`, `attachmentKey` à NULL et `redactedAt` posé, dans une transaction. Motif en liste fermée
+  (`REDACTION_REASONS`), jamais de texte libre ; journal `evidence.redact` sans aucun contenu. Déjà effacée : CONFLICT
+  `evidence.alreadyRedacted`. `redactionStorage` remplaçable par les tests.
+- `evidence_guard` (migration 20261114090000) : acteur, sel, charge brute et pièce jointe ne vont que vers NULL ; le sel
+  ne disparaît qu'avec l'effacement ; `redactedAt` posé une fois, jamais retiré ; preuve effacée sans charge ni fichiers.
+- Leaf, enveloppe et place dans le lot demeurent : `verifyOrgChain`, `evidence.proof`, le pack et `@prooflayer/verify`
+  passent toujours (preuve comptée « effacée »). Une preuve effacée ne nourrit plus les évaluations (charge absente).
+- Écran D : action « Effacer » (admin, motif, confirmation explicite), preuve ensuite affichée « Preuve effacée ».

@@ -1,11 +1,11 @@
 // Routeur `evidence` (§4.4.2, rôle contributor en écriture). PL-405 : `createUploadUrl`, `registerUpload`, `attest`.
-// PL-503 : `proof` (lecture, tout membre). list, get et redact arrivent avec le pack (PL-504) et l'effacement (PL-507). Aucune
-// logique ici : src/server/services/manual-evidence.ts.
+// PL-503 : `proof` (lecture, tout membre). PL-507 : `redact` (admin). Aucune logique ici : src/server/services/.
 import { z } from "zod";
 import { evidenceProof } from "@/server/services/evidence-proof";
+import { REDACTION_REASONS, redactEvidence } from "@/server/services/evidence-redaction";
 import * as manual from "@/server/services/manual-evidence";
 import { passwordVerifier } from "@/server/services/session";
-import { orgProcedure, router, writeProcedure } from "@/server/trpc";
+import { adminProcedure, orgProcedure, router, writeProcedure } from "@/server/trpc";
 
 const controls = z.array(z.string().min(1).max(128)).min(1).max(20);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/u);
@@ -47,4 +47,7 @@ export const evidenceRouter = router({
     .mutation(({ ctx, input }) =>
       manual.attest(ctx, input, { verifyPassword: passwordVerifier(ctx.headers) }),
     ),
+  redact: adminProcedure
+    .input(z.object({ evidenceId: z.string().min(1).max(128), reason: z.enum(REDACTION_REASONS) }))
+    .mutation(({ ctx, input }) => redactEvidence(ctx, input)),
 });

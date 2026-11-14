@@ -11,7 +11,8 @@ import { signState } from "@/server/connectors/jira/oauth";
 import { signToken } from "@/server/crypto/signed-token";
 import { LIBRARY_VERSION } from "@/server/rules/library";
 import { generateKey } from "@/server/crypto/envelope";
-import { forOrg, prisma } from "@/server/db";
+import { forOrg, prisma, withOrgTransaction } from "@/server/db";
+import { createEvidence } from "@/server/services/evidence";
 import { appRouter, createCaller } from "@/server/routers/_app";
 
 const run = randomUUID().slice(0, 8);
@@ -30,6 +31,7 @@ const a = {
   designChangeId: "",
   classificationId: "",
   controlInstanceId: "",
+  evidenceId: "",
   memberId: `mem_${ownerA}`,
 };
 
@@ -70,6 +72,10 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "control.get": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
   "evidence.proof": () => ({ input: { evidenceId: "ev_de_A_inexistante" }, code: "NOT_FOUND" }),
+  "evidence.redact": () => ({
+    input: { evidenceId: a.evidenceId, reason: "data_subject_request" },
+    code: "NOT_FOUND",
+  }),
   "pack.create": () => ({
     input: {
       systemId: a.systemId,
@@ -298,6 +304,20 @@ beforeAll(async () => {
     await forOrg(A).controlInstance.create({
       data: { orgId: A, systemId: a.systemId, definitionId: definition.id },
     })
+  ).id;
+  a.evidenceId = (
+    await withOrgTransaction(A, (tx) =>
+      createEvidence(tx, A, {
+        kind: "github.pull_request.merged",
+        source: "GITHUB",
+        capturedVia: "WEBHOOK",
+        sourceRef: `xorg:${run}`,
+        dedupeKey: `xorg:${run}`,
+        occurredAt: new Date(),
+        summary: "Preuve de A",
+        payload: { n: 1 },
+      }),
+    )
   ).id;
 });
 
