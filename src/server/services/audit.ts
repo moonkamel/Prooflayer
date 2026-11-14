@@ -38,6 +38,7 @@ export const AUDIT_ACTIONS = [
   "integration.mapping",
   "evidence.upload",
   "evidence.attest",
+  "evidence.redact",
   "evidence.attestRefused",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

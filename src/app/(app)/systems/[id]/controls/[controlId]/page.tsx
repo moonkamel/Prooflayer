@@ -12,7 +12,7 @@ import { Alert } from "@/components/ui/alert";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
 import { ADMIN_ROLES, WRITE_ROLES } from "@/server/services/role-policy";
 import { loadSystem } from "../../load";
-import { CommentForm, NotApplicableForm, OwnerForm } from "./control-forms";
+import { CommentForm, NotApplicableForm, OwnerForm, RedactEvidenceForm } from "./control-forms";
 
 type Params = {
   params: Promise<{ id: string; controlId: string }>;
@@ -222,6 +222,9 @@ export default async function ControlDetailPage({ params, searchParams }: Params
                         )}
                         <span>{t(e.linkedByUser ? "linkedByUser" : "linkedByRule")}</span>
                       </p>
+                      {canAdmin && !e.redacted && (
+                        <RedactEvidenceForm evidenceId={e.id} summary={e.summary} />
+                      )}
                     </TableCell>
                     <TableCell>{tk(e.kind.replaceAll(".", "_") as "manual_upload")}</TableCell>
                     <TableCell>{date(e.occurredAt)}</TableCell>

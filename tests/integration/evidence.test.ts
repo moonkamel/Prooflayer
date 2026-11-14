@@ -150,6 +150,7 @@ describe("immutabilité (trigger evidence_guard, §4.3.3)", () => {
         payload: Prisma.DbNull,
         actor: Prisma.DbNull,
         salt: null,
+        rawObjectKey: null,
         redactedAt: new Date(),
       },
     });

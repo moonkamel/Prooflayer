@@ -160,6 +160,16 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
     .click();
   await expect(page.getByTestId("evidence-seal")).toContainText("En attente de scellement");
   await expectNoViolations(page, "détail d'un contrôle avec preuve");
+  // Effacement (PL-507) : motif, confirmation explicite ; la preuve reste listée, marquée effacée.
+  const redact = page.getByTestId("redact-evidence");
+  await redact.locator("summary").click();
+  await expectNoViolations(page, "effacement d'une preuve");
+  const erase = redact.getByRole("button", { name: "Effacer définitivement" });
+  await expect(erase).toBeDisabled();
+  await redact.getByLabel("Je comprends que l'effacement est définitif.").check();
+  await erase.click();
+  await expect(page.getByTestId("evidence-row")).toContainText("Preuve effacée");
+  await expect(page.getByTestId("redact-evidence")).toHaveCount(0);
   await page.goBack();
 
   // Dashboard (PL-406) : 37 contrôles, filtres reflétés dans l'adresse et conservés au rechargement.

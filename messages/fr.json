@@ -255,7 +255,8 @@
     "integration_mapping": "Correspondance Jira enregistrée",
     "evidence_upload": "Preuve manuelle déposée",
     "evidence_attest": "Attestation signée",
-    "evidence_attestRefused": "Attestation refusée : mot de passe incorrect"
+    "evidence_attestRefused": "Attestation refusée : mot de passe incorrect",
+    "evidence_redact": "Effacement d'une preuve"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1026,7 +1027,24 @@
       "control_justificationRequired": "Une justification d'au moins 20 caractères est obligatoire.",
       "control_naByReclassification": "Ce contrôle a été écarté par la reclassification : il suit la classification du système.",
       "control_commentEmpty": "Le commentaire est vide.",
-      "system_archived": "Le système est archivé : sa fiche est en lecture seule."
+      "system_archived": "Le système est archivé : sa fiche est en lecture seule.",
+      "evidence_alreadyRedacted": "Cette preuve est déjà effacée.",
+      "evidence_notFound": "Preuve introuvable."
+    },
+    "redact": {
+      "open": "Effacer",
+      "title": "Effacer cette preuve",
+      "intro": "La charge, l'acteur et le sel sont supprimés, ainsi que la charge brute et la pièce jointe. L'empreinte scellée demeure : le lot et les autres preuves restent vérifiables. L'effacement est définitif.",
+      "reason": "Motif",
+      "reasons": {
+        "data_subject_request": "Demande d'effacement d'une personne concernée (RGPD, Art. 17)",
+        "data_minimisation": "Minimisation des données",
+        "other": "Autre motif"
+      },
+      "confirm": "Je comprends que l'effacement est définitif.",
+      "submit": "Effacer définitivement",
+      "done": "Preuve effacée.",
+      "forEvidence": "Effacer la preuve : {summary}"
     }
   },
   "evidenceKinds": {
