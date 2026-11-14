@@ -80,6 +80,7 @@ beforeAll(async () => {
   systemA = (
     await forOrg(A).aiSystem.create({
       data: {
+        monitored: true,
         orgId: A,
         name: "Score",
         slug: `score-${run}`,
@@ -92,6 +93,7 @@ beforeAll(async () => {
   systemB = (
     await forOrg(B).aiSystem.create({
       data: {
+        monitored: true,
         orgId: B,
         name: "Tri",
         slug: `tri-${run}`,

@@ -41,6 +41,7 @@ export const AUDIT_ACTIONS = [
   "evidence.redact",
   "evidence.attestRefused",
   "billing.checkout",
+  "system.monitor",
   "billing.portal",
   "billing.subscriptionSynced",
 ] as const;

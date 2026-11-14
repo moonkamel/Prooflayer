@@ -81,20 +81,23 @@ function signed(body: string, secret = SECRET) {
 }
 
 /** Le traitement lancé par waitUntil peut tourner en parallèle : on le rejoue puis on attend sa fin. */
-async function deliverUntil(event: { id: string }, done: (status: string) => boolean) {
+async function deliverUntil(
+  event: { id: string },
+  done: (d: { status: string; attempts: number }) => boolean,
+) {
   const response = await POST(signed(JSON.stringify(event)));
   await processDelivery("STRIPE", event.id);
   for (let i = 0; i < 50; i++) {
     const d = await prisma.webhookDelivery.findFirst({
       where: { provider: "STRIPE", deliveryId: event.id },
     });
-    if (d && done(d.status)) return { response, delivery: d };
+    if (d && done(d)) return { response, delivery: d };
     await new Promise((r) => setTimeout(r, 50));
   }
   throw new Error("livraison non traitée");
 }
 const deliver = (event: { id: string }) =>
-  deliverUntil(event, (status) => status !== "PENDING" && status !== "PROCESSING");
+  deliverUntil(event, ({ status }) => status !== "PENDING" && status !== "PROCESSING");
 
 const subscription = () => forOrg(A).subscription.findUniqueOrThrow({ where: { orgId: A } });
 const ts = (d: Date) => Math.floor(d.getTime() / 1000);
@@ -349,7 +352,11 @@ describe("webhook Stripe", () => {
     error.mockRestore();
     retrieve.mockRejectedValueOnce(new Error("Stripe indisponible"));
     const event = { ...fixture("subscription-updated-plan"), id: `evt_retry_${run}` };
-    const { delivery: pending } = await deliverUntil(event, (status) => status !== "PROCESSING");
+    // Une tentative a eu lieu (le traitement lancé par waitUntil peut la prendre avant nous), puis a échoué.
+    const { delivery: pending } = await deliverUntil(
+      event,
+      ({ status, attempts }) => attempts >= 1 && status !== "PROCESSING",
+    );
     expect(pending).toMatchObject({ status: "PENDING", attempts: 1 });
   });
 });

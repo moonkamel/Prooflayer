@@ -3,6 +3,7 @@
 // `jira.webhook.ensure` enregistre ou prolonge le webhook du site. Effets réseau en lecture (et gestion du webhook) :
 // une tentative rejouée relit les mêmes tickets, les preuves sont dédupliquées.
 import { z } from "zod";
+import { accessFor } from "@/server/services/entitlements";
 import { jiraDependencies } from "@/server/services/jira-integration";
 import { ensureWebhook, reconcile, syncIssue, type JiraDeps } from "@/server/services/jira-sync";
 import { scheduleEvaluation } from "./control-evaluate";
@@ -31,6 +32,7 @@ export const jiraIssueSyncJob = defineJob({
     if (!ctx.job.orgId) throw new Error("jira.issue.sync sans organisation");
     const integration = await integrationOf(ctx.tx, integrationId);
     if (integration?.status !== "ACTIVE") return;
+    if ((await accessFor(ctx.tx, ctx.job.orgId)).kind === "readOnly") return;
     await syncIssue(
       ctx.tx,
       { orgId: ctx.job.orgId, integrationId, issueKey, capturedVia },
@@ -51,6 +53,8 @@ export const jiraReconcileJob = defineJob({
     if (!orgId) throw new Error("jira.reconcile sans organisation");
     const integration = await integrationOf(ctx.tx, integrationId);
     if (integration?.status !== "ACTIVE") return;
+    // PL-602 : lecture seule → capture suspendue.
+    if ((await accessFor(ctx.tx, orgId)).kind === "readOnly") return;
     await reconcile(
       ctx.tx,
       { orgId, integrationId, mode },

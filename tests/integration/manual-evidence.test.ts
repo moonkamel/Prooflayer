@@ -72,6 +72,7 @@ beforeAll(async () => {
   }
   const system = await forOrg(A).aiSystem.create({
     data: {
+      monitored: true,
       orgId: A,
       name: "Score",
       slug: `score-${run}`,

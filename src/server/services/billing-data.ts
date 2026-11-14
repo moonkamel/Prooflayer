@@ -185,3 +185,32 @@ export const TRACKED_EVENTS = new Set([
   "customer.subscription.deleted",
   "invoice.payment_failed",
 ]);
+
+/**
+ * Procédures tRPC bloquées en lecture seule (§3.2 E11 : essai expiré ou impayé) : toute écriture métier. Restent
+ * permises la facturation (pour régulariser), l'organisation et ses membres, les notifications ; les lectures et
+ * exports (registre, journal, téléchargement des packs existants) sont des requêtes, jamais bloquées.
+ */
+const READ_ONLY_BLOCKED = [
+  "system.",
+  "classification.",
+  "control.",
+  "evidence.",
+  "exemption.",
+  "integration.",
+  "pack.create",
+];
+
+export function blockedWhenReadOnly(path: string): boolean {
+  return READ_ONLY_BLOCKED.some((p) => (p.endsWith(".") ? path.startsWith(p) : path === p));
+}
+
+/** Un système de plus peut-il être surveillé ? Rien n'est jamais retiré au dépassement (§3.2 E11). */
+export function canMonitorAnother(monitoredCount: number, limit: number): boolean {
+  return monitoredCount < limit;
+}
+
+/** Un dépôt de plus peut-il être lié (Starter : 10, §6.1) ? `null` : illimité. */
+export function canLinkRepository(linkedCount: number, limit: number | null): boolean {
+  return limit === null || linkedCount < limit;
+}

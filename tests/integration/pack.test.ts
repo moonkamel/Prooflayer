@@ -129,6 +129,7 @@ beforeAll(async () => {
       (
         await db.aiSystem.create({
           data: {
+            monitored: true,
             orgId: A,
             name,
             slug: `${name.toLowerCase()}-${run}`,

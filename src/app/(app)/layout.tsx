@@ -8,12 +8,18 @@ import { MAIN_ID, SkipLink } from "@/components/shell/skip-link";
 import { listOwnMemberships } from "@/server/services/organization";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
 import { activeOrganizationIdOf, requireSession } from "@/server/services/session";
+import { accessFor } from "@/server/services/entitlements";
+import { forOrg } from "@/server/db";
+import Link from "next/link";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
   const memberships = await listOwnMemberships(session.user.id);
   const active = memberships.find((m) => m.id === activeOrganizationIdOf(session));
   const t = await getTranslations("shell");
+  // PL-602 : essai terminé ou impayé → bandeau de lecture seule, sur chaque écran.
+  const access = active ? await accessFor(forOrg(active.id), active.id) : null;
+  const readOnly = access?.kind === "readOnly" ? access.reason : null;
 
   return (
     <>
@@ -48,6 +54,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
       <main id={MAIN_ID} className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+        {readOnly && (
+          <p
+            role="status"
+            data-testid="read-only-banner"
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+          >
+            {t(`readOnly.${readOnly}`)}{" "}
+            <Link href="/organization/billing">{t("readOnlyLink")}</Link>
+          </p>
+        )}
         {children}
       </main>
     </>

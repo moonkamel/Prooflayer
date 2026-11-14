@@ -68,6 +68,9 @@ export const systemRouter = router({
   update: adminProcedure
     .input(z.object({ id, patch }))
     .mutation(({ ctx, input }) => systems.updateSystem(ctx, input)),
+  setMonitored: adminProcedure
+    .input(z.object({ id: z.string().min(1).max(128), monitored: z.boolean() }))
+    .mutation(({ ctx, input }) => systems.setSystemMonitored(ctx, input)),
   archive: adminProcedure
     .input(z.object({ id }))
     .mutation(({ ctx, input }) => systems.archiveSystem(ctx, input)),

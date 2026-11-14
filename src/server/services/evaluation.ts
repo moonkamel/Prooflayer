@@ -22,10 +22,10 @@ export type ScheduleEvaluation = (
   instanceId: string,
 ) => Promise<string | null>;
 
-/** Contrôles évaluables : instance applicable, système non archivé, évaluateur livré. */
+/** Contrôles évaluables : instance applicable, système surveillé (PL-602) et non archivé, évaluateur livré. */
 const evaluableWhere = (registry: EvaluatorRegistry) => ({
   notApplicable: false,
-  system: { archivedAt: null },
+  system: { archivedAt: null, monitored: true },
   definition: { evaluatorKey: { in: implementedEvaluatorKeys(registry) } },
 });
 
@@ -218,10 +218,10 @@ export async function evaluateInstance(
 ): Promise<EvaluateOutcome> {
   const instance = await tx.controlInstance.findUnique({
     where: { id: instanceId },
-    include: { definition: true, system: { select: { archivedAt: true } } },
+    include: { definition: true, system: { select: { archivedAt: true, monitored: true } } },
   });
   if (!instance || instance.orgId !== orgId) return { evaluated: false, reason: "not_found" };
-  if (instance.notApplicable || instance.system.archivedAt) {
+  if (instance.notApplicable || instance.system.archivedAt || !instance.system.monitored) {
     return { evaluated: false, reason: "not_evaluable" };
   }
   const definition = instance.definition;

@@ -8,6 +8,8 @@ import type { Context } from "./context";
 import { forOrg } from "./db";
 import { findMembership } from "./system/identity";
 import { ServiceError } from "./services/errors";
+import { blockedWhenReadOnly } from "./services/billing-data";
+import { accessFor } from "./services/entitlements";
 
 export interface ProcedureMeta {
   /** Rôles autorisés. Absent : tout membre de l'organisation active. */
@@ -48,16 +50,22 @@ const errorTranslation = t.middleware(async ({ next }) => {
 
 export const publicProcedure = t.procedure.use(errorTranslation);
 
-export const orgProcedure = publicProcedure.use(async ({ ctx, next }) => {
+export const orgProcedure = publicProcedure.use(async ({ ctx, next, type, path }) => {
   const orgId = ctx.session?.activeOrganizationId;
   if (!ctx.session || !orgId) throw new TRPCError({ code: "UNAUTHORIZED" });
 
   const member = await findMembership(orgId, ctx.session.userId);
   if (!member) throw new TRPCError({ code: "FORBIDDEN" });
 
-  return next({
-    ctx: { ...ctx, userId: ctx.session.userId, orgId, role: member.role, db: forOrg(orgId) },
-  });
+  const db = forOrg(orgId);
+  // PL-602 : essai expiré ou impayé → lecture seule ; les écritures métier sont refusées, la facturation reste ouverte.
+  if (type === "mutation" && blockedWhenReadOnly(path)) {
+    if ((await accessFor(db, orgId)).kind === "readOnly") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "billing.readOnly" });
+    }
+  }
+
+  return next({ ctx: { ...ctx, userId: ctx.session.userId, orgId, role: member.role, db } });
 });
 
 export const withRole = (...allowed: OrgRole[]) =>
