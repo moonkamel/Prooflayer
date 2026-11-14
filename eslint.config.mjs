@@ -11,6 +11,7 @@ const config = [
       "playwright-report/**",
       "test-results/**",
       "src/generated/**",
+      "packages/*/dist/**",
       "next-env.d.ts",
     ],
   },
@@ -54,6 +55,29 @@ const config = [
           selector:
             "JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder)$/] > Literal[value=/\\p{L}/u]",
           message: "Texte lu par l'utilisateur : passer par la traduction (messages/{fr,en}.json).",
+        },
+      ],
+    },
+  },
+  {
+    // PL-505 : l'outil de vérification ne dépend pas de l'application, et son cœur s'exécute aussi dans le navigateur
+    // (page publique de vérification, PL-508) : ni `@/…`, ni module propre à Node hors du point d'entrée.
+    files: ["packages/verify/src/**/*.ts"],
+    ignores: ["packages/verify/src/bin.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/*", "../../src/*", "../../../src/*"],
+              message: "Paquet autonome : aucun import de l'application.",
+            },
+            {
+              regex: "^node:",
+              message: "Cœur exécutable dans le navigateur : WebCrypto plutôt que node:crypto.",
+            },
+          ],
         },
       ],
     },

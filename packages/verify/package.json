@@ -1,0 +1,32 @@
+{
+  "name": "@prooflayer/verify",
+  "version": "0.1.0",
+  "description": "Vérifie hors ligne un pack d'audit ProofLayer : signature, preuves, lots de Merkle, ancres, jetons RFC 3161.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "bin": {
+    "prooflayer-verify": "dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "asn1js": "4.0.0",
+    "fflate": "0.8.3",
+    "pkijs": "4.0.1"
+  }
+}
