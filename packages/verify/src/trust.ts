@@ -2,7 +2,7 @@
 // prestataires d'horodatage. Rien n'est téléchargé, pour qu'une compromission DNS ou du site ne suffise pas ; une
 // nouvelle clé ou un nouveau prestataire passe par une nouvelle version du paquet. Les clés retirées restent ici pour
 // vérifier les anciens packs (§4.6.5).
-import type { TrustedRoot } from "./tsa.js";
+import type { TrustedRoot } from "./tsa.ts";
 
 /**
  * Clés publiques Ed25519 de ProofLayer (32 octets, base64), par identifiant `pl-AAAA-MM`. Elles sont aussi publiées

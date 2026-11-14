@@ -4,7 +4,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@prooflayer/verify": fileURLToPath(
+        new URL("./packages/verify/src/index.ts", import.meta.url),
+      ),
+    },
   },
   test: {
     include: ["tests/integration/**/*.test.ts"],

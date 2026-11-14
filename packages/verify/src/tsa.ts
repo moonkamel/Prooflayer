@@ -4,7 +4,7 @@
 // l'outil (ou passées explicitement) le sont.
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
-import { equalBytes, toHex } from "./crypto.js";
+import { equalBytes, toHex } from "./crypto.ts";
 
 let engineReady = false;
 function ensureEngine() {

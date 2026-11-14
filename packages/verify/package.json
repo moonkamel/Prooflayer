@@ -22,7 +22,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json && node scripts/fix-declarations.mjs"
   },
   "dependencies": {
     "asn1js": "4.0.0",
