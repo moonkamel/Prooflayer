@@ -19,9 +19,9 @@ import {
   toHex,
   utf8,
   verifyEd25519,
-} from "./crypto.js";
-import { PINNED_KEYS, PINNED_TSA_ROOTS } from "./trust.js";
-import { verifyToken, type TrustedRoot } from "./tsa.js";
+} from "./crypto.ts";
+import { PINNED_KEYS, PINNED_TSA_ROOTS } from "./trust.ts";
+import { verifyToken, type TrustedRoot } from "./tsa.ts";
 
 export const STEPS = [
   "signature",

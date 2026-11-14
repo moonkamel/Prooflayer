@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Point d'entrée exécutable (Node 20 et plus).
 import { readFile } from "node:fs/promises";
-import { main } from "./cli.js";
+import { main } from "./cli.ts";
 
 const code = await main(process.argv.slice(2), {
   readFile: async (path) => new Uint8Array(await readFile(path)),

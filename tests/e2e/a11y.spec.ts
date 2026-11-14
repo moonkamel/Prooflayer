@@ -15,6 +15,7 @@ test("écrans publics : aucune violation WCAG 2.2 AA", async ({ page }) => {
     "/reset-password",
     "/verify-email",
     "/classifier",
+    "/verify",
   ]) {
     await page.goto(path);
     await expectNoViolations(page, path);

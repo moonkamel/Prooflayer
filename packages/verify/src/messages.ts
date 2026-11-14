@@ -1,6 +1,6 @@
 // Textes de l'outil, en français et en anglais. Le paquet ne dépend pas de l'application : ses textes vivent ici, pas
 // dans messages/{fr,en}.json. Jamais le mot « conforme » : l'outil dit ce qui est vérifié, pas ce qui est conforme.
-import type { IssueCode, StepId } from "./verify.js";
+import type { IssueCode, StepId } from "./verify.ts";
 
 export type Lang = "fr" | "en";
 type Params = Record<string, string | number>;

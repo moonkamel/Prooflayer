@@ -1313,5 +1313,69 @@
       "annexIv": "Technical documentation (Annex IV): templates/annex-iv.md — {empty, plural, =0 {no empty section} one {# section to write} other {# sections to write}}, {partial, plural, =0 {none prefilled} one {# prefilled, to complete} other {# prefilled, to complete}}.",
       "annexV": "EU declaration of conformity (Annex V): templates/eu-declaration.md — {count, plural, =0 {items prefilled, to review} one {# item to write} other {# items to write}}, provider's signature required."
     }
+  },
+  "publicVerify": {
+    "title": "Verify an audit pack",
+    "intro": "Drop a ProofLayer audit pack (.zip file) to check that no evidence has been changed, removed or backdated since it was sealed.",
+    "privacy": "The file never leaves your device: verification runs entirely in your browser, nothing is sent to ProofLayer.",
+    "drop": "Drop the pack here",
+    "choose": "or choose a file",
+    "fileLabel": "Audit pack (.zip)",
+    "verifying": "Verifying {name}…",
+    "notZip": "This file is not a .zip archive.",
+    "unreadable": "This file cannot be read.",
+    "verdict": {
+      "ok": "No alteration",
+      "okWithWarnings": "No alteration, with points to note",
+      "fail": "Verification failed"
+    },
+    "verdictText": {
+      "ok": "All disclosed evidence matches its sealed hash, and every timestamp is valid.",
+      "okWithWarnings": "No evidence has been changed. Some elements cannot be established, however: see the details below.",
+      "fail": "At least one element of the pack no longer matches what was sealed. Do not rely on this pack without an explanation from its issuer."
+    },
+    "pack": "Pack \"{system}\" from {organization}, period {start} to {end}.",
+    "signedBy": "Manifest signed with key {kid}.",
+    "stepsTitle": "The six verification steps",
+    "status": {
+      "pass": "Verified",
+      "warning": "Point to note",
+      "fail": "Failed",
+      "skipped": "Not run"
+    },
+    "steps": {
+      "signature": {
+        "title": "Pack signature",
+        "what": "The manifest is signed by ProofLayer, and every file in the pack matches its listed hash."
+      },
+      "evidence": {
+        "title": "Disclosed evidence",
+        "what": "Each evidence item is recomputed from its content and found at its place in its sealed batch."
+      },
+      "batches": {
+        "title": "Evidence batches",
+        "what": "Each batch is intact and batches follow each other without gaps: no evidence has been removed."
+      },
+      "anchors": {
+        "title": "Anchors",
+        "what": "Each batch is included in a shared anchor, timestamped by a third party."
+      },
+      "timestamps": {
+        "title": "Third-party timestamp",
+        "what": "The timestamp token (RFC 3161) is signed by a recognised provider and dates the anchor."
+      },
+      "census": {
+        "title": "Census",
+        "what": "The number of evidence items in the period, disclosed or not, matches what the pack states."
+      }
+    },
+    "timestamp": "Anchor {anchor} timestamped on {date} by {tsa}",
+    "qualified": "eIDAS-qualified provider",
+    "notQualified": "non-qualified provider",
+    "more": "… and {count} more",
+    "proves": "What verification establishes: the content of each evidence item existed no later than the timestamp date and has not changed since; no evidence has been removed from a batch; the order of batches is intact. It does not establish that the event happened in the source tool, nor that an uploaded document is truthful.",
+    "downloadReport": "Download the report (JSON)",
+    "again": "Verify another pack",
+    "cli": "Same verification on the command line: npx @prooflayer/verify pack.zip"
   }
 }

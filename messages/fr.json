@@ -1315,5 +1315,69 @@
       "annexIv": "Documentation technique (Annexe IV) : templates/annex-iv.md — {empty, plural, =0 {aucune rubrique vide} one {# rubrique à rédiger} other {# rubriques à rédiger}}, {partial, plural, =0 {aucune préremplie} one {# préremplie à compléter} other {# préremplies à compléter}}.",
       "annexV": "Déclaration UE de conformité (Annexe V) : templates/eu-declaration.md — {count, plural, =0 {mentions préremplies, à relire} one {# mention à rédiger} other {# mentions à rédiger}}, signature du fournisseur requise."
     }
+  },
+  "publicVerify": {
+    "title": "Vérifier un pack d'audit",
+    "intro": "Déposez un pack d'audit ProofLayer (fichier .zip) pour vérifier qu'aucune preuve n'a été modifiée, retirée ou antidatée depuis son scellement.",
+    "privacy": "Le fichier ne quitte pas votre poste : la vérification s'exécute entièrement dans votre navigateur, rien n'est envoyé à ProofLayer.",
+    "drop": "Déposez le pack ici",
+    "choose": "ou choisissez un fichier",
+    "fileLabel": "Pack d'audit (.zip)",
+    "verifying": "Vérification de {name} en cours…",
+    "notZip": "Ce fichier n'est pas une archive .zip.",
+    "unreadable": "Ce fichier ne peut pas être lu.",
+    "verdict": {
+      "ok": "Aucune altération",
+      "okWithWarnings": "Aucune altération, avec des points d'attention",
+      "fail": "Échec de la vérification"
+    },
+    "verdictText": {
+      "ok": "Toutes les preuves divulguées correspondent à leur empreinte scellée, et chaque horodatage est valide.",
+      "okWithWarnings": "Aucune preuve n'a été modifiée. Certains éléments ne peuvent cependant pas être établis : voir le détail ci-dessous.",
+      "fail": "Au moins un élément du pack ne correspond plus à ce qui a été scellé. Ne vous fiez pas à ce pack sans explication de l'émetteur."
+    },
+    "pack": "Pack « {system} » de {organization}, période du {start} au {end}.",
+    "signedBy": "Manifeste signé par la clé {kid}.",
+    "stepsTitle": "Les six étapes de la vérification",
+    "status": {
+      "pass": "Vérifié",
+      "warning": "Point d'attention",
+      "fail": "Échec",
+      "skipped": "Non exécuté"
+    },
+    "steps": {
+      "signature": {
+        "title": "Signature du pack",
+        "what": "Le manifeste est signé par ProofLayer, et chaque fichier du pack correspond à l'empreinte listée."
+      },
+      "evidence": {
+        "title": "Preuves divulguées",
+        "what": "Chaque preuve est recalculée à partir de son contenu et retrouvée à sa place dans son lot scellé."
+      },
+      "batches": {
+        "title": "Lots de preuves",
+        "what": "Chaque lot est intact et les lots se suivent sans trou : aucune preuve n'a été retirée."
+      },
+      "anchors": {
+        "title": "Ancres",
+        "what": "Chaque lot figure dans une ancre commune, horodatée par un tiers."
+      },
+      "timestamps": {
+        "title": "Horodatage par un tiers",
+        "what": "Le jeton d'horodatage (RFC 3161) est signé par un prestataire reconnu et date l'ancre."
+      },
+      "census": {
+        "title": "Recensement",
+        "what": "Le nombre de preuves de la période, divulguées ou non, correspond à ce qu'annonce le pack."
+      }
+    },
+    "timestamp": "Ancre {anchor} horodatée le {date} par {tsa}",
+    "qualified": "prestataire qualifié eIDAS",
+    "notQualified": "prestataire non qualifié",
+    "more": "… et {count} de plus",
+    "proves": "Ce que la vérification établit : le contenu de chaque preuve existait au plus tard à la date de l'horodatage et n'a pas changé depuis ; aucune preuve n'a été retirée d'un lot ; l'ordre des lots est intact. Elle n'établit pas que l'événement s'est produit dans l'outil source, ni la véracité d'un document déposé.",
+    "downloadReport": "Télécharger le rapport (JSON)",
+    "again": "Vérifier un autre pack",
+    "cli": "Même vérification en ligne de commande : npx @prooflayer/verify pack.zip"
   }
 }

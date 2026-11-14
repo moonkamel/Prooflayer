@@ -1,6 +1,6 @@
 // Sortie lisible d'un rapport de vérification.
-import { MESSAGES, type Lang } from "./messages.js";
-import type { VerifyReport } from "./verify.js";
+import { MESSAGES, type Lang } from "./messages.ts";
+import type { VerifyReport } from "./verify.ts";
 
 const MARK = { pass: "✓", warning: "!", fail: "✗", skipped: "·" } as const;
 

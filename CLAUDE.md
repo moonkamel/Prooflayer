@@ -527,7 +527,8 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 ## Outil de vérification (conventions établies par PL-505)
 - `packages/verify/` (`@prooflayer/verify`, MIT) : implémentation indépendante, sans import de l'application ni module
   Node hors `src/bin.ts` (règle ESLint) ; WebCrypto, fflate, pkijs, asn1js. Le cœur (`verifyPack`) resservira à la
-  page publique de vérification (PL-508). Imports relatifs en `.js` (build NodeNext : `pnpm verify:build`, en CI).
+  page publique de vérification (PL-508). Imports relatifs en `.ts` (Turbopack), réécrits en `.js` au build NodeNext
+  (`rewriteRelativeImportExtensions`, puis `scripts/fix-declarations.mjs` : `pnpm verify:build`, en CI).
 - `verifyPack(zip, { keys, tsaRoots })` : six étapes du §4.6.3 (`STEPS`), anomalies typées (`ISSUE_CODES`, erreur ou
   avertissement, 50 détaillées par étape puis le décompte). `ok` = aucune erreur (code 0) ; `clean` = ni erreur ni
   avertissement (`--strict`). Avertissements : lot non ancré, prestataire non qualifié, pièce jointe non jointe.
@@ -562,3 +563,13 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Leaf, enveloppe et place dans le lot demeurent : `verifyOrgChain`, `evidence.proof`, le pack et `@prooflayer/verify`
   passent toujours (preuve comptée « effacée »). Une preuve effacée ne nourrit plus les évaluations (charge absente).
 - Écran D : action « Effacer » (admin, motif, confirmation explicite), preuve ensuite affichée « Preuve effacée ».
+
+## Page publique de vérification (conventions établies par PL-508)
+- `/verify` (groupe `src/app/(public)/`, sans session) : `PackVerifier` (client) lit le fichier par la File API et appelle
+  `verifyPack` de `@prooflayer/verify` (alias tsconfig et vitest vers `packages/verify/src/index.ts`) : le pack ne quitte
+  jamais le poste (test e2e : aucune requête autre que GET). Verdict (`ok`, `okWithWarnings`, `fail`), identité du pack,
+  six étapes expliquées (`publicVerify.steps`), anomalies dans les textes du paquet (`MESSAGES[locale].issues`),
+  horodatages, rapport JSON téléchargeable.
+- Confiance fournie par le serveur, `verificationTrust()` (`src/server/services/public-verification.ts`) : clés épinglées
+  du paquet, puis clés publiées (`publishedSigningKeys`, sans `pl-dev` en production) ; racines épinglées, plus celle du
+  prestataire configuré (`TSA_URL`, `TSA_TRUST_PEM`, qualification par `TSA_QUALIFIED`).

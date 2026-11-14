@@ -1,10 +1,10 @@
 // Ligne de commande : `npx @prooflayer/verify pack.zip`. Code de sortie 0 si aucune altération, 1 sinon (ou si le
 // fichier est illisible, ou les options invalides). `main` est séparée de l'exécution pour être testée sans processus.
-import { formatReport } from "./format.js";
-import { MESSAGES, type Lang } from "./messages.js";
-import { PINNED_KEYS, PINNED_TSA_ROOTS } from "./trust.js";
-import type { TrustedRoot } from "./tsa.js";
-import { verifyPack } from "./verify.js";
+import { formatReport } from "./format.ts";
+import { MESSAGES, type Lang } from "./messages.ts";
+import { PINNED_KEYS, PINNED_TSA_ROOTS } from "./trust.ts";
+import type { TrustedRoot } from "./tsa.ts";
+import { verifyPack } from "./verify.ts";
 
 export const VERSION = "0.1.0";
 
