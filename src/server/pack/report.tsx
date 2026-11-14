@@ -48,6 +48,8 @@ export interface ReportInput {
     unanchoredBatches: number;
   };
   signingKid: string;
+  /** Rubriques des gabarits joints restant à rédiger (PL-506). */
+  templates?: { annexIvEmpty: number; annexIvPartial: number; annexVToWrite: number };
 }
 
 const styles = StyleSheet.create({
@@ -107,6 +109,11 @@ export async function renderPackReport(input: ReportInput): Promise<Buffer> {
   const ts = createTranslator({ locale: input.locale, messages, namespace: "controlStatus" });
   const tk = createTranslator({ locale: input.locale, messages, namespace: "riskTier" });
   const tr = createTranslator({ locale: input.locale, messages, namespace: "aiActRole" });
+  const tt = createTranslator({
+    locale: input.locale,
+    messages,
+    namespace: "packTemplates.report",
+  });
   const dateFmt = new Intl.DateTimeFormat(input.locale === "en" ? "en-GB" : "fr-FR", {
     dateStyle: "long",
     timeZone: "UTC",
@@ -277,6 +284,18 @@ export async function renderPackReport(input: ReportInput): Promise<Buffer> {
           <Text>{t("declarativeNote")}</Text>
           <Text>{t("signature", { kid: input.signingKid })}</Text>
         </View>
+        {input.templates ? (
+          <View>
+            <Text style={styles.h2}>{tt("title")}</Text>
+            <Text>
+              {tt("annexIv", {
+                empty: input.templates.annexIvEmpty,
+                partial: input.templates.annexIvPartial,
+              })}
+            </Text>
+            <Text>{tt("annexV", { count: input.templates.annexVToWrite })}</Text>
+          </View>
+        ) : null}
         <Text style={{ marginTop: 8 }}>{t("command")}</Text>
         <Text style={{ fontFamily: "Courier", marginTop: 2 }}>{VERIFY_COMMAND}</Text>
 

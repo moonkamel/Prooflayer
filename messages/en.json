@@ -1144,5 +1144,156 @@
   },
   "packVerify": {
     "body": "# Verifying this audit pack\n\nThis pack is verified without a ProofLayer account and without network access. The command `npx @prooflayer/verify pack.zip` runs the six steps below and exits with code 0 (no tampering) or 1. They can also be redone by hand, with `openssl` and `sha256sum`.\n\n## 1. Manifest signature\n\n`manifest.json` is signed with Ed25519 by key `{kid}`. The signed bytes are the canonical JSON form (RFC 8785) of the manifest without its `signature` field. ProofLayer's public keys are published at {keysUrl} and pinned in the verification tool.\n\n## 2. File integrity\n\nThe manifest lists every file in the pack with its SHA-256 hash (`files`). Example: `sha256sum report.pdf`.\n\n## 3. Disclosed evidence\n\nEach `evidence/<id>.json` file holds the payload, salt and envelope of one item of evidence. Recompute `contentSha256 = SHA-256(JCS(payload))` then `leafHash = SHA-256(0x00 ‖ salt ‖ JCS(envelope))`, the envelope being `{{ v, org, id, kind, sourceRef, occurredAt, capturedAt, contentSha256, attachmentSha256 }}`. Any attachment hashes to `attachmentSha256`.\n\n## 4. Batches\n\nEach `proofs/batches/<seq>.json` file lists ALL the leaves of the batch, disclosed or not: an omitted item remains visible through its `leafHash` alone. The Merkle root (RFC 6962) of the leaves must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `batchHash`. Batches follow each other without gaps and each `prevBatchHash` is the `batchHash` of the previous batch.\n\n## 5. Anchors and timestamps\n\nEach `proofs/anchors/<seq>.json` file lists the anchor's `batchHash` values; their root must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `anchorHash`. The RFC 3161 token timestamps `anchorHash`:\n\n    openssl ts -verify -digest <anchorHash> -in proofs/anchors/<seq>.tst -token_in -CAfile proofs/tsa/<provider>.pem\n\n## 6. Census\n\nThe manifest states the number of leaves in the period, the number of disclosed items and the difference. A batch without an anchor (`anchor: null`) has not yet been timestamped by the provider.\n\n## What sealing proves\n\nThe content of an item of evidence existed no later than the token date and has not changed since; no item has been removed from a batch; the order of batches is intact. It does not prove that the event happened in the source tool: each item carries its source address for cross-checking. Declarative evidence (uploaded document, attestation) dates the upload, not the truth of the document."
+  },
+  "packTemplates": {
+    "annexIv": {
+      "fileTitle": "Technical documentation — {system}",
+      "intro": "Template prepared by ProofLayer on {date} from the AI system register and tracked controls. It is a starting point: each section must be reviewed, completed and validated by the provider. No section is validated automatically.",
+      "legalBasis": "Sections based on Art. 11(1) and Annex IV of Regulation (EU) 2024/1689. SMEs and small mid-caps may provide these elements in the simplified form provided for by Art. 11(1). Have this template reviewed by your legal counsel.",
+      "statusTitle": "Section status",
+      "statusColumns": "| Point | Section | Status |",
+      "statusSummary": "{empty, plural, =0 {No empty section} one {# section to write from scratch} other {# sections to write from scratch}}, {partial, plural, =0 {none prefilled} one {# prefilled, to complete} other {# prefilled, to complete}}, out of 9.",
+      "state": {
+        "EMPTY": "⚠ To write",
+        "PARTIAL": "Prefilled, to complete"
+      },
+      "prefilled": "Prefilled from the register",
+      "tracked": "Controls tracked by ProofLayer for this section",
+      "trackedLine": "{key} · {title}: {status}",
+      "notTracked": "{key} · {title}: not applicable to this system",
+      "todo": "To complete",
+      "emptyNotice": "⚠ Nothing in the register can prefill this section.",
+      "sectionTitle": "{number}. {title} (Annex IV, point {number})",
+      "fields": {
+        "name": "System name: {value}",
+        "provider": "Provider: {value}",
+        "role": "Organization's role under the AI Act: {value}",
+        "vendor": "Third-party provider of the system: {value}",
+        "purpose": "Intended purpose (Art. 3(12)): {value}",
+        "description": "Description: {value}",
+        "status": "Status: {value}",
+        "placedOnMarket": "Placed on the market or put into service: {value}",
+        "classification": "Classification signed on {date}: {tier}, Annex III points: {points}",
+        "model": "Model: {name} ({provider}{version}){gpai}",
+        "gpai": ", general-purpose AI model",
+        "dataCategories": "Data categories processed: {value}",
+        "owner": "System owner: {value}",
+        "oversightOwner": "Human oversight owner (Art. 14): {value}",
+        "change": "{date} · {summary} · {qualification}",
+        "significant": "substantial modification",
+        "notSignificant": "non-substantial modification",
+        "unqualified": "to be assessed",
+        "declaration": "The EU declaration of conformity template is included in the pack (templates/eu-declaration.md)."
+      },
+      "sections": {
+        "1": {
+          "title": "General description of the AI system",
+          "todo": [
+            "Forms in which the system is placed on the market or put into service (software, API, integration).",
+            "Hardware on which the system is intended to run and interactions with other systems.",
+            "Screenshots or illustrations of the user interface provided to the deployer.",
+            "Instructions for use for the deployer (Art. 13)."
+          ]
+        },
+        "2": {
+          "title": "Elements of the system and development process",
+          "todo": [
+            "Development methods and steps, including use of systems or tools provided by third parties.",
+            "General logic and design choices, assumptions, trade-offs made.",
+            "Architecture and computational resources used.",
+            "Training, validation and test data: provenance, preparation, labelling (Art. 10).",
+            "Human oversight measures (Art. 14) and validation and testing procedures, with their metrics.",
+            "Cybersecurity measures in place."
+          ]
+        },
+        "3": {
+          "title": "Monitoring, functioning and control of the system",
+          "todo": [
+            "Capabilities and limitations in performance, including accuracy for the persons or groups concerned.",
+            "Foreseeable unintended outcomes and sources of risk.",
+            "Human oversight measures and technical measures facilitating the interpretation of outputs.",
+            "Input data specifications."
+          ]
+        },
+        "4": {
+          "title": "Appropriateness of the performance metrics",
+          "todo": ["Performance metrics chosen and why they suit the system."]
+        },
+        "5": {
+          "title": "Risk management system (Art. 9)",
+          "todo": [
+            "Detailed description of the risk management system and how it runs throughout the lifecycle."
+          ]
+        },
+        "6": {
+          "title": "Changes made through the lifecycle",
+          "todo": ["Description of relevant changes made by the provider."]
+        },
+        "7": {
+          "title": "Harmonised standards and other solutions applied",
+          "todo": [
+            "List of harmonised standards applied (references published in the OJEU), or failing that a description of the solutions adopted to meet the requirements of Chapter III, Section 2, and of other standards or technical specifications applied."
+          ]
+        },
+        "8": {
+          "title": "Copy of the EU declaration of conformity (Art. 47)",
+          "todo": ["Declaration drawn up, dated and signed, then attached to the documentation."]
+        },
+        "9": {
+          "title": "Post-market performance evaluation (Art. 72)",
+          "todo": [
+            "System in place to evaluate performance after placing on the market, including the post-market monitoring plan."
+          ]
+        }
+      }
+    },
+    "annexV": {
+      "fileTitle": "EU declaration of conformity — {system}",
+      "intro": "Template prepared by ProofLayer on {date} from the register. The declaration is written, dated and signed by the provider, under its sole responsibility; ProofLayer does not write it on its behalf and does not attest it.",
+      "legalBasis": "Items based on Art. 47 and Annex V of Regulation (EU) 2024/1689. Have this template reviewed by your legal counsel.",
+      "deployerNotice": "⚠ The register shows the role \"{role}\": the EU declaration is the duty of the system's provider ({vendor}). Use this template to check the declaration you receive.",
+      "statusTitle": "Items to complete",
+      "statusSummary": "{count, plural, =0 {All items are prefilled: review before signing.} one {# item out of 8 remains to be written.} other {# items out of 8 remain to be written.}}",
+      "toWrite": "⚠ To be written by the provider.",
+      "sectionTitle": "{number}. {title} (Annex V, point {number})",
+      "items": {
+        "1": {
+          "title": "AI system name and type, and any reference allowing its identification",
+          "value": "{system} — ProofLayer identifier {id}"
+        },
+        "2": {
+          "title": "Name and address of the provider or, where applicable, its authorised representative",
+          "value": "{organization} — address to complete"
+        },
+        "3": {
+          "title": "Statement of the provider's sole responsibility",
+          "value": "This declaration is issued under the sole responsibility of {organization}."
+        },
+        "4": {
+          "title": "Provider's statement with regard to the Regulation and, where applicable, other applicable Union law"
+        },
+        "5": {
+          "title": "Processing of personal data: statement regarding the GDPR and, where applicable, Regulation (EU) 2018/1725 and Directive (EU) 2016/680",
+          "hint": "Data categories declared in the register: {value}."
+        },
+        "6": {
+          "title": "References to harmonised standards or common specifications applied"
+        },
+        "7": {
+          "title": "Where applicable: notified body (name, number), conformity assessment procedure followed and certificate issued",
+          "hint": "Assessment based on internal control (Art. 43(2), Annex VI): in principle no notified body for Annex III systems, points 2 to 8."
+        },
+        "8": {
+          "title": "Place and date of issue, name and function of the signatory, on behalf of whom they sign, signature"
+        }
+      }
+    },
+    "notProvided": "not provided",
+    "none": "none",
+    "report": {
+      "title": "Templates included",
+      "annexIv": "Technical documentation (Annex IV): templates/annex-iv.md — {empty, plural, =0 {no empty section} one {# section to write} other {# sections to write}}, {partial, plural, =0 {none prefilled} one {# prefilled, to complete} other {# prefilled, to complete}}.",
+      "annexV": "EU declaration of conformity (Annex V): templates/eu-declaration.md — {count, plural, =0 {items prefilled, to review} one {# item to write} other {# items to write}}, provider's signature required."
+    }
   }
 }

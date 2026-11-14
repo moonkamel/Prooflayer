@@ -1144,5 +1144,158 @@
   },
   "packVerify": {
     "body": "# Vérifier ce pack d'audit\n\nCe pack se vérifie sans compte ProofLayer et sans réseau. La commande `npx @prooflayer/verify pack.zip` exécute les six étapes ci-dessous et répond par un code de sortie 0 (aucune altération) ou 1. Elles peuvent aussi être refaites à la main, avec `openssl` et `sha256sum`.\n\n## 1. Signature du manifeste\n\n`manifest.json` est signé en Ed25519 par la clé `{kid}`. Les octets signés sont la forme canonique JSON (RFC 8785) du manifeste privé de son champ `signature`. Les clés publiques de ProofLayer sont publiées à l'adresse {keysUrl} et épinglées dans l'outil de vérification.\n\n## 2. Intégrité des fichiers\n\nLe manifeste liste chaque fichier du pack avec son empreinte SHA-256 (`files`). Exemple : `sha256sum report.pdf`.\n\n## 3. Preuves divulguées\n\nChaque fichier `evidence/<id>.json` porte la charge, le sel et l'enveloppe d'une preuve. On recalcule `contentSha256 = SHA-256(JCS(payload))` puis `leafHash = SHA-256(0x00 ‖ sel ‖ JCS(enveloppe))`, l'enveloppe étant `{{ v, org, id, kind, sourceRef, occurredAt, capturedAt, contentSha256, attachmentSha256 }}`. La pièce jointe éventuelle a pour empreinte `attachmentSha256`.\n\n## 4. Lots\n\nChaque fichier `proofs/batches/<seq>.json` liste TOUTES les feuilles du lot, divulguées ou non : une preuve omise reste visible par son seul `leafHash`. La racine de Merkle (RFC 6962) des feuilles doit égaler `header.merkleRoot`, et `SHA-256(JCS(header))` doit égaler `batchHash`. Les lots se suivent sans trou et chaque `prevBatchHash` est le `batchHash` du lot précédent.\n\n## 5. Ancres et horodatage\n\nChaque fichier `proofs/anchors/<seq>.json` liste les `batchHash` de l'ancre ; leur racine doit égaler `header.merkleRoot`, et `SHA-256(JCS(header))` doit égaler `anchorHash`. Le jeton RFC 3161 horodate `anchorHash` :\n\n    openssl ts -verify -digest <anchorHash> -in proofs/anchors/<seq>.tst -token_in -CAfile proofs/tsa/<prestataire>.pem\n\n## 6. Recensement\n\nLe manifeste indique le nombre de feuilles de la période, le nombre de preuves divulguées et l'écart. Un lot sans ancre (`anchor: null`) n'a pas encore été horodaté par le prestataire.\n\n## Ce que le scellement prouve\n\nLe contenu d'une preuve existait au plus tard à la date du jeton et n'a pas changé depuis ; aucune preuve n'a été retirée d'un lot ; l'ordre des lots est intact. Il ne prouve pas que l'événement s'est produit dans l'outil source : chaque preuve porte l'adresse de sa source pour contre-vérification. Une preuve déclarative (document déposé, attestation) date le dépôt, pas la véracité du document."
+  },
+  "packTemplates": {
+    "annexIv": {
+      "fileTitle": "Documentation technique — {system}",
+      "intro": "Gabarit préparé par ProofLayer le {date} à partir du registre des systèmes d'IA et des contrôles suivis. C'est un point de départ : chaque rubrique est à relire, compléter et valider par le fournisseur. Aucune rubrique n'est validée automatiquement.",
+      "legalBasis": "Rubriques établies d'après l'Art. 11(1) et l'Annexe IV du règlement (UE) 2024/1689. Les PME et petites entreprises de taille intermédiaire peuvent fournir ces éléments sous la forme simplifiée prévue par l'Art. 11(1). Gabarit à faire relire par votre conseil juridique.",
+      "statusTitle": "État des rubriques",
+      "statusColumns": "| Point | Rubrique | État |",
+      "statusSummary": "{empty, plural, =0 {Aucune rubrique vide} one {# rubrique à rédiger entièrement} other {# rubriques à rédiger entièrement}}, {partial, plural, =0 {aucune préremplie} one {# préremplie à compléter} other {# préremplies à compléter}}, sur 9.",
+      "state": {
+        "EMPTY": "⚠ À rédiger",
+        "PARTIAL": "Préremplie, à compléter"
+      },
+      "prefilled": "Prérempli depuis le registre",
+      "tracked": "Contrôles suivis par ProofLayer pour cette rubrique",
+      "trackedLine": "{key} · {title} : {status}",
+      "notTracked": "{key} · {title} : non applicable à ce système",
+      "todo": "À compléter",
+      "emptyNotice": "⚠ Rien dans le registre ne permet de préremplir cette rubrique.",
+      "sectionTitle": "{number}. {title} (Annexe IV, point {number})",
+      "fields": {
+        "name": "Nom du système : {value}",
+        "provider": "Fournisseur : {value}",
+        "role": "Rôle de l'organisation au sens de l'AI Act : {value}",
+        "vendor": "Fournisseur tiers du système : {value}",
+        "purpose": "Finalité prévue (Art. 3(12)) : {value}",
+        "description": "Description : {value}",
+        "status": "Statut : {value}",
+        "placedOnMarket": "Mise sur le marché ou en service : {value}",
+        "classification": "Classification signée le {date} : {tier}, points de l'Annexe III : {points}",
+        "model": "Modèle : {name} ({provider}{version}){gpai}",
+        "gpai": ", modèle d'IA à usage général",
+        "dataCategories": "Catégories de données traitées : {value}",
+        "owner": "Responsable du système : {value}",
+        "oversightOwner": "Responsable du contrôle humain (Art. 14) : {value}",
+        "change": "{date} · {summary} · {qualification}",
+        "significant": "modification importante",
+        "notSignificant": "modification non importante",
+        "unqualified": "à qualifier",
+        "declaration": "Le gabarit de déclaration UE de conformité est joint au pack (templates/eu-declaration.md)."
+      },
+      "sections": {
+        "1": {
+          "title": "Description générale du système d'IA",
+          "todo": [
+            "Formes sous lesquelles le système est mis sur le marché ou en service (logiciel, API, intégration).",
+            "Matériel sur lequel le système est destiné à fonctionner et interactions avec d'autres systèmes.",
+            "Captures ou illustrations de l'interface utilisateur destinée au déployeur.",
+            "Notice d'utilisation destinée au déployeur (Art. 13)."
+          ]
+        },
+        "2": {
+          "title": "Éléments du système et processus de développement",
+          "todo": [
+            "Méthodes et étapes du développement, y compris le recours à des systèmes ou outils fournis par des tiers.",
+            "Logique générale et choix de conception, hypothèses, compromis retenus.",
+            "Architecture et ressources de calcul utilisées.",
+            "Données d'entraînement, de validation et de test : provenance, préparation, étiquetage (Art. 10).",
+            "Mesures de contrôle humain (Art. 14) et procédures de validation et de test, avec leurs métriques.",
+            "Mesures de cybersécurité mises en place."
+          ]
+        },
+        "3": {
+          "title": "Surveillance, fonctionnement et contrôle du système",
+          "todo": [
+            "Capacités et limites de performance, dont le niveau d'exactitude pour les personnes ou groupes visés.",
+            "Résultats non intentionnels prévisibles et sources de risques.",
+            "Mesures de contrôle humain et mesures techniques facilitant l'interprétation des sorties.",
+            "Spécifications des données d'entrée."
+          ]
+        },
+        "4": {
+          "title": "Adéquation des indicateurs de performance",
+          "todo": [
+            "Indicateurs de performance retenus et justification de leur adéquation au système."
+          ]
+        },
+        "5": {
+          "title": "Système de gestion des risques (Art. 9)",
+          "todo": [
+            "Description détaillée du système de gestion des risques et de son déroulement sur tout le cycle de vie."
+          ]
+        },
+        "6": {
+          "title": "Modifications apportées au cours du cycle de vie",
+          "todo": ["Description des modifications pertinentes apportées par le fournisseur."]
+        },
+        "7": {
+          "title": "Normes harmonisées et autres solutions appliquées",
+          "todo": [
+            "Liste des normes harmonisées appliquées (références publiées au JOUE), ou à défaut description des solutions retenues pour satisfaire aux exigences du chapitre III, section 2, et des autres normes ou spécifications techniques appliquées."
+          ]
+        },
+        "8": {
+          "title": "Copie de la déclaration UE de conformité (Art. 47)",
+          "todo": ["Déclaration établie, datée et signée, puis jointe à la documentation."]
+        },
+        "9": {
+          "title": "Évaluation des performances après commercialisation (Art. 72)",
+          "todo": [
+            "Système mis en place pour évaluer les performances après la mise sur le marché, dont le plan de surveillance après commercialisation."
+          ]
+        }
+      }
+    },
+    "annexV": {
+      "fileTitle": "Déclaration UE de conformité — {system}",
+      "intro": "Gabarit préparé par ProofLayer le {date} à partir du registre. La déclaration est rédigée, datée et signée par le fournisseur, sous sa seule responsabilité ; ProofLayer ne la rédige pas à sa place et ne l'atteste pas.",
+      "legalBasis": "Mentions établies d'après l'Art. 47 et l'Annexe V du règlement (UE) 2024/1689. Gabarit à faire relire par votre conseil juridique.",
+      "deployerNotice": "⚠ Le registre indique le rôle « {role} » : la déclaration UE incombe au fournisseur du système ({vendor}). Ce gabarit sert à vérifier la déclaration reçue.",
+      "statusTitle": "Mentions à compléter",
+      "statusSummary": "{count, plural, =0 {Toutes les mentions sont préremplies : à relire avant signature.} one {# mention sur 8 reste à rédiger.} other {# mentions sur 8 restent à rédiger.}}",
+      "toWrite": "⚠ À rédiger par le fournisseur.",
+      "sectionTitle": "{number}. {title} (Annexe V, point {number})",
+      "items": {
+        "1": {
+          "title": "Nom et type du système d'IA, et toute référence permettant de l'identifier",
+          "value": "{system} — identifiant ProofLayer {id}"
+        },
+        "2": {
+          "title": "Nom et adresse du fournisseur ou, le cas échéant, de son mandataire",
+          "value": "{organization} — adresse à compléter"
+        },
+        "3": {
+          "title": "Mention de la seule responsabilité du fournisseur",
+          "value": "La présente déclaration est établie sous la seule responsabilité de {organization}."
+        },
+        "4": {
+          "title": "Déclaration du fournisseur au regard du règlement et, le cas échéant, des autres actes de l'Union applicables"
+        },
+        "5": {
+          "title": "Traitement de données à caractère personnel : mention relative au RGPD et, le cas échéant, au règlement (UE) 2018/1725 et à la directive (UE) 2016/680",
+          "hint": "Catégories de données déclarées au registre : {value}."
+        },
+        "6": {
+          "title": "Références des normes harmonisées ou spécifications communes appliquées"
+        },
+        "7": {
+          "title": "Le cas échéant : organisme notifié (nom, numéro), procédure d'évaluation suivie et certificat délivré",
+          "hint": "Évaluation par contrôle interne (Art. 43(2), Annexe VI) : en principe sans organisme notifié pour les systèmes de l'Annexe III, points 2 à 8."
+        },
+        "8": {
+          "title": "Lieu et date d'établissement, nom et fonction du signataire, au nom ou pour le compte de qui il signe, signature"
+        }
+      }
+    },
+    "notProvided": "non renseigné",
+    "none": "aucune",
+    "report": {
+      "title": "Gabarits joints",
+      "annexIv": "Documentation technique (Annexe IV) : templates/annex-iv.md — {empty, plural, =0 {aucune rubrique vide} one {# rubrique à rédiger} other {# rubriques à rédiger}}, {partial, plural, =0 {aucune préremplie} one {# préremplie à compléter} other {# préremplies à compléter}}.",
+      "annexV": "Déclaration UE de conformité (Annexe V) : templates/eu-declaration.md — {count, plural, =0 {mentions préremplies, à relire} one {# mention à rédiger} other {# mentions à rédiger}}, signature du fournisseur requise."
+    }
   }
 }
