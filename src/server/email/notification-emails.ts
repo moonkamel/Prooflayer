@@ -163,3 +163,54 @@ export async function renderPackReadyEmail(data: PackReadyEmail): Promise<EmailM
     ].join("\n\n"),
   };
 }
+
+export interface WatchPublishedEmail {
+  to: string;
+  name: string;
+  locale?: unknown;
+  baseUrl: string;
+  organization: string;
+  entry: {
+    id: string;
+    title: { fr: string; en: string };
+    summary: { fr: string; en: string };
+    source: { fr: string; en: string };
+    effectiveDate: Date | null;
+    controls: string[];
+  };
+}
+
+/** Nouvelle entrée du fil de veille (PL-603) : titre, date d'effet, résumé, source, contrôles concernés. */
+export async function renderWatchPublishedEmail(data: WatchPublishedEmail): Promise<EmailMessage> {
+  const locale = localeOf(data.locale);
+  const t = createTranslator({
+    locale,
+    messages: await loadMessages(locale),
+    namespace: "emails.watchPublished",
+  });
+  const date = data.entry.effectiveDate
+    ? new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "fr-FR", {
+        dateStyle: "long",
+        timeZone: "UTC",
+      }).format(data.entry.effectiveDate)
+    : null;
+  const title = data.entry.title[locale];
+  return {
+    to: data.to,
+    subject: t("subject", { title }),
+    text: [
+      t("intro", { name: data.name, organization: data.organization }),
+      title,
+      date ? t("effective", { date }) : null,
+      data.entry.summary[locale],
+      t("source", { source: data.entry.source[locale] }),
+      data.entry.controls.length
+        ? t("controls", { controls: data.entry.controls.join(", ") })
+        : null,
+      t("open", { url: link(data.baseUrl, `/watch#${data.entry.id}`) }),
+      t("footer", { url: link(data.baseUrl, "/notifications") }),
+    ]
+      .filter((p): p is string => p !== null)
+      .join("\n\n"),
+  };
+}

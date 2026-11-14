@@ -139,6 +139,15 @@
       "intro": "Hello {name},\n\nThe audit pack for system {system} ({organization}) is ready: {count, plural, one {# disclosed item of evidence} other {# disclosed items of evidence}}.",
       "open": "Download it:\n{url}",
       "verify": "It can be verified offline, without a ProofLayer account: npx @prooflayer/verify pack.zip"
+    },
+    "watchPublished": {
+      "subject": "Regulatory watch: {title}",
+      "intro": "Hello {name}, ProofLayer has published a new regulatory watch entry that concerns {organization}.",
+      "effective": "Effective date: {date}.",
+      "source": "Source: {source}.",
+      "controls": "Controls concerned: {controls}.",
+      "open": "Read the entry and see your controls concerned: {url}",
+      "footer": "You receive this email as an administrator. Your alerts: {url}"
     }
   },
   "roles": {
@@ -288,7 +297,8 @@
       "pastDue": "Payment failed: the workspace is read-only and capture is suspended.",
       "canceled": "Subscription ended: the workspace is read-only and capture is suspended. Existing packs can still be exported."
     },
-    "readOnlyLink": "View subscription"
+    "readOnlyLink": "View subscription",
+    "watch": "Watch"
   },
   "home": {
     "title": "ProofLayer",
@@ -1101,7 +1111,9 @@
     "openControl": "View the control",
     "when": "On {date}",
     "packReady": "Audit pack ready: {system}",
-    "openPacks": "View packs"
+    "openPacks": "View packs",
+    "watchPublished": "Regulatory watch: {title}",
+    "openWatch": "Read the watch entry"
   },
   "packReport": {
     "documentTitle": "Audit pack · {system}",
@@ -1447,5 +1459,22 @@
     "nav": "Subscription",
     "monitoredCount": "{count, plural, =0 {No monitored system} one {# monitored system} other {# monitored systems}} out of {limit} allowed.",
     "overLimit": "More monitored systems than your plan allows: none is removed, but no other can be added."
+  },
+  "watch": {
+    "title": "Regulatory watch",
+    "intro": "Changes to the Regulation and its timeline, published by ProofLayer. Each entry links to the controls it concerns in your systems; administrators are emailed at each publication.",
+    "empty": "No entry published yet.",
+    "published": "Published on {date}",
+    "effective": "effective date: {date}",
+    "severity": {
+      "info": "Good to know",
+      "action_required": "To check"
+    },
+    "source": "Source: {source}.",
+    "regulation": "Text of the Regulation",
+    "newTab": "opens in a new tab",
+    "controls": "Controls concerned",
+    "controlsFor": "Controls concerned by \"{title}\"",
+    "notInScope": "not yet tracked for your systems"
   }
 }

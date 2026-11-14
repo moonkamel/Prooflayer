@@ -139,6 +139,15 @@
       "intro": "Bonjour {name},\n\nLe pack d'audit du système {system} ({organization}) est prêt : {count, plural, one {# preuve divulguée} other {# preuves divulguées}}.",
       "open": "Le télécharger :\n{url}",
       "verify": "Il se vérifie hors ligne, sans compte ProofLayer : npx @prooflayer/verify pack.zip"
+    },
+    "watchPublished": {
+      "subject": "Veille réglementaire : {title}",
+      "intro": "Bonjour {name}, ProofLayer publie une nouvelle entrée de veille qui concerne {organization}.",
+      "effective": "Date d'effet : {date}.",
+      "source": "Source : {source}.",
+      "controls": "Contrôles concernés : {controls}.",
+      "open": "Lire l'entrée et voir vos contrôles concernés : {url}",
+      "footer": "Vous recevez cet email en tant qu'administrateur. Vos alertes : {url}"
     }
   },
   "roles": {
@@ -288,7 +297,8 @@
       "pastDue": "Paiement en échec : l'espace est en lecture seule et la capture est suspendue.",
       "canceled": "Abonnement terminé : l'espace est en lecture seule et la capture est suspendue. Les packs existants restent exportables."
     },
-    "readOnlyLink": "Voir l'abonnement"
+    "readOnlyLink": "Voir l'abonnement",
+    "watch": "Veille"
   },
   "home": {
     "title": "ProofLayer",
@@ -1101,7 +1111,9 @@
     "openControl": "Voir le contrôle",
     "when": "Le {date}",
     "packReady": "Pack d'audit prêt : {system}",
-    "openPacks": "Voir les packs"
+    "openPacks": "Voir les packs",
+    "watchPublished": "Veille réglementaire : {title}",
+    "openWatch": "Lire l'entrée de veille"
   },
   "packReport": {
     "documentTitle": "Pack d'audit · {system}",
@@ -1449,5 +1461,22 @@
     "nav": "Abonnement",
     "monitoredCount": "{count, plural, =0 {Aucun système surveillé} one {# système surveillé} other {# systèmes surveillés}} sur {limit} permis.",
     "overLimit": "Plus de systèmes surveillés que n'en permet votre plan : aucun n'est retiré, mais aucun autre ne peut être ajouté."
+  },
+  "watch": {
+    "title": "Veille réglementaire",
+    "intro": "Les évolutions du règlement et de son calendrier, publiées par ProofLayer. Chaque entrée renvoie vers les contrôles qu'elle concerne dans vos systèmes ; les administrateurs sont prévenus par email à chaque publication.",
+    "empty": "Aucune entrée publiée pour l'instant.",
+    "published": "Publiée le {date}",
+    "effective": "date d'effet : {date}",
+    "severity": {
+      "info": "À connaître",
+      "action_required": "À vérifier"
+    },
+    "source": "Source : {source}.",
+    "regulation": "Texte du règlement",
+    "newTab": "s'ouvre dans un nouvel onglet",
+    "controls": "Contrôles concernés",
+    "controlsFor": "Contrôles concernés par « {title} »",
+    "notInScope": "pas encore suivi pour vos systèmes"
   }
 }

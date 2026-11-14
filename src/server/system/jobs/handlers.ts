@@ -7,6 +7,7 @@ import { packBuildJob } from "./pack";
 import { publicClassifierNoteJob } from "./public-classifier-note";
 import { sealAnchorJob, sealOrgJob, sealVerifyAnchorsJob, sealVerifyOrgJob } from "./seal";
 import { JobRegistry } from "./registry";
+import { watchNotifyJob } from "./watch";
 
 export const jobRegistry = new JobRegistry()
   .register(publicClassifierNoteJob)
@@ -21,4 +22,5 @@ export const jobRegistry = new JobRegistry()
   .register(sealAnchorJob)
   .register(sealVerifyOrgJob)
   .register(sealVerifyAnchorsJob)
-  .register(packBuildJob);
+  .register(packBuildJob)
+  .register(watchNotifyJob);

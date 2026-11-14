@@ -604,3 +604,15 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   ouverts. Capture suspendue : livraisons GitHub et Jira IGNORED « capture suspendue », jobs Jira sautés. Bandeau dans
   la coque (`shell.readOnly`).
 - Tests : les systèmes créés directement en base par les tests d'intégration portent `monitored: true`.
+
+## Fil de veille réglementaire (conventions établies par PL-603)
+- Contenu versionné `src/server/watch/entries.ts` (`WATCH_ENTRIES`, schéma Zod `watchEntrySchema`) : identifiant
+  `AAAA-MM-JJ-sujet`, date de publication, date d'effet, gravité (`info`, `action_required`), titre, résumé et source en
+  fr et en, contrôles concernés (clés de la bibliothèque, vérifiées par `tests/unit/watch.test.ts`). Une entrée publiée
+  ne change pas sur le fond : une évolution fait l'objet d'une nouvelle entrée. Faits repris du §1.5 uniquement.
+- Publication : `/api/cron/daily` → `scheduleWatchNotifications` (`src/server/system/regulatory-watch.ts`) synchronise
+  les entrées dont la date est passée dans la table système `RegulatoryUpdate` (§4.3), puis programme `watch.notify`
+  (`src/server/system/jobs/watch.ts`, clé `watch.notify:{id}`) : notification `watch.published` et email pour chaque owner
+  et admin, une fois (`notifiedAt` ; `watchAudience` remplaçable par les tests). Lecture : `regulatory-updates.ts`.
+- Écran `/watch` (lien « Veille » de la navigation), routeur `watch.list` (tout membre) : contrôles concernés reliés aux
+  contrôles des systèmes de l'organisation avec leur statut.
