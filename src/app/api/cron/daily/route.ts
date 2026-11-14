@@ -1,9 +1,10 @@
-// Passage quotidien (PL-401, PL-404, PL-408), appelé une fois par jour par Vercel Cron (vercel.json). Aucune logique ici :
+// Passage quotidien (PL-401, PL-404, PL-408, PL-603), appelé une fois par jour par Vercel Cron (vercel.json). Aucune logique ici :
 // authentification puis src/server/system/evaluation-sweep.ts ; le drainage de chaque minute exécute les jobs.
 import { isAuthorizedCron } from "@/server/system/cron-auth";
 import { scheduleDailySweep } from "@/server/system/evaluation-sweep";
 import { scheduleJiraReconciliation } from "@/server/system/jira-schedule";
 import { scheduleDailyDigests } from "@/server/system/notification-schedule";
+import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,5 +19,7 @@ export async function GET(request: Request): Promise<Response> {
   const jira = await scheduleJiraReconciliation("full");
   // Alertes (PL-408) : résumé quotidien, un email au plus par utilisateur.
   const digests = await scheduleDailyDigests();
-  return Response.json({ ...sweep, jira, digests });
+  // Veille (PL-603) : entrées publiées ce jour, administrateurs prévenus une fois.
+  const watch = await scheduleWatchNotifications();
+  return Response.json({ ...sweep, jira, digests, watch });
 }

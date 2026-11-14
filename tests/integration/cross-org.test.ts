@@ -239,6 +239,7 @@ const ORG_SCOPED = [
   "billing.get",
   "billing.checkout",
   "billing.portal",
+  "watch.list",
 ];
 
 const paths = Object.keys(appRouter._def.procedures as unknown as Record<string, unknown>);

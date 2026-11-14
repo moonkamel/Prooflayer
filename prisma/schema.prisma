@@ -740,6 +740,7 @@ model RegulatoryUpdate {
   impactedControlKeys String[]
   severity            String // "info", "action_required"
   libraryVersion      String? // version de bibliothèque qui intègre le changement
+  notifiedAt          DateTime? // PL-603 : administrateurs prévenus (notification et email), une seule fois
 }
 
 enum Plan {

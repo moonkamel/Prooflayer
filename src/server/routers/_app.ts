@@ -11,6 +11,7 @@ import { notificationRouter } from "./notification";
 import { orgRouter } from "./org";
 import { packRouter } from "./pack";
 import { systemRouter } from "./system";
+import { watchRouter } from "./watch";
 
 export const appRouter = router({
   org: orgRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
   notification: notificationRouter,
   pack: packRouter,
   billing: billingRouter,
+  watch: watchRouter,
 });
 
 export type AppRouter = typeof appRouter;

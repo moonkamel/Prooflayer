@@ -12,8 +12,10 @@ import {
   renderControlFailedEmail,
   renderDigestEmail,
   renderPackReadyEmail,
+  renderWatchPublishedEmail,
 } from "@/server/email/notification-emails";
 import { membershipsOfUser, userContact } from "@/server/system/identity";
+import { watchUpdate } from "@/server/system/regulatory-updates";
 import { audit, clientIp } from "./audit";
 import {
   digestForUser,
@@ -134,6 +136,7 @@ export async function sendNotificationEmail(
   const notification = await tx.notification.findUnique({ where: { id: notificationId } });
   if (!notification || notification.orgId !== orgId || notification.emailedAt) return "skipped";
   if (notification.type === "pack.ready") return sendPackReadyEmail(tx, notification, deps);
+  if (notification.type === "watch.published") return sendWatchEmail(tx, notification, deps);
   if (notification.type !== "control.failed") return "skipped";
   const memberships = await membershipsOfUser(notification.userId);
   const organization = memberships.find((m) => m.id === orgId);
@@ -181,6 +184,42 @@ export async function sendNotificationEmail(
     where: { id: notification.id },
     data: { emailedAt: deps.now() },
   });
+  return "sent";
+}
+
+/** Email de veille (PL-603) : à l'administrateur encore membre et encore administrateur de l'organisation. */
+async function sendWatchEmail(
+  tx: OrgTransaction,
+  notification: { id: string; orgId: string; userId: string; payload: unknown },
+  deps: NotificationDependencies,
+): Promise<"sent" | "skipped"> {
+  const memberships = await membershipsOfUser(notification.userId);
+  const organization = memberships.find((m) => m.id === notification.orgId);
+  const user = await userContact(notification.userId);
+  const entryId = (notification.payload as { entryId?: string }).entryId;
+  const entry = entryId ? await watchUpdate(entryId) : null;
+  if (!organization || !user || !entry || !["owner", "admin"].includes(organization.role)) {
+    return "skipped";
+  }
+  const summary = entry.summary as { fr: string; en: string; source: { fr: string; en: string } };
+  await deps.transport.send(
+    await renderWatchPublishedEmail({
+      to: user.email,
+      name: user.name,
+      locale: user.locale,
+      baseUrl: deps.baseUrl,
+      organization: organization.name,
+      entry: {
+        id: entry.id,
+        title: entry.title as { fr: string; en: string },
+        summary: { fr: summary.fr, en: summary.en },
+        source: summary.source,
+        effectiveDate: entry.effectiveDate,
+        controls: entry.impactedControlKeys,
+      },
+    }),
+  );
+  await tx.notification.update({ where: { id: notification.id }, data: { emailedAt: deps.now() } });
   return "sent";
 }
 

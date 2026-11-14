@@ -2,7 +2,7 @@
 // (régressions d'un contrôle, résumés quotidiens envoyés). Lien de pied de chaque email d'alerte.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { serverCaller } from "@/server/caller";
 import { requireSession } from "@/server/services/session";
 import { MarkAllReadButton, PreferencesForm } from "./notification-forms";
@@ -24,6 +24,7 @@ export default async function NotificationsPage() {
   ]);
   const t = await getTranslations("notifications");
   const format = await getFormatter();
+  const locale = (await getLocale()) === "en" ? "en" : "fr";
   const unread = notifications.filter((n) => !n.read).map((n) => n.id);
 
   return (
@@ -59,12 +60,18 @@ export default async function NotificationsPage() {
                     ? t("controlFailed", { key: str(n.payload.controlKey) })
                     : n.type === "pack.ready"
                       ? t("packReady", { system: str(n.payload.systemName) })
-                      : t("digestDaily", {
-                          day: str(n.payload.day),
-                          expiring: num(n.payload.expiring),
-                          integrations: num(n.payload.integrations),
-                          stale: num(n.payload.staleClassifications),
-                        })}
+                      : n.type === "watch.published"
+                        ? t("watchPublished", {
+                            title: str(
+                              (n.payload.title as Record<string, unknown> | undefined)?.[locale],
+                            ),
+                          })
+                        : t("digestDaily", {
+                            day: str(n.payload.day),
+                            expiring: num(n.payload.expiring),
+                            integrations: num(n.payload.integrations),
+                            stale: num(n.payload.staleClassifications),
+                          })}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("when", {
@@ -76,6 +83,11 @@ export default async function NotificationsPage() {
                   {!n.read && <span> · {t("unread")}</span>}
                   {n.emailed && <span> · {t("emailed")}</span>}
                 </p>
+                {n.type === "watch.published" && (
+                  <p className="mt-1 text-sm">
+                    <Link href={`/watch#${str(n.payload.entryId)}`}>{t("openWatch")}</Link>
+                  </p>
+                )}
                 {n.type === "pack.ready" && (
                   <p className="mt-1 text-sm">
                     <Link href={`/systems/${str(n.payload.systemId)}/packs`}>{t("openPacks")}</Link>

@@ -39,6 +39,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             {active && ADMIN_ROLES.includes(active.role) && (
               <NavLink href="/audit">{t("audit")}</NavLink>
             )}
+            <NavLink href="/watch">{t("watch")}</NavLink>
             <NavLink href="/notifications">{t("notifications")}</NavLink>
             <NavLink href="/account">{t("account")}</NavLink>
           </nav>
