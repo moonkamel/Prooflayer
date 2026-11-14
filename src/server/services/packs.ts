@@ -16,6 +16,8 @@ import {
 } from "@/server/pack/contents";
 import { zipPack } from "@/server/pack/archive";
 import { renderPackReport } from "@/server/pack/report";
+import { buildTemplates } from "@/server/pack/templates";
+import { templateLabels } from "@/server/pack/template-labels";
 import { packSigningKey, signManifest, type PackSigningKey } from "@/server/pack/signing";
 import { LIBRARY_VERSION } from "@/server/rules/library";
 import { storedAnchorHeader, storedBatchHeader } from "@/server/seal/chain";
@@ -35,6 +37,7 @@ import { audit, clientIp } from "./audit";
 import { ServiceError } from "./errors";
 import { orgDataKey } from "./evidence";
 import { sealOrg } from "./seal";
+import { parseModels } from "./system-registry";
 import type { OrgContext } from "./organization";
 
 const DAY_MS = 86_400_000;
@@ -315,27 +318,33 @@ async function assemble(
 
   const from = pack.periodStart;
   const until = new Date(pack.periodEnd.getTime() + DAY_MS);
-  const [organization, system, classification, instances, batchRows] = await Promise.all([
-    tx.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true, name: true } }),
-    tx.aiSystem.findUniqueOrThrow({ where: { id: pack.systemId } }),
-    tx.classification.findFirst({
-      where: { systemId: pack.systemId, status: "SIGNED" },
-      orderBy: { signedAt: "desc" },
-    }),
-    tx.controlInstance.findMany({
-      where: { systemId: pack.systemId },
-      include: {
-        definition: true,
-        evidenceLinks: { select: { evidenceId: true } },
-        evaluations: { orderBy: { evaluatedAt: "desc" }, take: 1 },
-      },
-    }),
-    tx.sealBatch.findMany({
-      where: { orgId, sealedAt: { gte: from, lt: until } },
-      orderBy: { seq: "asc" },
-      include: { anchor: true },
-    }),
-  ]);
+  const [organization, system, classification, instances, batchRows, designChanges] =
+    await Promise.all([
+      tx.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true, name: true } }),
+      tx.aiSystem.findUniqueOrThrow({ where: { id: pack.systemId } }),
+      tx.classification.findFirst({
+        where: { systemId: pack.systemId, status: "SIGNED" },
+        orderBy: { signedAt: "desc" },
+      }),
+      tx.controlInstance.findMany({
+        where: { systemId: pack.systemId },
+        include: {
+          definition: true,
+          evidenceLinks: { select: { evidenceId: true } },
+          evaluations: { orderBy: { evaluatedAt: "desc" }, take: 1 },
+        },
+      }),
+      tx.sealBatch.findMany({
+        where: { orgId, sealedAt: { gte: from, lt: until } },
+        orderBy: { seq: "asc" },
+        include: { anchor: true },
+      }),
+      tx.designChange.findMany({
+        where: { systemId: pack.systemId },
+        orderBy: { occurredAt: "asc" },
+        select: { occurredAt: true, summary: true, isSignificant: true },
+      }),
+    ]);
 
   // 2. Lots de la période, avec TOUTES leurs feuilles ; preuves divulguées : celles du système.
   const batchIds = batchRows.map((b) => b.id);
@@ -440,7 +449,43 @@ async function assemble(
     .sort((a, b) => a.key.localeCompare(b.key));
 
   const key = deps.signingKey();
-  const users = await usersByIds([system.ownerUserId]);
+  const users = await usersByIds(
+    [system.ownerUserId, system.oversightOwnerUserId].filter((id): id is string => Boolean(id)),
+  );
+  const templates = buildTemplates(
+    {
+      locale,
+      generatedAt: now,
+      organization,
+      system: {
+        id: system.id,
+        name: system.name,
+        intendedPurpose: system.intendedPurpose,
+        description: system.description,
+        role: system.role,
+        status: system.status,
+        placedOnMarketAt: system.placedOnMarketAt,
+        vendorName: system.vendorName,
+        models: parseModels(system.models),
+        dataCategories: system.dataCategories,
+        owner: users.get(system.ownerUserId)?.name ?? null,
+        oversightOwner: system.oversightOwnerUserId
+          ? (users.get(system.oversightOwnerUserId)?.name ?? null)
+          : null,
+      },
+      classification:
+        classification && classification.signedAt
+          ? {
+              signedAt: classification.signedAt,
+              tier: classification.tier,
+              annexIIIPoints: classification.annexIIIPoints,
+            }
+          : null,
+      designChanges,
+      controls,
+    },
+    await templateLabels(locale),
+  );
   const counts = {
     leaves: leaves.length,
     disclosed: evidence.filter((e) => !e.redactedAt).length,
@@ -476,6 +521,7 @@ async function assemble(
     evidence,
     counts,
     signingKid: key.kid,
+    templates: templates.counts,
   });
   const verifyMd = await verifyMarkdown(locale, {
     kid: key.kid,
@@ -496,6 +542,7 @@ async function assemble(
     tsaRoots,
     report,
     verifyMd,
+    templates: { annexIv: templates.annexIv.markdown, annexV: templates.annexV.markdown },
   });
   const signed = signManifest(manifest, key);
   const zip = zipPack(files, signed, now);

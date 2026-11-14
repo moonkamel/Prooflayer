@@ -538,3 +538,15 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Tests : `packages/verify/test/` sur des packs produits par le code de l'application, altérations comprises ;
   prestataire d'horodatage de test `tests/helpers/test-tsa.ts` (racine et jetons générés, sans réseau), utilisé aussi
   par `tests/integration/pack.test.ts`, dont le pack généré par le job doit passer `verifyPack`.
+
+## Gabarits Annexe IV et déclaration UE (conventions établies par PL-506)
+- `src/server/pack/templates.ts` (pur) : `buildTemplates(input, labels)` → `templates/annex-iv.md` (9 rubriques de
+  l'Annexe IV, Art. 11(1)) et `templates/eu-declaration.md` (8 mentions de l'Annexe V, Art. 47), en Markdown, joints à
+  chaque pack (`PackInput.templates`, listés au manifeste) et décomptés dans le rapport PDF (`packTemplates.report`).
+- Préremplissage depuis le registre (fiche, modèles, catégories de données, responsables, classification signée,
+  modifications de conception) ; contrôles suivis par rubrique : `ANNEX_IV_CONTROLS`. États `EMPTY` (« ⚠ À rédiger »)
+  ou `PARTIAL` (préremplie, à compléter) : aucune rubrique n'est jamais déclarée complète.
+- Annexe V point 4 : jamais rédigé par ProofLayer (règle 7), laissé au fournisseur ; rôle autre que fournisseur →
+  avertissement (la déclaration incombe au fournisseur tiers). Titre légal « Déclaration UE de conformité » conservé.
+- Rubriques établies d'après le règlement 2024/1689 (le cahier ne les énumère pas) : relecture par l'avocat partenaire.
+- Textes : `packTemplates` dans messages/{fr,en}.json ; libellés par `templateLabels(locale)` (`template-labels.ts`).

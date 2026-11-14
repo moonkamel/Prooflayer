@@ -11,6 +11,8 @@
 //   proofs/anchors/<seq>.tst   son jeton RFC 3161 (TimeStampToken DER)
 //   proofs/tsa/<nom>.pem       racine du prestataire, pour `openssl ts -verify` (l'outil épingle les siennes)
 //   VERIFY.md                  la vérification pas à pas, sans notre outil
+//   templates/annex-iv.md      gabarit de documentation technique, prérempli (PL-506)
+//   templates/eu-declaration.md gabarit de déclaration UE (PL-506)
 //
 // Divulgation : chaque lot du pack liste toutes ses feuilles ; une preuve non divulguée n'y figure que par son
 // leafHash, une omission est donc visible (§3.2 E9). Encodage : hexadécimal minuscule, dates ISO 8601 UTC.
@@ -108,6 +110,8 @@ export interface PackInput {
   tsaRoots: Record<string, string>;
   report: Uint8Array;
   verifyMd: string;
+  /** Gabarits Annexe IV et Annexe V (PL-506), en Markdown. */
+  templates?: { annexIv: string; annexV: string };
 }
 
 export const evidencePath = (id: string) => `evidence/${id}.json`;
@@ -175,6 +179,10 @@ export function buildPackFiles(input: PackInput): {
   files.set("report.pdf", input.report);
   files.set("VERIFY.md", enc.encode(input.verifyMd));
   files.set("controls.json", json(input.controls));
+  if (input.templates) {
+    files.set("templates/annex-iv.md", enc.encode(input.templates.annexIv));
+    files.set("templates/eu-declaration.md", enc.encode(input.templates.annexV));
+  }
   for (const e of input.evidence) {
     const ext = e.attachmentMime ? EXTENSIONS[e.attachmentMime] : undefined;
     const attachmentPath = e.attachment && ext && !e.redactedAt ? `evidence/${e.id}.${ext}` : null;

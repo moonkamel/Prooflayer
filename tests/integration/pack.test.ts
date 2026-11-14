@@ -329,6 +329,13 @@ describe("génération", () => {
       "AIA-47-01:PASS",
     ]);
     expect(Buffer.from(entries.get("VERIFY.md")!).toString()).toContain("openssl ts -verify");
+    // PL-506 : gabarits Annexe IV et Annexe V joints, préremplis depuis le registre.
+    const annexIv = Buffer.from(entries.get("templates/annex-iv.md")!).toString();
+    expect(annexIv).toContain("# Documentation technique — Score");
+    expect(annexIv).toContain("(Annexe IV, point 9)");
+    expect(Buffer.from(entries.get("templates/eu-declaration.md")!).toString()).toContain(
+      "⚠ À rédiger par le fournisseur.",
+    );
   });
 
   it("vérifié par @prooflayer/verify ; un octet modifié le fait échouer", async () => {
