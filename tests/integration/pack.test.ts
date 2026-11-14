@@ -2,14 +2,13 @@
 // ancrage immédiat, rapport, archive, signature, notification), contenu vérifié de bout en bout (signature, empreinte de
 // chaque fichier, feuilles recalculées, racine des lots, preuve non divulguée comptée, pièce jointe en clair, contrôles
 // en échec et sans preuve présents), téléchargement par un auditeur, clé publique publiée ; 2 000 preuves en moins de
-// 3 minutes.
+// 3 minutes. PL-505 : le pack produit est vérifié par l'outil indépendant @prooflayer/verify (six étapes, jeton d'un
+// prestataire de test réellement émis sur l'anchorHash), puis refusé s'il est altéré.
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
-import * as pkijs from "pkijs";
-import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { generateKey, masterKeyFromEnv } from "@/server/crypto/envelope";
 import { forOrg, prisma, withOrgTransaction } from "@/server/db";
@@ -20,7 +19,6 @@ import { createCaller } from "@/server/routers/_app";
 import { batchHash } from "@/server/seal/batch";
 import { contentSha256, envelopeOf, evidenceLeafHash } from "@/server/seal/evidence";
 import { merkleRoot } from "@/server/seal/merkle";
-import { FREETSA } from "@/server/seal/tsa-config";
 import { createEvidence } from "@/server/services/evidence";
 import { packStorage, type PackDependencies } from "@/server/services/packs";
 import { LocalObjectStore } from "@/server/storage/object-store";
@@ -29,6 +27,8 @@ import { jobRegistry } from "@/server/system/jobs/handlers";
 import { packJobDependencies } from "@/server/system/jobs/pack";
 import { runJobNow } from "@/server/system/jobs/queue";
 import { publishedSigningKeys } from "@/server/system/signing-keys";
+import { verifyPack } from "../../packages/verify/src/verify";
+import { createTestTsa, TEST_POLICY_OID, type TestTsa } from "../helpers/test-tsa";
 
 const run = randomUUID().slice(0, 8);
 const A = `org_pack_${run}`;
@@ -45,22 +45,18 @@ const today = new Date().toISOString().slice(0, 10);
 const start = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
 const sha = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
 
-const fixture = new Uint8Array(
-  readFileSync(join(process.cwd(), "tests/fixtures/tsa/response.tsr")),
-);
-const fixtureToken = new Uint8Array(
-  pkijs.TimeStampResp.fromBER(fixture.buffer.slice(0) as ArrayBuffer)
-    .timeStampToken!.toSchema()
-    .toBER(false),
-);
+let testTsa: TestTsa;
 const fakeTsa: Timestamper = {
-  name: FREETSA.name,
-  timestamp: async () => ({
-    token: fixtureToken,
-    genTime: new Date(),
-    serial: "01",
-    policyOid: "1.2.3",
-  }),
+  name: "Prestataire de test",
+  timestamp: async (digest) => {
+    const genTime = new Date();
+    return {
+      token: await testTsa.token(digest, genTime),
+      genTime,
+      serial: "01",
+      policyOid: TEST_POLICY_OID,
+    };
+  },
 };
 
 let deps: PackDependencies;
@@ -104,6 +100,7 @@ async function addEvidence(controlKey: string | null, n: number, attachment?: Bu
 
 beforeAll(async () => {
   process.env.PROOFLAYER_MASTER_KEY ??= generateKey().toString("base64");
+  testTsa = await createTestTsa();
   dir = await mkdtemp(join(tmpdir(), "pl-pack-"));
   deps = {
     store: new LocalObjectStore(dir, "secret-pack-0123456789"),
@@ -324,7 +321,6 @@ describe("génération", () => {
     });
     // 5. Ancre et jeton joints.
     expect([...entries.keys()].some((p) => p.endsWith(".tst"))).toBe(true);
-    expect(entries.has("proofs/tsa/freetsa.pem")).toBe(true);
     // Contrôles en échec et sans preuve toujours présents.
     const controls = JSON.parse(Buffer.from(entries.get("controls.json")!).toString());
     expect(controls.map((c: { key: string; status: string }) => `${c.key}:${c.status}`)).toEqual([
@@ -333,6 +329,31 @@ describe("génération", () => {
       "AIA-47-01:PASS",
     ]);
     expect(Buffer.from(entries.get("VERIFY.md")!).toString()).toContain("openssl ts -verify");
+  });
+
+  it("vérifié par @prooflayer/verify ; un octet modifié le fait échouer", async () => {
+    const published = await publishedSigningKeys({});
+    const trust = {
+      keys: Object.fromEntries(published.map((k) => [k.kid, k.publicKey])),
+      tsaRoots: [{ name: "Prestataire de test", qualified: true, pem: testTsa.rootPem }],
+    };
+    const { bytes } = await as(auditor).pack.download({ packId });
+    const report = await verifyPack(new Uint8Array(bytes), trust);
+    expect(report.steps.flatMap((s) => s.issues)).toEqual([]);
+    expect(report).toMatchObject({
+      ok: true,
+      clean: true,
+      summary: { verified: 5, undisclosed: 1, alterations: 0, unanchoredBatches: 0 },
+    });
+    const path = [...entries.keys()].find((p) => /^evidence\/[^/]+\.json$/u.test(p))!;
+    const tampered = new Map(entries);
+    const doc = JSON.parse(Buffer.from(entries.get(path)!).toString());
+    doc.summary = "PR #0 (modifiée)";
+    tampered.set(path, Buffer.from(JSON.stringify(doc)));
+    const { zipSync } = await import("fflate");
+    const altered = await verifyPack(zipSync(Object.fromEntries(tampered)), trust);
+    expect(altered.ok).toBe(false);
+    expect(altered.steps[0]!.issues.map((i) => i.code)).toEqual(["file_hash"]);
   });
 
   it("un octet modifié dans une preuve ne correspond plus au manifeste", () => {

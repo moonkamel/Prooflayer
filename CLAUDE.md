@@ -523,3 +523,18 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   Pied de page react-pdf positionné par `top` (avec `bottom` et un lineHeight hérité, il disparaît).
 - `VERIFY.md` : `packVerify.body` lu brut (`t.raw`, accolades littérales), `{kid}` et `{keysUrl}` remplacés.
 - Exemple à relire : `PACK_SAMPLE_OUT=<fichier>.zip` sur `tests/integration/pack.test.ts`.
+
+## Outil de vérification (conventions établies par PL-505)
+- `packages/verify/` (`@prooflayer/verify`, MIT) : implémentation indépendante, sans import de l'application ni module
+  Node hors `src/bin.ts` (règle ESLint) ; WebCrypto, fflate, pkijs, asn1js. Le cœur (`verifyPack`) resservira à la
+  page publique de vérification (PL-508). Imports relatifs en `.js` (build NodeNext : `pnpm verify:build`, en CI).
+- `verifyPack(zip, { keys, tsaRoots })` : six étapes du §4.6.3 (`STEPS`), anomalies typées (`ISSUE_CODES`, erreur ou
+  avertissement, 50 détaillées par étape puis le décompte). `ok` = aucune erreur (code 0) ; `clean` = ni erreur ni
+  avertissement (`--strict`). Avertissements : lot non ancré, prestataire non qualifié, pièce jointe non jointe.
+- Confiance épinglée dans `src/trust.ts` (`PINNED_KEYS` sans `pl-dev`, `PINNED_TSA_ROOTS` avec leur qualification) ;
+  les racines jointes au pack ne sont jamais crues ; `--trust-key` / `--trust-tsa` ajoutent une confiance explicite
+  (une racine ajoutée n'est jamais réputée qualifiée). Nouvelle clé ou nouveau prestataire = nouvelle version du paquet.
+- Textes fr et en dans `src/messages.ts` (le paquet ne lit pas messages/{fr,en}.json).
+- Tests : `packages/verify/test/` sur des packs produits par le code de l'application, altérations comprises ;
+  prestataire d'horodatage de test `tests/helpers/test-tsa.ts` (racine et jetons générés, sans réseau), utilisé aussi
+  par `tests/integration/pack.test.ts`, dont le pack généré par le job doit passer `verifyPack`.

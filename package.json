@@ -25,7 +25,8 @@
     "db:seed": "prisma db seed",
     "controls:sync": "tsx scripts/sync-controls.ts",
     "db:check": "tsx scripts/db-check.ts",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "verify:build": "tsc -p packages/verify/tsconfig.build.json"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1166.0",

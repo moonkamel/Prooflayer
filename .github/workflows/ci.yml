@@ -42,6 +42,9 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm test:classify
+      # PL-505 : l'outil de vérification se construit seul (NodeNext) et s'exécute.
+      - run: pnpm verify:build
+      - run: node packages/verify/dist/bin.js --version
       - run: pnpm db:validate
 
   # Parcours Playwright sur le vrai serveur et une vraie base (PL-103 : authentification de bout en bout).
