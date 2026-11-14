@@ -9,6 +9,7 @@ import { scheduleEvaluation } from "@/server/system/jobs/control-evaluate";
 import { jobRegistry } from "@/server/system/jobs/handlers";
 import { enqueueInTransaction, runJobNow } from "@/server/system/jobs/queue";
 import { jiraIssueSyncJob } from "@/server/system/jobs/jira";
+import { syncSubscriptionFromEvent } from "@/server/services/billing";
 import {
   claimDeliveries,
   failDelivery,
@@ -31,6 +32,7 @@ export async function handleDelivery(
 ): Promise<DeliveryOutcome> {
   try {
     if (delivery.provider === "JIRA") return await handleJiraDelivery(delivery);
+    if (delivery.provider === "STRIPE") return await handleStripeDelivery(delivery);
     if (delivery.provider !== "GITHUB") {
       return (await finishDelivery(
         delivery,
@@ -145,6 +147,19 @@ async function handleJiraDelivery(delivery: ClaimedDelivery): Promise<DeliveryOu
   });
   if (job) await runJobNow(job, jobRegistry).catch(() => undefined);
   return "processed";
+}
+
+/**
+ * Webhook Stripe (PL-601) : l'événement ne sert qu'à désigner l'abonnement, relu auprès de Stripe puis écrit sur
+ * `Subscription`. Une erreur de Stripe (réseau, indisponibilité) fait échouer la tentative : elle est rejouée.
+ */
+async function handleStripeDelivery(delivery: ClaimedDelivery): Promise<DeliveryOutcome> {
+  const event = delivery.payload as { id: string; type: string; data: { object: unknown } };
+  const result = await syncSubscriptionFromEvent({ ...event, id: delivery.deliveryId });
+  const status = result.outcome === "synced" ? "PROCESSED" : "IGNORED";
+  const reason = result.outcome === "ignored" ? result.reason : undefined;
+  if (!(await finishDelivery(delivery, status, undefined, reason))) return "lease_lost";
+  return status === "PROCESSED" ? "processed" : "ignored";
 }
 
 /** Traite aussitôt une livraison qui vient d'arriver (route handler, par waitUntil). */

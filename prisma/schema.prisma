@@ -419,6 +419,7 @@ enum IntegrationProvider {
   GITLAB
   NOTION
   API
+  STRIPE // PL-601 : boîte de réception des webhooks Stripe seulement (jamais une Integration)
 }
 
 enum IntegrationStatus {
@@ -758,6 +759,10 @@ model Subscription {
   monitoredSystemsLimit Int          @default(1)
   trialEndsAt           DateTime?
   currentPeriodEnd      DateTime?
+  priceId               String? // PL-601 : tarif Stripe en vigueur
+  billingInterval       String? // "month" | "year"
+  cancelAtPeriodEnd     Boolean      @default(false)
+  syncedAt              DateTime? // dernière relecture auprès de Stripe
   org                   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 

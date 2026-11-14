@@ -3,7 +3,11 @@
 import * as Sentry from "@sentry/nextjs";
 
 export type OperationalAlert =
-  "seal.anchorOverdue" | "seal.tsaNotConfigured" | "seal.integrityFailure";
+  | "seal.anchorOverdue"
+  | "seal.tsaNotConfigured"
+  | "seal.integrityFailure"
+  | "billing.orgMissing"
+  | "billing.unknownPrice";
 
 export function raiseOperationalAlert(
   code: OperationalAlert,

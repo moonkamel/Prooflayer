@@ -1,5 +1,6 @@
 import { createCallerFactory, router } from "@/server/trpc";
 import { auditRouter } from "./audit";
+import { billingRouter } from "./billing";
 import { classificationRouter } from "./classification";
 import { controlRouter } from "./control";
 import { dashboardRouter } from "./dashboard";
@@ -23,6 +24,7 @@ export const appRouter = router({
   dashboard: dashboardRouter,
   notification: notificationRouter,
   pack: packRouter,
+  billing: billingRouter,
 });
 
 export type AppRouter = typeof appRouter;

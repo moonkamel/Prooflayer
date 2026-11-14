@@ -7,6 +7,8 @@ import { organization, twoFactor } from "better-auth/plugins";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/config";
 import { ac, roles } from "./auth-roles";
 import { audit } from "./services/audit";
+import { startTrial } from "./services/billing";
+import { withOrgTransaction } from "./db";
 import { renderInvitationEmail, sendAuthEmail } from "./email/auth-emails";
 import { createEmailTransport } from "./email/transport";
 import { authDatabase } from "./system/auth-database";
@@ -106,6 +108,10 @@ export const auth = betterAuth({
       // Journal d'audit (PL-106) des écritures faites directement auprès de Better Auth, sans service intermédiaire.
       organizationHooks: {
         afterCreateOrganization: async ({ organization, user }) => {
+          // PL-601 : essai de 14 jours sans carte (§3.2 E11).
+          await withOrgTransaction(organization.id, (tx) =>
+            startTrial(tx, organization.id, new Date()),
+          );
           await audit(
             { orgId: organization.id, actor: { type: "user", id: user.id } },
             "organization.create",

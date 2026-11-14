@@ -189,7 +189,8 @@
         "forbidden": "Only owners and administrators can connect Jira.",
         "error": "The Jira connection failed. Try again."
       }
-    }
+    },
+    "billingLink": "Subscription and billing"
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -256,7 +257,10 @@
     "evidence_upload": "Manual evidence uploaded",
     "evidence_attest": "Attestation signed",
     "evidence_attestRefused": "Attestation refused: incorrect password",
-    "evidence_redact": "Evidence erased"
+    "evidence_redact": "Evidence erased",
+    "billing_checkout": "Subscription started",
+    "billing_portal": "Billing portal opened",
+    "billing_subscriptionSynced": "Subscription updated"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1377,5 +1381,56 @@
     "downloadReport": "Download the report (JSON)",
     "again": "Verify another pack",
     "cli": "Same verification on the command line: npx @prooflayer/verify pack.zip"
+  },
+  "billing": {
+    "title": "Subscription",
+    "back": "← Organization",
+    "current": "Current subscription",
+    "plans": {
+      "TRIAL": "Trial",
+      "STARTER": "Starter",
+      "GROWTH": "Growth",
+      "SCALE": "Scale"
+    },
+    "intervals": {
+      "month": "monthly, no commitment",
+      "year": "yearly"
+    },
+    "trialLeft": "{days, plural, =0 {Trial: last day} one {Trial: # day left} other {Trial: # days left}}, until {date}. No card, all Growth features.",
+    "renewsOn": "Renews on {date}.",
+    "endsOn": "Cancelled: ends on {date}.",
+    "readOnly": {
+      "trialExpired": "Trial ended: the workspace is read-only until {date}. Existing packs can still be exported.",
+      "pastDue": "Payment failed: the workspace is read-only until {date}. Update your payment method.",
+      "canceled": "Subscription ended: the workspace is read-only until {date}. Existing packs can still be exported."
+    },
+    "systemsLimit": "Up to {count, plural, one {# monitored system} other {# monitored systems}}.",
+    "portal": "Manage subscription and invoices",
+    "offersTitle": "Choose a plan",
+    "prices": {
+      "STARTER_year": "€3,480 excl. VAT per year (€290 per month)",
+      "STARTER_month": "€349 excl. VAT per month",
+      "GROWTH_year": "€8,280 excl. VAT per year (€690 per month)",
+      "GROWTH_month": "€829 excl. VAT per month",
+      "SCALE_year": "€17,880 excl. VAT per year (€1,490 per month)"
+    },
+    "features": {
+      "STARTER": "1 monitored system, 10 linked repositories, GitHub and Jira.",
+      "GROWTH": "5 monitored systems, unlimited repositories, all connectors.",
+      "SCALE": "20 monitored systems, unlimited repositories, all connectors."
+    },
+    "subscribe": "Subscribe",
+    "ownerOnly": "Only the organization owner can subscribe or change the subscription.",
+    "paymentNote": "Pay by card or SEPA direct debit, with Stripe. Enter your EU VAT number for reverse charge. Any remaining trial is carried over: the first payment falls at its end.",
+    "notConfigured": "Online subscription is not open yet. Write to us to get started.",
+    "checkoutSuccess": "Thank you: your subscription is recorded. It shows here as soon as Stripe confirms it.",
+    "checkoutCancel": "Subscription interrupted: nothing was charged.",
+    "errors": {
+      "alreadySubscribed": "A subscription is already active: change it from the portal.",
+      "notConfigured": "Billing is not configured.",
+      "noCustomer": "No Stripe subscription is linked yet.",
+      "generic": "Something went wrong. Try again in a moment."
+    },
+    "nav": "Subscription"
   }
 }

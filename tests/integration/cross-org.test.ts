@@ -235,6 +235,9 @@ const ORG_SCOPED = [
   "system.list",
   "system.export",
   "integration.jira.authorizeUrl",
+  "billing.get",
+  "billing.checkout",
+  "billing.portal",
 ];
 
 const paths = Object.keys(appRouter._def.procedures as unknown as Record<string, unknown>);

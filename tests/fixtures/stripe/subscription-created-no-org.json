@@ -1,0 +1,9 @@
+{
+  "id": "evt_subscription_created_no_org",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1800000000,
+  "type": "customer.subscription.created",
+  "livemode": false,
+  "data": { "object": { "id": "sub_test_orphan", "object": "subscription", "status": "active" } }
+}

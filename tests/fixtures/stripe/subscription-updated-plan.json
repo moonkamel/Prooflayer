@@ -1,0 +1,22 @@
+{
+  "id": "evt_subscription_updated_plan",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1801000000,
+  "type": "customer.subscription.updated",
+  "livemode": false,
+  "data": {
+    "object": {
+      "id": "sub_test_1",
+      "object": "subscription",
+      "status": "active",
+      "customer": "cus_test_1",
+      "metadata": { "orgId": "__ORG__" },
+      "items": {
+        "object": "list",
+        "data": [{ "id": "si_1", "price": { "id": "price_scale_year" } }]
+      }
+    },
+    "previous_attributes": { "items": { "data": [{ "price": { "id": "price_growth_year" } }] } }
+  }
+}

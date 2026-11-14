@@ -1,0 +1,20 @@
+{
+  "id": "evt_invoice_payment_failed",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1802000000,
+  "type": "invoice.payment_failed",
+  "livemode": false,
+  "data": {
+    "object": {
+      "id": "in_test_1",
+      "object": "invoice",
+      "customer": "cus_test_1",
+      "customer_email": "facturation@example.test",
+      "parent": {
+        "type": "subscription_details",
+        "subscription_details": { "subscription": "sub_test_1" }
+      }
+    }
+  }
+}

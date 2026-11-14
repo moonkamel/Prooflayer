@@ -573,3 +573,19 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Confiance fournie par le serveur, `verificationTrust()` (`src/server/services/public-verification.ts`) : clés épinglées
   du paquet, puis clés publiées (`publishedSigningKeys`, sans `pl-dev` en production) ; racines épinglées, plus celle du
   prestataire configuré (`TSA_URL`, `TSA_TRUST_PEM`, qualification par `TSA_QUALIFIED`).
+
+## Abonnement Stripe (conventions établies par PL-601)
+- Pur : `src/server/services/billing-data.ts` (`PLAN_LIMITS` du §6.1, `OFFERS` (pas de mensuel Scale), tarifs en
+  configuration `STRIPE_PRICE_<PLAN>_<MONTH|YEAR>` → `priceConfig`, `subscriptionState` (fin de période portée par
+  l'élément ou la racine), `supersedes` (un ancien abonnement terminé n'écrase pas le nouveau), `accessOf` (essai,
+  actif, lecture seule 30 jours : appliquée par PL-602), `subscriptionIdOf`, `TRACKED_EVENTS`).
+- Service `src/server/services/billing.ts` (`billingDependencies` remplaçable par les tests, Stripe simulé) : `startTrial`
+  (crochet `afterCreateOrganization`, migration pour les organisations existantes), `getBilling`, `startCheckout`
+  (owner ; `metadata.orgId` sur la session et l'abonnement, essai restant reporté par `trial_end`, TVA intracommunautaire
+  collectée, Stripe Tax si `STRIPE_TAX=true`, moyens de paiement du compte ou `STRIPE_PAYMENT_METHOD_CONFIGURATION`),
+  `openPortal` (owner), `syncSubscriptionFromEvent` (relit l'abonnement chez Stripe ; sans orgId ou tarif inconnu :
+  alerte `billing.orgMissing` / `billing.unknownPrice`, livraison IGNORED).
+- Webhook `/api/webhooks/stripe` : `Stripe.webhooks.constructEvent` (400), boîte de réception `WebhookDelivery`
+  fournisseur STRIPE (`event.id`, déjà vu → 200), seuls type et identifiants conservés ; `handleStripeDelivery` dans
+  `process-delivery.ts`, erreur Stripe → nouvel essai. Routeur `billing` (`get` tout membre ; `checkout`, `portal` owner).
+- Écran `/organization/billing` (lien depuis `/organization`), retour de Checkout `?checkout=success|cancel`.

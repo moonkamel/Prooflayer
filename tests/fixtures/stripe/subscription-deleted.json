@@ -1,0 +1,21 @@
+{
+  "id": "evt_subscription_deleted",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1803000000,
+  "type": "customer.subscription.deleted",
+  "livemode": false,
+  "data": {
+    "object": {
+      "id": "sub_test_1",
+      "object": "subscription",
+      "status": "canceled",
+      "customer": "cus_test_1",
+      "metadata": { "orgId": "__ORG__" },
+      "items": {
+        "object": "list",
+        "data": [{ "id": "si_1", "price": { "id": "price_scale_year" } }]
+      }
+    }
+  }
+}

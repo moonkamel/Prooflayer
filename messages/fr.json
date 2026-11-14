@@ -189,7 +189,8 @@
         "forbidden": "Seuls les propriétaires et administrateurs peuvent connecter Jira.",
         "error": "La connexion à Jira a échoué. Recommencez."
       }
-    }
+    },
+    "billingLink": "Abonnement et facturation"
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -256,7 +257,10 @@
     "evidence_upload": "Preuve manuelle déposée",
     "evidence_attest": "Attestation signée",
     "evidence_attestRefused": "Attestation refusée : mot de passe incorrect",
-    "evidence_redact": "Effacement d'une preuve"
+    "evidence_redact": "Effacement d'une preuve",
+    "billing_checkout": "Souscription lancée",
+    "billing_portal": "Ouverture du portail de facturation",
+    "billing_subscriptionSynced": "Abonnement mis à jour"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1379,5 +1383,56 @@
     "downloadReport": "Télécharger le rapport (JSON)",
     "again": "Vérifier un autre pack",
     "cli": "Même vérification en ligne de commande : npx @prooflayer/verify pack.zip"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "back": "← Organisation",
+    "current": "Abonnement en cours",
+    "plans": {
+      "TRIAL": "Essai",
+      "STARTER": "Starter",
+      "GROWTH": "Growth",
+      "SCALE": "Scale"
+    },
+    "intervals": {
+      "month": "mensuel sans engagement",
+      "year": "annuel"
+    },
+    "trialLeft": "{days, plural, =0 {Essai : dernier jour} one {Essai : # jour restant} other {Essai : # jours restants}}, jusqu'au {date}. Sans carte, toutes les fonctions du plan Growth.",
+    "renewsOn": "Renouvellement le {date}.",
+    "endsOn": "Résilié : prend fin le {date}.",
+    "readOnly": {
+      "trialExpired": "Essai terminé : l'espace est en lecture seule jusqu'au {date}. Les packs existants restent exportables.",
+      "pastDue": "Paiement en échec : l'espace est en lecture seule jusqu'au {date}. Mettez à jour votre moyen de paiement.",
+      "canceled": "Abonnement terminé : l'espace est en lecture seule jusqu'au {date}. Les packs existants restent exportables."
+    },
+    "systemsLimit": "{count, plural, one {# système surveillé} other {# systèmes surveillés}} au plus.",
+    "portal": "Gérer l'abonnement et les factures",
+    "offersTitle": "Choisir une formule",
+    "prices": {
+      "STARTER_year": "3 480 € HT par an (290 € par mois)",
+      "STARTER_month": "349 € HT par mois",
+      "GROWTH_year": "8 280 € HT par an (690 € par mois)",
+      "GROWTH_month": "829 € HT par mois",
+      "SCALE_year": "17 880 € HT par an (1 490 € par mois)"
+    },
+    "features": {
+      "STARTER": "1 système surveillé, 10 dépôts liés, GitHub et Jira.",
+      "GROWTH": "5 systèmes surveillés, dépôts illimités, tous les connecteurs.",
+      "SCALE": "20 systèmes surveillés, dépôts illimités, tous les connecteurs."
+    },
+    "subscribe": "Souscrire",
+    "ownerOnly": "Seul le propriétaire de l'organisation peut souscrire ou modifier l'abonnement.",
+    "paymentNote": "Paiement par carte ou prélèvement SEPA, chez Stripe. Saisissez votre numéro de TVA intracommunautaire pour l'autoliquidation. L'essai restant est reporté : la première échéance tombe à sa fin.",
+    "notConfigured": "La souscription en ligne n'est pas encore ouverte. Écrivez-nous pour démarrer.",
+    "checkoutSuccess": "Merci : votre souscription est enregistrée. L'abonnement s'affiche ici dès que Stripe l'a confirmé.",
+    "checkoutCancel": "Souscription interrompue : rien n'a été prélevé.",
+    "errors": {
+      "alreadySubscribed": "Un abonnement est déjà actif : modifiez-le depuis le portail.",
+      "notConfigured": "La facturation n'est pas configurée.",
+      "noCustomer": "Aucun abonnement Stripe n'est encore lié.",
+      "generic": "Une erreur est survenue. Réessayez dans un instant."
+    },
+    "nav": "Abonnement"
   }
 }
