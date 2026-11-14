@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { serverCaller } from "@/server/caller";
 import { ADMIN_ROLES, ORG_ROLES } from "@/server/services/role-policy";
@@ -41,6 +42,9 @@ export default async function OrganizationPage({
   return (
     <div className="space-y-4">
       <h1>{t("title")}</h1>
+      <p>
+        <Link href="/organization/billing">{t("billingLink")}</Link>
+      </p>
       {isAdmin ? <RenameForm name={org.name} /> : <p data-testid="org-name">{org.name}</p>}
 
       <section aria-labelledby="members-title">

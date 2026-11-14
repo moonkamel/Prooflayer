@@ -1,0 +1,21 @@
+{
+  "id": "evt_checkout_completed",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1799000000,
+  "type": "checkout.session.completed",
+  "livemode": false,
+  "data": {
+    "object": {
+      "id": "cs_test_1",
+      "object": "checkout.session",
+      "mode": "subscription",
+      "status": "complete",
+      "customer": "cus_test_1",
+      "customer_details": { "email": "facturation@example.test", "name": "Talvio SAS" },
+      "subscription": "sub_test_1",
+      "client_reference_id": "__ORG__",
+      "metadata": { "orgId": "__ORG__" }
+    }
+  }
+}

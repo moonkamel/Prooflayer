@@ -40,6 +40,9 @@ export const AUDIT_ACTIONS = [
   "evidence.attest",
   "evidence.redact",
   "evidence.attestRefused",
+  "billing.checkout",
+  "billing.portal",
+  "billing.subscriptionSynced",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

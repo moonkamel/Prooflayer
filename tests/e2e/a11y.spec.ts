@@ -40,6 +40,7 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
     "/notifications",
     "/account",
     "/organization",
+    "/organization/billing",
     "/audit",
     "/systems",
   ]) {
