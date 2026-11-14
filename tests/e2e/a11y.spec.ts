@@ -66,7 +66,15 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
   await page.getByRole("button", { name: "Ajouter un modèle" }).click();
   await expectNoViolations(page, "/systems/[id] (édition)");
   const fiche = new URL(page.url()).pathname;
-  for (const tab of ["changes", "history", "classification", "controls", "sources", "dashboard"]) {
+  for (const tab of [
+    "changes",
+    "history",
+    "classification",
+    "controls",
+    "sources",
+    "dashboard",
+    "packs",
+  ]) {
     await page.goto(`${fiche}/${tab}`);
     await expectNoViolations(page, `/systems/[id]/${tab}`);
   }

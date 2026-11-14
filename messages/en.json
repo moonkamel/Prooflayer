@@ -133,6 +133,12 @@
       "staleLine": "{system}\n  {url}",
       "more": "- … and {count} more",
       "footer": "One summary per day at most, sent only when there is something to report. Notification preferences:\n{url}"
+    },
+    "packReady": {
+      "subject": "[ProofLayer] Audit pack ready · {system}",
+      "intro": "Hello {name},\n\nThe audit pack for system {system} ({organization}) is ready: {count, plural, one {# disclosed item of evidence} other {# disclosed items of evidence}}.",
+      "open": "Download it:\n{url}",
+      "verify": "It can be verified offline, without a ProofLayer account: npx @prooflayer/verify pack.zip"
     }
   },
   "roles": {
@@ -240,6 +246,8 @@
     "control_setNotApplicable": "Control applicability changed",
     "control_comment": "Comment on a control",
     "notification_preferences": "Notification preferences",
+    "pack_create": "Audit pack generated",
+    "pack_download": "Audit pack downloaded",
     "exemption_save": "Exemption file saved",
     "exemption_sign": "Exemption file signed",
     "exemption_signRefused": "Exemption file signature refused: incorrect password",
@@ -367,7 +375,8 @@
     "controlsCount": "Controls {count}",
     "exemption": "Exemption",
     "sources": "Sources",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "packs": "Packs"
   },
   "designChanges": {
     "title": "Design changes",
@@ -1054,6 +1063,86 @@
     "controlFailed": "{key} is now failing",
     "digestDaily": "Summary of {day}: {expiring} items of evidence expiring soon, {integrations} failing connectors, {stale} classifications to review",
     "openControl": "View the control",
-    "when": "On {date}"
+    "when": "On {date}",
+    "packReady": "Audit pack ready: {system}",
+    "openPacks": "View packs"
+  },
+  "packReport": {
+    "documentTitle": "Audit pack · {system}",
+    "title": "Audit pack · {system}",
+    "subtitle": "{organization} · period from {start} to {end} · generated on {generated}",
+    "identity": "System identity",
+    "purpose": "Intended purpose",
+    "owner": "Owner",
+    "tier": "Category",
+    "role": "Role",
+    "unclassified": "Not classified",
+    "classification": "Signed classification",
+    "classificationLine": "{tier} · Annex III: {points} · role: {role}",
+    "signedLine": "Signed on {date} by {name}, {title} · rules {version}",
+    "noClassification": "No signed classification for this system.",
+    "gaps": "{count, plural, =0 {Failing controls and controls without evidence} other {Failing controls and controls without evidence (#)}}",
+    "noGaps": "No failing, stale, partial or missing control at the pack date.",
+    "controls": "Controls by article ({count})",
+    "evidenceCount": "{count, plural, =0 {no evidence} one {# item} other {# items}}",
+    "justification": "Not applicable: {text}",
+    "evidenceByControl": "Evidence by control",
+    "redacted": "Erased evidence (right to erasure)",
+    "declarative": "declarative",
+    "method": "Verification method",
+    "methodIntro": "Each item of evidence is sealed into an hourly batch (Merkle tree, RFC 6962), batches are chained together and anchored every 6 hours by an RFC 3161 timestamp token. The pack manifest is signed with Ed25519.",
+    "sealing": "{leaves, plural, one {# item sealed} other {# items sealed}} in the period, {disclosed} disclosed; {batches, plural, one {# batch} other {# batches}}; {anchors, plural, =0 {no anchor} one {# anchor} other {# anchors}}.",
+    "unanchored": "{count, plural, one {# batch is not yet timestamped.} other {# batches are not yet timestamped.}}",
+    "window": "Uncovered window: up to 60 minutes between capture and sealing, up to 6 hours before timestamping by the provider.",
+    "declarativeNote": "Declarative evidence is sealed like any other: sealing dates the upload, not the truth of the document.",
+    "signature": "Manifest signed with key {kid}.",
+    "command": "Offline verification, without a ProofLayer account:",
+    "footer": "{system} · page {page} of {pages}",
+    "moreEvidence": "… and {count, plural, one {# more item} other {# more items}}, all in the pack's evidence/ folder."
+  },
+  "packs": {
+    "title": "Audit packs",
+    "newTitle": "New audit pack",
+    "intro": "A pack gathers, for a period, the report, controls, evidence and their integrity proofs, in a signed archive that can be verified offline.",
+    "period": "Period",
+    "from": "From",
+    "to": "to",
+    "language": "Report language",
+    "fr": "Français",
+    "en": "English",
+    "contents": "Contents",
+    "contentsList": "Signed classification, controls and statuses, evidence and attachments, integrity proofs, PDF report, VERIFY.md.",
+    "preview": "Preview",
+    "previewLine": "{controls} controls · {evidence} items of evidence in the period · {failing} failing · {missing} without evidence",
+    "neverHidden": "Failing controls and controls without evidence are always in the pack. An immediate anchoring is requested before generation.",
+    "generate": "Generate the pack",
+    "generating": "Generation started: you will receive an email when it is done.",
+    "adminOnly": "Only an administrator can generate a pack.",
+    "previous": "Generated packs",
+    "empty": "No pack for this system.",
+    "createdAt": "Generated on",
+    "periodCol": "Period",
+    "evidenceCol": "Evidence",
+    "signatureCol": "Signature",
+    "statusCol": "Status",
+    "actions": "Actions",
+    "download": "Download",
+    "periodRange": "{start} → {end}",
+    "status": {
+      "QUEUED": "Queued",
+      "BUILDING": "Building",
+      "READY": "Ready",
+      "FAILED": "Failed"
+    },
+    "verifyTitle": "Verify without an account or network",
+    "verifyCommand": "npx @prooflayer/verify pack.zip",
+    "copy": "Copy the command",
+    "copied": "Command copied.",
+    "errors": {
+      "pack_invalidPeriod": "Invalid period: the end follows the start, is not after today, and the period is at most 400 days."
+    }
+  },
+  "packVerify": {
+    "body": "# Verifying this audit pack\n\nThis pack is verified without a ProofLayer account and without network access. The command `npx @prooflayer/verify pack.zip` runs the six steps below and exits with code 0 (no tampering) or 1. They can also be redone by hand, with `openssl` and `sha256sum`.\n\n## 1. Manifest signature\n\n`manifest.json` is signed with Ed25519 by key `{kid}`. The signed bytes are the canonical JSON form (RFC 8785) of the manifest without its `signature` field. ProofLayer's public keys are published at {keysUrl} and pinned in the verification tool.\n\n## 2. File integrity\n\nThe manifest lists every file in the pack with its SHA-256 hash (`files`). Example: `sha256sum report.pdf`.\n\n## 3. Disclosed evidence\n\nEach `evidence/<id>.json` file holds the payload, salt and envelope of one item of evidence. Recompute `contentSha256 = SHA-256(JCS(payload))` then `leafHash = SHA-256(0x00 ‖ salt ‖ JCS(envelope))`, the envelope being `{{ v, org, id, kind, sourceRef, occurredAt, capturedAt, contentSha256, attachmentSha256 }}`. Any attachment hashes to `attachmentSha256`.\n\n## 4. Batches\n\nEach `proofs/batches/<seq>.json` file lists ALL the leaves of the batch, disclosed or not: an omitted item remains visible through its `leafHash` alone. The Merkle root (RFC 6962) of the leaves must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `batchHash`. Batches follow each other without gaps and each `prevBatchHash` is the `batchHash` of the previous batch.\n\n## 5. Anchors and timestamps\n\nEach `proofs/anchors/<seq>.json` file lists the anchor's `batchHash` values; their root must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `anchorHash`. The RFC 3161 token timestamps `anchorHash`:\n\n    openssl ts -verify -digest <anchorHash> -in proofs/anchors/<seq>.tst -token_in -CAfile proofs/tsa/<provider>.pem\n\n## 6. Census\n\nThe manifest states the number of leaves in the period, the number of disclosed items and the difference. A batch without an anchor (`anchor: null`) has not yet been timestamped by the provider.\n\n## What sealing proves\n\nThe content of an item of evidence existed no later than the token date and has not changed since; no item has been removed from a batch; the order of batches is intact. It does not prove that the event happened in the source tool: each item carries its source address for cross-checking. Declarative evidence (uploaded document, attestation) dates the upload, not the truth of the document."
   }
 }

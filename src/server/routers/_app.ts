@@ -8,6 +8,7 @@ import { exemptionRouter } from "./exemption";
 import { integrationRouter } from "./integration";
 import { notificationRouter } from "./notification";
 import { orgRouter } from "./org";
+import { packRouter } from "./pack";
 import { systemRouter } from "./system";
 
 export const appRouter = router({
@@ -21,6 +22,7 @@ export const appRouter = router({
   evidence: evidenceRouter,
   dashboard: dashboardRouter,
   notification: notificationRouter,
+  pack: packRouter,
 });
 
 export type AppRouter = typeof appRouter;

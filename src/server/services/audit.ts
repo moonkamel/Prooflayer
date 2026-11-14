@@ -29,6 +29,8 @@ export const AUDIT_ACTIONS = [
   "control.setNotApplicable",
   "control.comment",
   "notification.preferences",
+  "pack.create",
+  "pack.download",
   "exemption.save",
   "exemption.sign",
   "exemption.signRefused",

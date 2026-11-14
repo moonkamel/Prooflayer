@@ -502,3 +502,24 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   contre la racine du prestataire nommé sur l'ancre). Anomalie : alerte `seal.integrityFailure` (codes, numéros, jamais
   de contenu).
 - Tests : corruption simulée sous le rôle propriétaire avec `SET session_replication_role = replica` (session seule).
+
+## Pack d'audit (conventions établies par PL-504)
+- Format (contrat relu par l'outil de PL-505), `src/server/pack/contents.ts` (pur) : `manifest.json` (identité, période,
+  décomptes, empreinte SHA-256 de chaque autre fichier, signature), `report.pdf`, `controls.json` (tous les contrôles,
+  jamais filtrés), `evidence/<id>.json` (charge, sel, enveloppe, `seal: { batch, leafIndex }`, `declarative`, pièce jointe
+  en clair `evidence/<id>.<ext>`), `proofs/batches/<seq>.json` (TOUTES les feuilles du lot : une omission est visible),
+  `proofs/anchors/<seq>.json` + `.tst` (jeton DER), `proofs/tsa/<nom>.pem`, `VERIFY.md` (étapes openssl).
+- Signature `src/server/pack/signing.ts` : Ed25519 sur le JCS du manifeste sans `signature`. Production :
+  `PACK_SIGNING_KEY` (PKCS#8, PEM ou DER base64, sensible) et `PACK_SIGNING_KID` (`pl-AAAA-MM`), sinon refus ; hors
+  production, clé `pl-dev` dérivée de BETTER_AUTH_SECRET. Clés publiques : table `SigningKey` (upsert à la génération),
+  servies par `/.well-known/prooflayer-keys.json` (sans `pl-dev` en production).
+- `src/server/services/packs.ts` : `createPack` (admin, période ≤ 400 j, fin ≤ aujourd'hui), `buildPack` (job `pack.build`,
+  orgId, 4 tentatives : scelle, ancre à la demande — sans prestataire en production, lots marqués non ancrés —, rassemble,
+  rend, signe, écrit `orgs/{orgId}/packs/{id}.zip`, notification `pack.ready` + email). Divulguées : preuves des lots de
+  la période liées aux contrôles du système ou `system.*` du système. Panne passagère → nouvel essai ; sinon FAILED.
+- Routeur `pack` : `create`, `list`, `get`, `downloadUrl`, `download` (contenu, pour la route `/api/packs/[id]/download`,
+  journalisé `pack.download`), `preview`. Écran E `/systems/[id]/packs` (onglet « Packs »).
+- Rapport PDF `src/server/pack/report.tsx` (`packReport`) : 100 preuves listées par contrôle au plus, puis le décompte.
+  Pied de page react-pdf positionné par `top` (avec `bottom` et un lineHeight hérité, il disparaît).
+- `VERIFY.md` : `packVerify.body` lu brut (`t.raw`, accolades littérales), `{kid}` et `{keysUrl}` remplacés.
+- Exemple à relire : `PACK_SAMPLE_OUT=<fichier>.zip` sur `tests/integration/pack.test.ts`.

@@ -204,7 +204,16 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   await expectNoViolations(page, "contrôle non applicable");
   await na.getByRole("button", { name: "Rouvrir le contrôle" }).click();
   await expect(page.getByTestId("control-status")).toHaveText("Sans preuve");
-  await page.goto(page.url().replace(/\/controls\/.*$/u, "/classification"));
+  // Écran E (PL-504) : aperçu chiffré et génération d'un pack (le job tourne en arrière-plan).
+  await page.goto(page.url().replace(/\/controls\/.*$/u, "/packs"));
+  await expect(page.getByTestId("pack-preview")).toContainText("37 contrôles");
+  await expectNoViolations(page, "export du pack");
+  await page.getByRole("button", { name: "Générer le pack" }).click();
+  await expect(
+    page.getByText("Génération lancée : vous recevrez un email à la fin."),
+  ).toBeVisible();
+  await expect(page.getByTestId("pack")).toHaveCount(1);
+  await page.goto(page.url().replace(/\/packs$/u, "/classification"));
 
   // Requalification : les réponses de la version signée sont reprises ; elle reste en vigueur et visible.
   await page.getByRole("button", { name: "Requalifier le système" }).click();

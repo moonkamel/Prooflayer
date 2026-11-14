@@ -89,11 +89,21 @@ export async function systemSummary(
             WHERE "controlInstanceId" = ANY(${ids}) AND "evaluatedAt" < ${windowStart}
             ORDER BY "controlInstanceId", "evaluatedAt" DESC`
         : [],
+      // Trois agrégats indépendants, chacun porté par un index : un `OR` de sous-requêtes peut, sans statistiques à
+      // jour, dégénérer en boucle imbriquée sur toute la table des preuves.
       tx.$queryRaw<{ at: Date | null }[]>`
-        SELECT max(e."capturedAt") AS at FROM "EvidenceItem" e
-        WHERE e."resourceId" IN (SELECT "resourceId" FROM "SystemResourceLink" WHERE "systemId" = ${system.id})
-           OR e.id IN (SELECT "evidenceId" FROM "EvidenceLink" WHERE "controlInstanceId" = ANY(${ids}))
-           OR (e.kind LIKE 'system.%' AND e.payload->>'systemId' = ${system.id})`,
+        SELECT max(at) AS at FROM (
+          SELECT max(e."capturedAt") AS at FROM "SystemResourceLink" l
+            JOIN "EvidenceItem" e ON e."resourceId" = l."resourceId"
+            WHERE l."systemId" = ${system.id}
+          UNION ALL
+          SELECT max(e."capturedAt") FROM "EvidenceLink" el
+            JOIN "EvidenceItem" e ON e.id = el."evidenceId"
+            WHERE el."controlInstanceId" = ANY(${ids})
+          UNION ALL
+          SELECT max(e."capturedAt") FROM "EvidenceItem" e
+            WHERE e.kind LIKE 'system.%' AND e.payload->>'systemId' = ${system.id}
+        ) sources`,
       tx.integration.findMany({ select: { id: true, provider: true, status: true } }),
     ]);
 

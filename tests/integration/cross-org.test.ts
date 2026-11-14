@@ -70,6 +70,23 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "control.get": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
   "evidence.proof": () => ({ input: { evidenceId: "ev_de_A_inexistante" }, code: "NOT_FOUND" }),
+  "pack.create": () => ({
+    input: {
+      systemId: a.systemId,
+      periodStart: "2026-11-01",
+      periodEnd: "2026-11-10",
+      language: "fr",
+    },
+    code: "NOT_FOUND",
+  }),
+  "pack.list": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
+  "pack.preview": () => ({
+    input: { systemId: a.systemId, periodStart: "2026-11-01", periodEnd: "2026-11-10" },
+    code: "NOT_FOUND",
+  }),
+  "pack.get": () => ({ input: { packId: "pck_de_A" }, code: "NOT_FOUND" }),
+  "pack.downloadUrl": () => ({ input: { packId: "pck_de_A" }, code: "NOT_FOUND" }),
+  "pack.download": () => ({ input: { packId: "pck_de_A" }, code: "NOT_FOUND" }),
   "control.evaluations": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
   "control.assignOwner": () => ({
     input: { controlId: a.controlInstanceId, ownerUserId: null },

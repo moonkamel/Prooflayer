@@ -8,7 +8,11 @@ import { withOrgTransaction, type OrgTransaction } from "@/server/db";
 import type { ControlStatus } from "@/generated/prisma/enums";
 import type { Evaluation } from "@/server/rules/evaluation";
 import { createEmailTransport, type EmailTransport } from "@/server/email/transport";
-import { renderControlFailedEmail, renderDigestEmail } from "@/server/email/notification-emails";
+import {
+  renderControlFailedEmail,
+  renderDigestEmail,
+  renderPackReadyEmail,
+} from "@/server/email/notification-emails";
 import { membershipsOfUser, userContact } from "@/server/system/identity";
 import { audit, clientIp } from "./audit";
 import {
@@ -88,6 +92,28 @@ export async function notifyRegression(
   return notification.id;
 }
 
+interface PackReadyPayload {
+  packId: string;
+  systemId: string;
+  systemName: string;
+  evidenceCount: number;
+}
+
+/** Pack prêt (PL-504, §3.2 E9 « notification par email à la fin ») : alerte au demandeur et email. */
+export async function notifyPackReady(
+  tx: OrgTransaction,
+  orgId: string,
+  input: PackReadyPayload & { userId: string },
+  schedule: ScheduleNotificationEmail,
+) {
+  const { userId, ...payload } = input;
+  const notification = await tx.notification.create({
+    data: { orgId, userId, type: "pack.ready", payload: payload as object },
+  });
+  await schedule(tx, orgId, notification.id);
+  return notification.id;
+}
+
 async function preferencesOf(tx: OrgTransaction, orgId: string, userId: string) {
   const row = await tx.notificationPreference.findUnique({
     where: { orgId_userId: { orgId, userId } },
@@ -107,6 +133,7 @@ export async function sendNotificationEmail(
 ): Promise<"sent" | "skipped"> {
   const notification = await tx.notification.findUnique({ where: { id: notificationId } });
   if (!notification || notification.orgId !== orgId || notification.emailedAt) return "skipped";
+  if (notification.type === "pack.ready") return sendPackReadyEmail(tx, notification, deps);
   if (notification.type !== "control.failed") return "skipped";
   const memberships = await membershipsOfUser(notification.userId);
   const organization = memberships.find((m) => m.id === orgId);
@@ -154,6 +181,32 @@ export async function sendNotificationEmail(
     where: { id: notification.id },
     data: { emailedAt: deps.now() },
   });
+  return "sent";
+}
+
+/** Email « pack prêt » : toujours envoyé au demandeur encore membre (il l'a demandé, ce n'est pas une alerte). */
+async function sendPackReadyEmail(
+  tx: OrgTransaction,
+  notification: { id: string; orgId: string; userId: string; payload: unknown },
+  deps: NotificationDependencies,
+): Promise<"sent" | "skipped"> {
+  const memberships = await membershipsOfUser(notification.userId);
+  const organization = memberships.find((m) => m.id === notification.orgId);
+  const user = await userContact(notification.userId);
+  if (!organization || !user) return "skipped";
+  const payload = notification.payload as PackReadyPayload;
+  await deps.transport.send(
+    await renderPackReadyEmail({
+      to: user.email,
+      name: user.name,
+      locale: user.locale,
+      baseUrl: deps.baseUrl,
+      organization: organization.name,
+      system: { id: payload.systemId, name: payload.systemName },
+      evidenceCount: payload.evidenceCount,
+    }),
+  );
+  await tx.notification.update({ where: { id: notification.id }, data: { emailedAt: deps.now() } });
   return "sent";
 }
 
