@@ -11,7 +11,7 @@ import { generateKey, masterKeyFromEnv } from "@/server/crypto/envelope";
 import { forOrg, prisma } from "@/server/db";
 import { drainDeliveries, handleDelivery, processDelivery } from "@/server/ingest/process-delivery";
 import type { ObjectStore } from "@/server/storage/object-store";
-import { claimDeliveries } from "@/server/system/webhooks";
+import { claimDeliveries, pruneDeliveries } from "@/server/system/webhooks";
 
 const SECRET = "secret-de-test-webhook";
 const run = randomUUID().slice(0, 8);
@@ -161,6 +161,43 @@ describe("traitement", () => {
     expect(JSON.stringify(evidence.payload)).not.toContain("Contexte confidentiel");
     const integration = await forOrg(A).integration.findFirstOrThrow({});
     expect(integration.lastEventAt).not.toBeNull();
+    // Revue finale : la charge du fournisseur ne reste pas en base une fois la livraison terminée.
+    const stored = await prisma.webhookDelivery.findFirstOrThrow({ where: { deliveryId: id } });
+    expect(stored.payload).toEqual({});
+    expect(stored.payloadSha256).toMatch(/^[0-9a-f]{64}$/u);
+  });
+
+  it("conservation : charge d'un échec effacée à 7 jours, livraison terminée supprimée à 30 jours", async () => {
+    const now = new Date();
+    const days = (n: number) => new Date(now.getTime() - n * 86_400_000);
+    const row = (suffix: string, status: "FAILED" | "PROCESSED" | "PENDING", age: number) => ({
+      provider: "GITHUB" as const,
+      deliveryId: `${run}-keep-${suffix}`,
+      eventType: "pull_request",
+      externalAccountId: "0",
+      payload: { secret: "contenu" },
+      payloadSha256: "0".repeat(64),
+      status,
+      receivedAt: days(age),
+    });
+    await prisma.webhookDelivery.createMany({
+      data: [
+        row("failed-recent", "FAILED", 6),
+        row("failed-old", "FAILED", 8),
+        row("done-old", "PROCESSED", 31),
+        row("pending-old", "PENDING", 40),
+      ],
+    });
+    await pruneDeliveries(now);
+    const left = await prisma.webhookDelivery.findMany({
+      where: { deliveryId: { startsWith: `${run}-keep-` } },
+      orderBy: { deliveryId: "asc" },
+    });
+    expect(left.map((d) => [d.deliveryId.split("-keep-")[1], d.payload])).toEqual([
+      ["failed-old", {}],
+      ["failed-recent", { secret: "contenu" }],
+      ["pending-old", { secret: "contenu" }],
+    ]);
   });
 
   it("ignore une installation inconnue, un dépôt non lié et un événement non suivi", async () => {

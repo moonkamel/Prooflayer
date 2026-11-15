@@ -1720,7 +1720,7 @@
           "title": "1. Subject matter and description of processing",
           "paragraphs": [
             "Purpose: capture, sealing, evaluation and export of governance evidence for the Customer's AI systems. Nature: collection from connected tools, encrypted storage, timestamping, audit pack generation.",
-            "Data: account identifiers and user names from source tools (GitHub, Jira), activity metadata (dates, statuses, reviews), files uploaded by the Customer. Message bodies, diffs, descriptions and comments are not captured. Data subjects: the Customer's employees and contractors active in those tools.",
+            "Data: account identifiers and user names from source tools (GitHub, Jira), activity metadata (dates, statuses, reviews), files uploaded by the Customer. Normalised evidence contains no message body, diff, description or comment. The original event received from the source tool, which may contain some, is kept separately, encrypted under the organisation's key, as evidence; it is read only for the export requested by the Customer. Data subjects: the Customer's employees and contractors active in those tools.",
             "Duration: that of the subscription, followed by purge 90 days after it ends."
           ]
         },
@@ -1950,7 +1950,7 @@
       "cancel": "Cancel deletion",
       "scheduled": {
         "owner_request": "Deletion scheduled on {date}. All data will then be erased and the encryption key destroyed.",
-        "contract_end": "Subscription ended almost 90 days ago: deletion scheduled on {date}. Subscribe or cancel to keep your data."
+        "contract_end": "Subscription ended almost 90 days ago: deletion scheduled on {date}. Subscribe to keep your data; cancelling postpones deletion by 30 days."
       }
     },
     "errors": {

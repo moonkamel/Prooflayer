@@ -44,7 +44,8 @@ contiennent que des codes, des décomptes et des âges : jamais d'identifiant de
      toutes les sessions, `CRON_SECRET`, `GITHUB_WEBHOOK_SECRET`, `JIRA_CLIENT_SECRET`, `STRIPE_WEBHOOK_SECRET`,
      clés S3) ; suspendre le déploiement fautif (Vercel → Instant Rollback) ; au besoin, mettre le projet en pause.
    - Webhooks : la boîte de réception rejoue d'elle-même (8 tentatives) ; un lot en échec se relance en repassant les
-     livraisons `FAILED` en `PENDING`.
+     livraisons `FAILED` en `PENDING` dans les 7 jours (au-delà, leur charge est effacée : redemander la livraison
+     au fournisseur).
    - Ancrage : vérifier le prestataire (`TSA_URL`) ; les lots attendent sans perte et partent dans l'ancre suivante.
    - Intégrité : **ne rien corriger à la main**. Relever `pnpm chain:verify` (JSON), conserver la base en l'état
      (sauvegarde immédiate), comparer à la dernière sauvegarde saine.

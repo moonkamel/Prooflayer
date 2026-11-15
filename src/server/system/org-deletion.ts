@@ -11,6 +11,8 @@ const DAY_MS = 86_400_000;
 export const DELETION_GRACE_DAYS = 7;
 /** §4.7 : « purge à 90 jours » après la fin de l'abonnement (30 jours de lecture seule compris). */
 export const CONTRACT_END_PURGE_DAYS = 90;
+/** Une purge de fin de contrat annulée par un owner n'est pas reprogrammée avant ce délai. */
+export const CANCEL_SNOOZE_DAYS = 30;
 
 export function pendingDeletion(orgId: string) {
   return prisma.organizationDeletion.findFirst({
@@ -55,12 +57,15 @@ export function deletionById(
 /**
  * Fin de contrat : 90 jours après la fin de l'abonnement, purge. L'avis part `DELETION_GRACE_DAYS` avant ; une
  * échéance déjà passée (organisation restée sans abonnement) laisse tout de même ce délai d'avis. Une organisation
- * sans abonnement enregistré n'est jamais purgée d'office.
+ * sans abonnement enregistré, ou restée à l'essai, n'est jamais purgée d'office.
  */
 export function contractEndPurgeAt(
   sub: { plan: Plan; status: string; trialEndsAt: Date | null; currentPeriodEnd: Date | null },
   now: Date,
 ): Date | null {
+  // Seul un abonnement payant terminé est une « fin de contrat » (§4.7 : « après résiliation »). Un essai expiré
+  // jamais converti n'est pas purgé d'office : la suppression reste à la main de l'owner (décision à confirmer).
+  if (sub.plan === "TRIAL") return null;
   const access = accessOf(sub, now);
   if (access.kind !== "readOnly" || !access.until) return null;
   // until = fin de l'abonnement + 30 jours ; purge à fin + 90 jours.
@@ -80,6 +85,15 @@ export async function dueDeletions(now: Date) {
     const purgeAt = contractEndPurgeAt(sub as never, now);
     if (!purgeAt || now.getTime() < purgeAt.getTime() - DELETION_GRACE_DAYS * DAY_MS) continue;
     if (await pendingDeletion(id)) continue;
+    // Annulée récemment par un owner : pas de nouvelle programmation (ni de nouvel email) avant 30 jours.
+    const snoozed = await prisma.organizationDeletion.count({
+      where: {
+        orgId: id,
+        reason: "contract_end",
+        cancelledAt: { gt: new Date(now.getTime() - CANCEL_SNOOZE_DAYS * DAY_MS) },
+      },
+    });
+    if (snoozed > 0) continue;
     const scheduledFor = new Date(
       Math.max(purgeAt.getTime(), now.getTime() + DELETION_GRACE_DAYS * DAY_MS),
     );
