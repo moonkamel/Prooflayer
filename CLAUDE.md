@@ -668,3 +668,16 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   s'ajoute à cette fonction (le test de purge parcourt le catalogue). Les ancres partagées restent.
 - Routeur `org.export` (`list`, `request`, `download`) et `org.deletion` (`get`, `request`, `cancel`) : owner seul,
   ouverts en lecture seule. Écran `/organization/data` (lien depuis `/organization`).
+
+## Entonnoir d'activation (conventions établies par PL-608)
+- Pur : `src/server/services/funnel-data.ts` (`FUNNEL_EVENTS` : signup, classification_signed, connector_linked,
+  first_evidence, first_pack ; `automatedShare` : contrôles applicables dont l'évaluateur est un connecteur GitHub ou Jira
+  et le statut tiré de preuves, hors MISSING ; `funnelSummary` : médianes et seuils du §1.4, < 15 min et ≥ 40 %).
+- Étapes tirées des données, sans instrumentation des services (`funnelFacts`, `syncFunnelEvents` dans
+  `src/server/services/funnel.ts`) : inscription du premier owner, `signedAt`, première `Integration`, première preuve
+  hors `system.*`, premier pack READY. Table `FunnelEvent` (RLS, une ligne par organisation et par étape).
+- `/api/cron/daily` → `syncAllFunnels` (`src/server/system/funnel.ts`) ; rapport du fondateur `pnpm funnel:report`
+  (`--json`). Aucune mesure par personne (§4.7).
+- PostHog (facultatif, `POSTHOG_API_KEY`, hôte UE par défaut) : job `analytics.capture` (`src/server/system/jobs/
+  analytics.ts`), organisation en HMAC, `uuid` = identifiant de l'étape (pas de doublon), aucun cookie, aucune donnée
+  de preuve ; erreur sans corps de réponse. `analyticsDependencies` remplaçable par les tests.

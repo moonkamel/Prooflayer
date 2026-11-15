@@ -213,6 +213,16 @@ const fixtures: [model: string, table: string, build: (org: string, tag?: string
     (o, t = "") => ({ id: id(o, "npf", t), orgId: o, userId: `u${t}` }),
   ],
   [
+    "funnelEvent",
+    "FunnelEvent",
+    (o, t = "") => ({
+      id: id(o, "fnl", t),
+      orgId: o,
+      name: t ? "first_pack" : "signup",
+      occurredAt: new Date(),
+    }),
+  ],
+  [
     "orgExport",
     "OrgExport",
     (o, t = "") => ({ id: id(o, "exp", t), orgId: o, requestedByUserId: "u" }),

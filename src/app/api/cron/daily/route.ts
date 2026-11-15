@@ -8,6 +8,7 @@ import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
 import { pruneRateLimits } from "@/server/system/rate-limit";
 import { prunePublicLeads } from "@/server/system/public-leads";
 import { scheduleOrgDeletions } from "@/server/system/org-deletion-schedule";
+import { syncAllFunnels } from "@/server/system/funnel";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,5 +31,16 @@ export async function GET(request: Request): Promise<Response> {
   const publicLeads = await prunePublicLeads();
   // PL-607 : avis de fin de contrat (purge à 90 jours) et purges arrivées à échéance.
   const deletions = await scheduleOrgDeletions();
-  return Response.json({ ...sweep, jira, digests, watch, rateLimits, publicLeads, deletions });
+  // PL-608 : étapes de l'entonnoir atteintes (et transmises à PostHog s'il est configuré).
+  const funnel = (await syncAllFunnels()).created;
+  return Response.json({
+    ...sweep,
+    jira,
+    digests,
+    watch,
+    rateLimits,
+    publicLeads,
+    deletions,
+    funnel,
+  });
 }

@@ -106,3 +106,13 @@ export function userContact(userId: string) {
     select: { id: true, email: true, name: true, locale: true },
   });
 }
+
+/** PL-608 : inscription la plus ancienne parmi les owners d'une organisation (début de l'entonnoir). */
+export async function earliestOwnerSignup(organizationId: string): Promise<Date | null> {
+  const first = await prisma.member.findFirst({
+    where: { organizationId, role: "owner" },
+    orderBy: { user: { createdAt: "asc" } },
+    select: { user: { select: { createdAt: true } } },
+  });
+  return first?.user.createdAt ?? null;
+}
