@@ -116,6 +116,7 @@ model Organization {
   apiKeys                 ApiKey[]
   notificationPreferences NotificationPreference[]
   exports                 OrgExport[]
+  funnelEvents            FunnelEvent[]
   subscription            Subscription?
   encryptionKey           OrgEncryptionKey?
 }
@@ -848,4 +849,17 @@ model OrganizationDeletion {
 
   @@index([scheduledFor])
   @@index([orgId])
+}
+
+// Entonnoir d'activation (PL-608, §1.4) : une ligne par organisation et par étape, à sa première occurrence.
+// Aucune donnée de preuve ni personnelle : nom de l'étape et date seulement.
+model FunnelEvent {
+  id         String       @id @default(cuid())
+  orgId      String
+  name       String // "signup" | "classification_signed" | "connector_linked" | "first_evidence" | "first_pack"
+  occurredAt DateTime
+  sentAt     DateTime? // transmis à PostHog (si configuré)
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, name])
 }

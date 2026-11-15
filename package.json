@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "controls:sync": "tsx scripts/sync-controls.ts",
+    "funnel:report": "tsx scripts/funnel-report.ts",
     "db:check": "tsx scripts/db-check.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "verify:build": "tsc -p packages/verify/tsconfig.build.json && node packages/verify/scripts/fix-declarations.mjs",
