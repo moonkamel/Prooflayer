@@ -35,6 +35,9 @@ jobs:
           cache: pnpm
       # §4.7 : aucun script d'installation exécuté en CI.
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      # PL-605 : détection de secrets dans le dépôt et audit des dépendances (gravité haute ou critique), bloquants.
+      - run: pnpm secrets:scan
+      - run: pnpm deps:audit
       # Client Prisma généré (non versionné) : requis par le typecheck et le build.
       - run: pnpm db:generate
       - run: pnpm typecheck
@@ -70,6 +73,7 @@ jobs:
       # Migrations et préparation des tests : rôle de migration.
       DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/prooflayer
       # Serveur testé : rôle applicatif, comme en production. Mot de passe propre à cette base jetable.
+      # secretlint-disable-next-line @secretlint/secretlint-rule-database-connection-string -- base jetable de la CI
       DATABASE_URL: postgresql://prooflayer_app:ci-only@localhost:5432/prooflayer
       # Secret propre à ce job, sans valeur hors de lui ; requis aussi au build par Better Auth.
       BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
@@ -126,6 +130,7 @@ jobs:
       DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/prooflayer
       DB_CHECK_CONFIRM: jetable
       # Tests d'intégration : rôle applicatif, comme en production. Mot de passe propre à cette base jetable.
+      # secretlint-disable-next-line @secretlint/secretlint-rule-database-connection-string -- base jetable de la CI
       DATABASE_URL: postgresql://prooflayer_app:ci-only@localhost:5432/prooflayer
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

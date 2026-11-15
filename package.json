@@ -26,7 +26,9 @@
     "controls:sync": "tsx scripts/sync-controls.ts",
     "db:check": "tsx scripts/db-check.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "verify:build": "tsc -p packages/verify/tsconfig.build.json && node packages/verify/scripts/fix-declarations.mjs"
+    "verify:build": "tsc -p packages/verify/tsconfig.build.json && node packages/verify/scripts/fix-declarations.mjs",
+    "secrets:scan": "secretlint \"**/*\"",
+    "deps:audit": "pnpm audit --audit-level high"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1166.0",
@@ -61,6 +63,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.65.0",
+    "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@types/node": "22.20.5",
     "@types/pg": "8.23.1",
     "@types/qrcode": "1.5.6",
@@ -73,6 +76,7 @@
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.10",
     "prisma": "7.10.1",
+    "secretlint": "13.1.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "vitest": "5.1.0"

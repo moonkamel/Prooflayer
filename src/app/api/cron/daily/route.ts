@@ -5,6 +5,7 @@ import { scheduleDailySweep } from "@/server/system/evaluation-sweep";
 import { scheduleJiraReconciliation } from "@/server/system/jira-schedule";
 import { scheduleDailyDigests } from "@/server/system/notification-schedule";
 import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
+import { pruneRateLimits } from "@/server/system/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,5 +22,7 @@ export async function GET(request: Request): Promise<Response> {
   const digests = await scheduleDailyDigests();
   // Veille (PL-603) : entrées publiées ce jour, administrateurs prévenus une fois.
   const watch = await scheduleWatchNotifications();
-  return Response.json({ ...sweep, jira, digests, watch });
+  // PL-605 : compteurs de limitation de débit périmés.
+  const rateLimits = await pruneRateLimits();
+  return Response.json({ ...sweep, jira, digests, watch, rateLimits });
 }

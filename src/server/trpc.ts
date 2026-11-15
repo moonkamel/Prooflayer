@@ -5,6 +5,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { APIError } from "better-auth/api";
 import type { OrgRole } from "@/generated/prisma/enums";
 import type { Context } from "./context";
+import { safeErrorShape } from "./error-shape";
 import { forOrg } from "./db";
 import { findMembership } from "./system/identity";
 import { ServiceError } from "./services/errors";
@@ -16,7 +17,10 @@ export interface ProcedureMeta {
   roles?: readonly OrgRole[];
 }
 
-const t = initTRPC.context<Context>().meta<ProcedureMeta>().create();
+const t = initTRPC
+  .context<Context>()
+  .meta<ProcedureMeta>()
+  .create({ errorFormatter: ({ shape, error }) => safeErrorShape(shape, error.code) });
 
 export const router = t.router;
 export const createCallerFactory = t.createCallerFactory;

@@ -5,12 +5,16 @@ import { waitUntil } from "@vercel/functions";
 import { verifyJiraWebhookJwt } from "@/server/connectors/jira/webhook-auth";
 import { processDelivery } from "@/server/ingest/process-delivery";
 import { recordDelivery } from "@/server/system/webhooks";
+import { consume, ipKey, RATE_RULES, requestIp, tooManyRequests } from "@/server/system/rate-limit";
 
 export const runtime = "nodejs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 export async function POST(req: Request, { params }: { params: Promise<{ cloudId: string }> }) {
+  // PL-605 : limitation de débit par fournisseur et adresse IP, avant la vérification de signature.
+  const limit = await consume(`webhook:jira:${ipKey(requestIp(req.headers))}`, RATE_RULES.webhook);
+  if (!limit.allowed) return tooManyRequests(limit);
   const secret = process.env.JIRA_CLIENT_SECRET;
   if (!secret) return new Response("webhook non configuré", { status: 503 });
   const { cloudId } = await params;

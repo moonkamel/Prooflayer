@@ -35,6 +35,9 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
   database: authDatabase,
+  // PL-605 : limite de débit sur l'authentification, en base (une mémoire par instance serverless ne protège rien).
+  // Règles par défaut de Better Auth (plus strictes sur la connexion, l'inscription et le mot de passe).
+  rateLimit: { storage: "database" },
 
   user: {
     additionalFields: {
