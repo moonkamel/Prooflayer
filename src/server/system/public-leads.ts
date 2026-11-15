@@ -17,3 +17,26 @@ export function leadById(
 ) {
   return client.publicLead.findUnique({ where: { id } });
 }
+
+/** Durées de conservation annoncées par la politique de confidentialité (PL-606). */
+export const LEAD_RETENTION_DAYS = { withoutConsent: 30, withConsent: 3 * 365 } as const;
+
+/** Purge quotidienne : sans accord de recontact, 30 jours ; avec accord, trois ans après la demande. */
+export async function prunePublicLeads(now = new Date()) {
+  const day = 86_400_000;
+  const { count } = await prisma.publicLead.deleteMany({
+    where: {
+      OR: [
+        {
+          contactConsent: false,
+          createdAt: { lt: new Date(now.getTime() - LEAD_RETENTION_DAYS.withoutConsent * day) },
+        },
+        {
+          contactConsent: true,
+          createdAt: { lt: new Date(now.getTime() - LEAD_RETENTION_DAYS.withConsent * day) },
+        },
+      ],
+    },
+  });
+  return count;
+}

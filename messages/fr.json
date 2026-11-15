@@ -1531,5 +1531,376 @@
     "controls": "Contrôles",
     "noControls": "Aucun contrôle ouvert : signez la classification du système.",
     "pending": "en attente"
+  },
+  "legal": {
+    "placeholder": "[à compléter]",
+    "version": "Version du {date}",
+    "incomplete": "Document incomplet : l'identité de l'éditeur n'est pas entièrement renseignée ({fields}).",
+    "fields": {
+      "company": "raison sociale",
+      "form": "forme sociale",
+      "capital": "capital social",
+      "registration": "immatriculation RCS",
+      "vat": "numéro de TVA",
+      "address": "siège social",
+      "director": "directeur de la publication",
+      "contact": "adresse de contact",
+      "security": "adresse de sécurité",
+      "privacy": "adresse de protection des données",
+      "court": "tribunal compétent",
+      "hostAddress": "adresse de l'hébergeur"
+    },
+    "footer": {
+      "label": "Informations légales",
+      "terms": "Conditions générales",
+      "dpa": "Contrat de sous-traitance",
+      "privacy": "Confidentialité",
+      "notice": "Mentions légales",
+      "trust": "Centre de confiance",
+      "verify": "Vérifier un pack"
+    },
+    "subprocessors": {
+      "caption": "Sous-traitants ultérieurs",
+      "name": "Fournisseur",
+      "role": "Rôle",
+      "data": "Données",
+      "location": "Localisation",
+      "items": {
+        "supabase": {
+          "role": "Base de données, stockage objet, sauvegardes",
+          "data": "Toutes les données de preuve et de compte",
+          "location": "Francfort (Allemagne)"
+        },
+        "vercel": {
+          "role": "Exécution du code",
+          "data": "Transit uniquement, aucun stockage de preuves",
+          "location": "Francfort (région fra1)"
+        },
+        "stripe": {
+          "role": "Paiement et facturation",
+          "data": "Contact de facturation, moyen de paiement",
+          "location": "Union européenne et États-Unis"
+        },
+        "brevo": {
+          "role": "Emails transactionnels",
+          "data": "Adresse email, contenu des notifications (jamais de charge de preuve)",
+          "location": "Union européenne"
+        },
+        "sentry": {
+          "role": "Suivi des erreurs",
+          "data": "Traces techniques nettoyées des données personnelles",
+          "location": "Région UE"
+        },
+        "posthog": {
+          "role": "Mesure d'usage, sans cookie (à partir de sa mise en service)",
+          "data": "Événements d'interface pseudonymisés",
+          "location": "Région UE"
+        }
+      }
+    },
+    "terms": {
+      "title": "Conditions générales d'utilisation et de vente",
+      "intro": "Les présentes conditions régissent l'accès au service ProofLayer, édité par {company}, {form} au capital de {capital}, immatriculée sous le numéro {registration}, dont le siège est situé {address} (« l'Éditeur »), par toute organisation professionnelle (« le Client »).",
+      "sections": [
+        {
+          "title": "1. Objet et acceptation",
+          "paragraphs": [
+            "ProofLayer est un service en ligne destiné aux professionnels. Il aide le Client à tenir un registre de ses systèmes d'IA, à qualifier ces systèmes au regard du règlement (UE) 2024/1689, à capturer des preuves depuis ses outils (GitHub, Jira, dépôts manuels), à les sceller et à en exporter un pack vérifiable.",
+            "La création d'une organisation ou la souscription d'un abonnement vaut acceptation des présentes conditions par la personne qui agit au nom du Client et déclare en avoir le pouvoir. Le service n'est pas destiné aux consommateurs."
+          ]
+        },
+        {
+          "title": "2. Absence de conseil juridique",
+          "paragraphs": [
+            "ProofLayer est un outil. Il ne fournit aucun conseil juridique et ne se substitue ni à un avocat ni à un organisme notifié. Les classifications, statuts de contrôle et documents préremplis reflètent uniquement les réponses données et les preuves disponibles ; ils n'attestent pas que le Client respecte ses obligations.",
+            "Le Client reste seul responsable de la qualification de ses systèmes, des décisions qu'il prend et du respect de ses obligations légales et réglementaires. Les signatures apposées dans ProofLayer engagent leurs signataires."
+          ]
+        },
+        {
+          "title": "3. Comptes, rôles et sécurité",
+          "paragraphs": [
+            "Le Client désigne au moins un propriétaire (owner) de son organisation. Les rôles owner et admin exigent une double authentification. Chaque utilisateur protège ses identifiants et signale sans délai tout accès non autorisé à {security}.",
+            "Le Client est responsable des accès qu'il accorde, des intégrations qu'il connecte et des données qu'il dépose."
+          ]
+        },
+        {
+          "title": "4. Essai, abonnement et paiement",
+          "paragraphs": [
+            "Un essai gratuit de 14 jours, sans moyen de paiement, permet de surveiller un système. Les formules, limites et prix en vigueur sont présentés lors de la souscription ; ils s'entendent hors taxes. Le paiement est traité par Stripe, par carte ou prélèvement SEPA, à l'avance, pour la période choisie (mensuelle ou annuelle).",
+            "À la fin de l'essai, en cas d'impayé ou de résiliation, l'organisation passe en lecture seule pendant 30 jours : la capture de nouvelles preuves est suspendue, la consultation, l'export et le téléchargement des packs restent ouverts."
+          ]
+        },
+        {
+          "title": "5. Disponibilité et support",
+          "paragraphs": [
+            "L'Éditeur vise une disponibilité mensuelle du service de 99,5 %, hors maintenance programmée annoncée au moins 48 heures à l'avance. Il s'agit d'une obligation de moyens. L'état du service et les incidents sont communiqués aux propriétaires et administrateurs par email.",
+            "Le support est assuré par email à {contact}, en français et en anglais, les jours ouvrés."
+          ]
+        },
+        {
+          "title": "6. Données du Client",
+          "paragraphs": [
+            "Le Client reste propriétaire de ses données et de ses preuves. Il concède à l'Éditeur le seul droit de les traiter pour fournir le service. L'Éditeur ne les utilise à aucune autre fin, ne les vend pas et ne les emploie pas pour entraîner un modèle d'IA.",
+            "Les données personnelles contenues dans les preuves sont traitées par l'Éditeur en qualité de sous-traitant, selon le contrat de sous-traitance qui fait partie intégrante des présentes conditions."
+          ]
+        },
+        {
+          "title": "7. Confidentialité",
+          "paragraphs": [
+            "Chaque partie garde confidentielles les informations non publiques reçues de l'autre et ne les utilise que pour l'exécution du contrat, pendant sa durée et cinq ans après son terme."
+          ]
+        },
+        {
+          "title": "8. Réversibilité",
+          "paragraphs": [
+            "Pendant l'abonnement et la période de lecture seule, le Client peut exporter à tout moment son registre, ses classifications, ses preuves et ses packs, dans des formats ouverts (JSON, CSV, PDF, ZIP). Les packs se vérifient avec l'outil de vérification open source publié par l'Éditeur, sans dépendre du service.",
+            "À l'issue de la période de lecture seule, ou sur demande d'un propriétaire, les données de l'organisation sont purgées et sa clé de chiffrement est détruite ; une confirmation est envoyée par email."
+          ]
+        },
+        {
+          "title": "9. Propriété intellectuelle",
+          "paragraphs": [
+            "Le service, son code et sa documentation restent la propriété de l'Éditeur, à l'exception de l'outil de vérification publié sous licence MIT. Le Client bénéficie d'un droit d'utilisation personnel, non exclusif et non transférable pendant la durée de l'abonnement."
+          ]
+        },
+        {
+          "title": "10. Responsabilité",
+          "paragraphs": [
+            "La responsabilité de chaque partie est limitée aux dommages directs et prévisibles. Le montant total que l'Éditeur peut devoir, toutes causes confondues, est plafonné aux sommes effectivement payées par le Client au titre des douze mois précédant le fait générateur.",
+            "Ces limites ne s'appliquent ni en cas de faute lourde ou dolosive (article 1231-3 du Code civil), ni aux dommages corporels, ni aux manquements à la confidentialité ou à la protection des données imputables à une partie."
+          ]
+        },
+        {
+          "title": "11. Durée et résiliation",
+          "paragraphs": [
+            "L'abonnement est conclu pour la période choisie et se renouvelle tacitement. Un propriétaire peut le résilier à tout moment depuis l'espace de facturation, avec effet à la fin de la période en cours.",
+            "En cas de manquement grave d'une partie non réparé 30 jours après une mise en demeure, l'autre partie peut résilier le contrat par écrit."
+          ]
+        },
+        {
+          "title": "12. Modification des conditions",
+          "paragraphs": [
+            "L'Éditeur informe les propriétaires par email de toute modification des présentes conditions au moins 30 jours avant son entrée en vigueur. Le Client qui la refuse peut résilier avant cette date."
+          ]
+        },
+        {
+          "title": "13. Droit applicable et juridiction",
+          "paragraphs": [
+            "Les présentes conditions sont soumises au droit français. À défaut d'accord amiable, tout litige relève de la compétence exclusive du {court}, y compris en cas de pluralité de défendeurs ou d'appel en garantie."
+          ]
+        }
+      ]
+    },
+    "dpa": {
+      "title": "Contrat de sous-traitance des données personnelles",
+      "intro": "Le présent contrat, établi en application de l'article 28 du règlement (UE) 2016/679 (RGPD), fait partie des conditions générales. Il lie le Client, responsable du traitement, et {company} (« l'Éditeur »), sous-traitant, pour les données personnelles contenues dans les preuves capturées par ProofLayer.",
+      "sections": [
+        {
+          "title": "1. Objet et description du traitement",
+          "paragraphs": [
+            "Finalité : capture, scellement, évaluation et export de preuves de gouvernance des systèmes d'IA du Client. Nature : collecte depuis les outils connectés, stockage chiffré, horodatage, constitution de packs d'audit.",
+            "Données : identifiants de compte et noms d'utilisateur des outils source (GitHub, Jira), métadonnées d'activité (dates, statuts, revues), fichiers déposés par le Client. Les corps de messages, diffs, descriptions et commentaires ne sont pas capturés. Personnes concernées : salariés et prestataires du Client actifs dans ces outils.",
+            "Durée : celle de l'abonnement et de la période de lecture seule, puis purge."
+          ]
+        },
+        {
+          "title": "2. Instructions documentées",
+          "paragraphs": [
+            "L'Éditeur ne traite les données que sur instruction documentée du Client, constituée par les présentes conditions, le paramétrage du service et les actions de ses utilisateurs (article 28(3)(a)). Il informe le Client si une instruction lui paraît contraire à la réglementation."
+          ]
+        },
+        {
+          "title": "3. Confidentialité",
+          "paragraphs": [
+            "Les personnes autorisées à traiter les données sont soumises à une obligation de confidentialité (article 28(3)(b)). Aucun membre de l'Éditeur n'accède aux preuves d'un Client hors demande de support explicite ou obligation légale."
+          ]
+        },
+        {
+          "title": "4. Sécurité",
+          "paragraphs": [
+            "L'Éditeur met en œuvre les mesures de l'article 32, décrites en annexe : isolation des organisations en base, chiffrement des charges et des pièces jointes par une clé propre à chaque organisation, double authentification des administrateurs, journal d'audit en ajout seul, chiffrement des communications."
+          ]
+        },
+        {
+          "title": "5. Sous-traitants ultérieurs",
+          "paragraphs": [
+            "Le Client autorise de manière générale le recours aux sous-traitants ultérieurs listés ci-dessous (article 28(2) et (4)). L'Éditeur informe les propriétaires par email de tout ajout ou remplacement au moins 30 jours à l'avance ; le Client peut s'y opposer et, à défaut de solution, résilier sans pénalité. L'Éditeur impose à chacun des obligations équivalentes à celles du présent contrat.",
+            "Le prestataire d'horodatage ne reçoit que des empreintes de 32 octets : il ne traite aucune donnée personnelle."
+          ]
+        },
+        {
+          "title": "6. Transferts hors de l'Union européenne",
+          "paragraphs": [
+            "Les données de preuve sont stockées dans l'Union européenne (Francfort). Lorsqu'un sous-traitant ultérieur relève d'un pays tiers, le transfert est encadré par une décision d'adéquation (cadre de protection des données UE–États-Unis) ou par les clauses contractuelles types de la Commission européenne (chapitre V du RGPD)."
+          ]
+        },
+        {
+          "title": "7. Droits des personnes",
+          "paragraphs": [
+            "L'Éditeur aide le Client, par des mesures techniques et organisationnelles appropriées, à répondre aux demandes d'exercice des droits (article 28(3)(e)). Toute demande reçue directement est transmise au Client sans délai. L'effacement d'une preuve conserve son empreinte scellée, sans contenu, afin que la chaîne reste vérifiable."
+          ]
+        },
+        {
+          "title": "8. Violation de données",
+          "paragraphs": [
+            "L'Éditeur notifie au Client toute violation de données personnelles sans délai après en avoir pris connaissance (article 33(2)), avec les informations de l'article 33(3) disponibles, afin de lui permettre de tenir le délai de 72 heures qui s'impose à lui."
+          ]
+        },
+        {
+          "title": "9. Assistance",
+          "paragraphs": [
+            "L'Éditeur aide le Client à garantir le respect des articles 32 à 36 (sécurité, notification, analyse d'impact, consultation préalable), compte tenu de la nature du traitement et des informations dont il dispose (article 28(3)(f))."
+          ]
+        },
+        {
+          "title": "10. Fin du traitement",
+          "paragraphs": [
+            "Au terme du contrat, l'Éditeur met les données à disposition pour export pendant la période de lecture seule, puis les supprime et détruit la clé de chiffrement de l'organisation, sauf obligation légale de conservation (article 28(3)(g)). Les sauvegardes sont effacées à l'expiration de leur cycle de rotation."
+          ]
+        },
+        {
+          "title": "11. Audit",
+          "paragraphs": [
+            "L'Éditeur met à disposition les informations nécessaires pour démontrer le respect du présent contrat : centre de confiance, revue de sécurité, pack d'audit de ProofLayer. Il permet un audit par le Client ou un auditeur mandaté, tenu à la confidentialité, une fois par an et sur préavis de 30 jours (article 28(3)(h))."
+          ]
+        },
+        {
+          "title": "Annexe — Mesures techniques et organisationnelles",
+          "paragraphs": [
+            "Isolation : sécurité au niveau des lignes (RLS) forcée sur toute table métier, contrôlée par des tests automatisés pour chaque procédure.",
+            "Chiffrement : AES-256-GCM pour les charges brutes, pièces jointes et jetons d'intégration, sous une clé de données propre à chaque organisation, elle-même enveloppée par une clé maîtresse ; TLS 1.2 ou supérieur et HSTS pour tous les échanges.",
+            "Accès : rôles owner, admin, contributor, auditor ; double authentification obligatoire pour owner et admin ; limitation du débit sur l'authentification, l'API et les webhooks.",
+            "Intégrité : preuves en ajout seul, scellées par arbre de Merkle et horodatage RFC 3161, revérifiées chaque jour.",
+            "Traçabilité : journal d'audit en ajout seul ; journaux techniques sans secret, jeton ni charge de preuve.",
+            "Développement : revue OWASP ASVS niveau 1, audit des dépendances et détection de secrets bloquants en intégration continue."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "intro": "Cette politique décrit les traitements dont {company} est responsable : comptes utilisateurs, facturation, prospection et sécurité du service. Les données contenues dans les preuves des clients relèvent du contrat de sous-traitance.",
+      "sections": [
+        {
+          "title": "1. Responsable du traitement",
+          "paragraphs": [
+            "{company}, {address}. Contact pour la protection des données : {privacy}."
+          ]
+        },
+        {
+          "title": "2. Données, finalités et bases légales",
+          "paragraphs": [
+            "Compte : nom, adresse email professionnelle, langue, mot de passe haché, paramètres de double authentification. Finalité : fournir le service. Base : exécution du contrat (article 6(1)(b) du RGPD).",
+            "Facturation : contact et adresse de facturation, numéro de TVA, historique des paiements ; les moyens de paiement sont détenus par Stripe. Base : contrat et obligation légale (article 6(1)(c)).",
+            "Sécurité : adresse IP sous forme d'empreinte (HMAC), journal d'audit, traces d'erreurs nettoyées des données personnelles. Base : intérêt légitime à protéger le service (article 6(1)(f)).",
+            "Classifieur public : adresse email professionnelle saisie pour recevoir la note, et accord facultatif pour être recontacté. Base : demande de la personne et, pour la prospection, son consentement (article 6(1)(a)).",
+            "Mesure d'usage : événements d'interface pseudonymisés, sans cookie ni identifiant publicitaire. Base : intérêt légitime à améliorer le service."
+          ]
+        },
+        {
+          "title": "3. Cookies",
+          "paragraphs": [
+            "ProofLayer n'utilise que des cookies strictement nécessaires : le cookie de session, posé à la connexion, et le cookie de langue (NEXT_LOCALE). Aucun cookie de mesure d'audience ni de publicité n'est déposé ; aucun bandeau de consentement n'est donc requis (article 82 de la loi Informatique et Libertés)."
+          ]
+        },
+        {
+          "title": "4. Durées de conservation",
+          "paragraphs": [
+            "Compte : pendant la relation contractuelle, puis suppression avec l'organisation. Facturation : dix ans (article L123-22 du Code de commerce). Classifieur public : 30 jours sans accord de recontact, trois ans après la demande avec cet accord. Empreintes d'IP de limitation de débit : un jour. Journal d'audit : conservé avec l'organisation, supprimé avec elle."
+          ]
+        },
+        {
+          "title": "5. Destinataires",
+          "paragraphs": [
+            "Les données ne sont accessibles qu'aux personnes de l'Éditeur qui en ont besoin et aux sous-traitants listés ci-dessous. Elles ne sont ni vendues ni louées."
+          ]
+        },
+        {
+          "title": "6. Vos droits",
+          "paragraphs": [
+            "Vous disposez des droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité (articles 15 à 21 du RGPD), et du droit de retirer votre consentement à tout moment. Écrivez à {privacy}. Vous pouvez introduire une réclamation auprès de la CNIL (www.cnil.fr)."
+          ]
+        }
+      ]
+    },
+    "notice": {
+      "title": "Mentions légales",
+      "intro": "Informations prévues par l'article 6-III de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique.",
+      "sections": [
+        {
+          "title": "Éditeur",
+          "paragraphs": [
+            "{company}, {form} au capital de {capital}.",
+            "Immatriculation : {registration}. TVA intracommunautaire : {vat}.",
+            "Siège social : {address}.",
+            "Contact : {contact}."
+          ]
+        },
+        {
+          "title": "Directeur de la publication",
+          "paragraphs": ["{director}."]
+        },
+        {
+          "title": "Hébergement",
+          "paragraphs": [
+            "Vercel Inc., {hostAddress}. Les fonctions s'exécutent dans la région de Francfort (fra1).",
+            "Les données sont stockées par Supabase, région de Francfort (Allemagne)."
+          ]
+        },
+        {
+          "title": "Propriété intellectuelle",
+          "paragraphs": [
+            "Les contenus du site sont protégés. L'outil de vérification des packs est publié sous licence MIT. Les références au règlement (UE) 2024/1689 renvoient au texte publié sur EUR-Lex ; ProofLayer n'est affilié à aucune institution de l'Union européenne."
+          ]
+        }
+      ]
+    }
+  },
+  "trust": {
+    "title": "Centre de confiance",
+    "intro": "Comment ProofLayer protège vos preuves et comment vérifier ce que nous affirmons, sans avoir à nous croire sur parole.",
+    "architecture": {
+      "title": "Architecture et hébergement",
+      "body": "Application Next.js exécutée par Vercel à Francfort ; base Postgres et stockage objet chez Supabase à Francfort. Aucune donnée de preuve n'est stockée hors de l'Union européenne. Les organisations sont isolées en base par sécurité au niveau des lignes, vérifiée par des tests automatisés pour chaque procédure de l'API."
+    },
+    "encryption": {
+      "title": "Chiffrement",
+      "body": "Chaque organisation dispose de sa propre clé de données, enveloppée par une clé maîtresse. Les charges brutes, pièces jointes et jetons d'intégration sont chiffrés en AES-256-GCM. Tous les échanges passent en TLS, avec HSTS préchargé."
+    },
+    "integrity": {
+      "title": "Intégrité des preuves",
+      "body": "Chaque preuve reçoit une empreinte SHA-256, puis entre dans un lot scellé par arbre de Merkle (RFC 6962), lui-même horodaté par un prestataire RFC 3161. La chaîne est revérifiée chaque jour. Un pack d'audit se vérifie hors de ProofLayer avec l'outil open source, ou dans votre navigateur."
+    },
+    "access": {
+      "title": "Accès et authentification",
+      "body": "Double authentification obligatoire pour les propriétaires et administrateurs, rôles distincts pour les contributeurs et auditeurs, limitation du débit sur l'authentification, l'API et les webhooks, journal d'audit en ajout seul."
+    },
+    "backups": {
+      "title": "Sauvegardes",
+      "body": "Sauvegardes quotidiennes de la base gérées par Supabase dans la région de Francfort. Les preuves scellées étant en ajout seul, une restauration se vérifie par la revérification de la chaîne de scellement."
+    },
+    "development": {
+      "title": "Développement sécurisé",
+      "body": "Revue OWASP ASVS niveau 1, audit des dépendances et détection de secrets bloquants en intégration continue, journaux et suivi d'erreurs sans secret, jeton ni contenu de preuve."
+    },
+    "subprocessors": {
+      "title": "Sous-traitants",
+      "body": "Liste tenue à jour ; tout changement est annoncé aux propriétaires 30 jours à l'avance."
+    },
+    "disclosure": {
+      "title": "Signaler une vulnérabilité",
+      "body": "Écrivez à {security}. Nous accusons réception sous trois jours ouvrés, ne poursuivons pas les recherches menées de bonne foi, et publions la correction une fois déployée. Merci de ne pas accéder aux données d'autrui ni de dégrader le service.",
+      "securityTxt": "Fichier security.txt"
+    },
+    "pack": {
+      "title": "Le pack d'audit de ProofLayer",
+      "body": "ProofLayer est inscrit dans son propre registre, classé par son propre moteur, et publie son propre pack d'audit.",
+      "summary": "{system} — période du {start} au {end}, {count} preuves, généré le {created}.",
+      "fingerprint": "Empreinte du manifeste (SHA-256) : {hash}",
+      "download": "Télécharger le pack",
+      "verify": "Le vérifier dans votre navigateur",
+      "unavailable": "Le pack public n'est pas encore publié."
+    },
+    "keys": "Clés publiques de signature des packs"
   }
 }

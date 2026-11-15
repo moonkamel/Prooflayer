@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/shell/language-switcher";
+import { LegalFooter } from "@/components/shell/legal-footer";
 import { MAIN_ID, SkipLink } from "@/components/shell/skip-link";
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
@@ -19,6 +20,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
       <main id={MAIN_ID} className="mx-auto max-w-3xl space-y-6 px-4 pb-12">
         {children}
       </main>
+      <LegalFooter width="max-w-3xl" />
     </>
   );
 }
