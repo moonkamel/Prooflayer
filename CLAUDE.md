@@ -692,3 +692,13 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   l'extérieur par Better Stack).
 - Restauration : `pnpm restore:drill` (pg_dump → base vierge → décomptes → `pnpm chain:verify` identique sur source et
   cible), `pnpm chain:verify` (JSON, anomalies par type). Runbook : `docs/operations/runbook.md` (journal des exercices).
+
+## Design partners (conventions établies par PL-610)
+- Pur : `src/server/services/design-partners-data.ts` (`cohortReport` : les quatre métriques du §1.4 par partenaire et
+  pour la cohorte active, seuils < 15 min, ≥ 40 %, 3 sur 5 ; `PILOT_DAYS` 84 ; remplacement si GitHub non connecté
+  après `REPLACE_AFTER_DAYS` 14).
+- Table système `DesignPartner` (sans RLS, exception de `isolation.test.ts`, cascade avec l'organisation) :
+  `src/server/system/design-partners.ts` (`addPartner` : essai porté à 12 semaines aux limites Growth, abonnement
+  payant jamais modifié ; `recordSession`, `recordPackShared`, `markReplaced`, `partnersReport`).
+- CLI du fondateur `pnpm partners add|session|shared|replace|report`. Guide de session :
+  `docs/design-partners/onboarding-session.md` (accord exprès avant tout enregistrement, conservé hors ProofLayer).

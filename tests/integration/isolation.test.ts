@@ -8,7 +8,8 @@ import { forOrg, prisma } from "@/server/db";
 
 /** Tables système sans RLS (prompt-type de PL-105) qui portent pourtant une colonne orgId. */
 // OrganizationDeletion (PL-607) : trace de suppression qui doit survivre à la purge de l'organisation.
-const SYSTEM_TABLES_WITH_ORG_ID = ["Job", "OrganizationDeletion"];
+// DesignPartner (PL-610) : suivi des pilotes tenu par le fondateur, toutes organisations confondues.
+const SYSTEM_TABLES_WITH_ORG_ID = ["Job", "OrganizationDeletion", "DesignPartner"];
 
 const run = randomUUID().slice(0, 8);
 const A = `org_iso_a_${run}`;

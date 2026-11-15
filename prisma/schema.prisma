@@ -117,6 +117,7 @@ model Organization {
   notificationPreferences NotificationPreference[]
   exports                 OrgExport[]
   funnelEvents            FunnelEvent[]
+  designPartner           DesignPartner?
   subscription            Subscription?
   encryptionKey           OrgEncryptionKey?
 }
@@ -862,4 +863,17 @@ model FunnelEvent {
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@unique([orgId, name])
+}
+
+// Design partners (PL-610, §7.5) : table système tenue par le fondateur (`pnpm partners`), sans RLS ; supprimée avec
+// l'organisation. Ni nom de personne ni enregistrement : dates et catégories seulement.
+model DesignPartner {
+  orgId           String       @id
+  segment         String // "hr_tech" | "fintech" | "exemption"
+  pilotStartedAt  DateTime
+  sessionAt       DateTime? // session de mise en route d'une heure, enregistrée (enregistrement hors ProofLayer)
+  packSharedAt    DateTime? // pack transmis à un tiers réel, déclaré par le partenaire
+  packAudience    String? // "client" | "investor" | "auditor"
+  replacedAt      DateTime?
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
