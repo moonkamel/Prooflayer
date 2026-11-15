@@ -26,7 +26,9 @@ export default async function SystemControlsPage({ params }: Params) {
     <section aria-labelledby="controls-title" className="space-y-3">
       <h2 id="controls-title">{t("title")}</h2>
       {controls.length === 0 ? (
-        <p>{t("empty")}</p>
+        <p>
+          {t("empty")} <Link href={`/systems/${system.id}/classification`}>{t("emptyAction")}</Link>
+        </p>
       ) : (
         <>
           <p>{t("intro")}</p>

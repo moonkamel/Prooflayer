@@ -50,7 +50,9 @@ export default async function SystemPacksPage({ params }: Params) {
       <section aria-labelledby="previous-packs" className="space-y-3">
         <h2 id="previous-packs">{t("previous")}</h2>
         {packs.length === 0 ? (
-          <p className="text-muted-foreground">{t("empty")}</p>
+          <p className="text-muted-foreground">
+            {t("empty")} {t("emptyHelp")}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <Table data-testid="packs">

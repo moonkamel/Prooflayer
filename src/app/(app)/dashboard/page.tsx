@@ -6,6 +6,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { CoverageMeter } from "@/components/dashboard/coverage-meter";
 import { SummaryBand } from "@/components/dashboard/summary-band";
 import { Alert } from "@/components/ui/alert";
+import { OnboardingChecklist } from "@/components/onboarding/checklist";
 import { serverCaller } from "@/server/caller";
 import { requireSession } from "@/server/services/session";
 
@@ -16,7 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OrgDashboardPage() {
   await requireSession();
   const api = await serverCaller();
-  const summary = await api.dashboard.orgSummary();
+  const [summary, onboarding] = await Promise.all([
+    api.dashboard.orgSummary(),
+    api.onboarding.progress(),
+  ]);
   const t = await getTranslations("dashboard");
   const tk = await getTranslations("riskTier");
   const format = await getFormatter();
@@ -25,6 +29,13 @@ export default async function OrgDashboardPage() {
     <section aria-labelledby="org-dashboard-title" className="space-y-4">
       <h1 id="org-dashboard-title">{t("title")}</h1>
       <p className="max-w-3xl text-muted-foreground">{t("orgIntro")}</p>
+      {!onboarding.complete && (
+        <OnboardingChecklist
+          steps={onboarding.steps}
+          current={onboarding.current}
+          done={onboarding.done}
+        />
+      )}
       {summary.failingIntegrations.length > 0 && (
         <Alert tone="error">
           {t("integrationFailing")} <a href="/organization">{t("integrationLink")}</a>

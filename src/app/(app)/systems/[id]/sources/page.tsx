@@ -1,6 +1,7 @@
 // Fiche système, onglet « Sources » (PL-404) : les quatre correspondances Jira du système (§3.2 E4), avec
 // prévisualisation du nombre de tickets avant enregistrement. Les dépôts GitHub s'y ajouteront avec PL-303.
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Alert } from "@/components/ui/alert";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
@@ -26,7 +27,10 @@ export default async function SystemSourcesPage({ params }: Params) {
 
   return (
     <section aria-labelledby="sources-title" className="space-y-4">
-      <h2 id="sources-title">{t("title")}</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="sources-title">{t("title")}</h2>
+        <Link href={`/systems/${system.id}/capture`}>{t("followCapture")}</Link>
+      </div>
       <h3>{t("jira.title")}</h3>
       {!jira.integration ? (
         <Alert>
