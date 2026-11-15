@@ -24,6 +24,7 @@ import { storedAnchorHeader, storedBatchHeader } from "@/server/seal/chain";
 import { TsaError } from "@/server/seal/tsa";
 import { FREETSA, FREETSA_ROOT_PEM, TsaNotConfiguredError } from "@/server/seal/tsa-config";
 import { createObjectStore, type ObjectStore } from "@/server/storage/object-store";
+import { openArchive, packAad, sealArchive } from "@/server/storage/sealed";
 import {
   anchorPendingBatches,
   defaultTimestamper,
@@ -56,12 +57,32 @@ export interface PackDependencies {
 }
 
 /** Stockage des archives, partagé par la génération et le téléchargement ; remplaçable par les tests. */
-export const packStorage: { store: () => ObjectStore } = { store: () => createObjectStore() };
+export const packStorage: { store: () => ObjectStore; master: () => MasterKey } = {
+  store: () => createObjectStore(),
+  master: () => masterKeyFromEnv(),
+};
+
+/**
+ * Archive d'un pack en clair, ou null si l'objet manque. Revue finale : les packs sont chiffrés au repos par la clé
+ * de données de l'organisation ; la clé n'est lue que pour un pack chiffré (un pack antérieur se lit tel quel).
+ */
+export async function readPackArchive(
+  orgId: string,
+  pack: { id: string; objectKey: string },
+  store: ObjectStore = packStorage.store(),
+  master: () => MasterKey = packStorage.master,
+): Promise<Buffer | null> {
+  const stored = await store.get(pack.objectKey);
+  if (!stored) return null;
+  return openArchive(stored, packAad(orgId, pack.id), () =>
+    withOrgTransaction(orgId, (tx) => orgDataKey(tx, orgId, master())),
+  );
+}
 
 export function defaultPackDependencies(): PackDependencies {
   return {
     store: packStorage.store(),
-    master: () => masterKeyFromEnv(),
+    master: packStorage.master,
     signingKey: () => packSigningKey(),
     timestamper: defaultTimestamper,
     baseUrl: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
@@ -214,7 +235,7 @@ export async function downloadPack(
   if (!pack) throw new ServiceError("NOT_FOUND", "pack.notFound");
   if (pack.status !== "READY" || !pack.objectKey)
     throw new ServiceError("CONFLICT", "pack.notReady");
-  const bytes = await store.get(pack.objectKey);
+  const bytes = await readPackArchive(ctx.orgId, { id: pack.id, objectKey: pack.objectKey }, store);
   if (!bytes) throw new ServiceError("NOT_FOUND", "pack.notFound");
   await record(ctx, "pack.download", pack.id, { size: bytes.length });
   return { bytes, filename: `pack-${pack.system.slug}-${dayOf(pack.createdAt)}.zip` };
@@ -553,7 +574,9 @@ async function assemble(
     update: {},
   });
   const objectKey = packObjectKey(orgId, pack.id);
-  await deps.store.put(objectKey, zip);
+  // Chiffrée au repos par la clé de données de l'organisation (détruite à la purge).
+  const archiveKey = await orgDataKey(tx, orgId, deps.master());
+  await deps.store.put(objectKey, sealArchive(archiveKey, zip, packAad(orgId, pack.id)));
   const manifestBytes = Buffer.from(`${JSON.stringify(signed, null, 2)}\n`);
   await tx.auditPack.update({
     where: { id: pack.id },

@@ -96,3 +96,33 @@ describe("suppression d'un préfixe d'organisation (PL-607)", () => {
     }
   });
 });
+
+describe("magasin local : taille et ménage de la zone d'arrivée (revue finale)", () => {
+  it("taille sans lecture ; seuls les dépôts anciens de la zone d'arrivée sont supprimés", async () => {
+    const { mkdtemp, rm, utimes } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { LocalObjectStore } = await import("@/server/storage/object-store");
+    const dir = await mkdtemp(join(tmpdir(), "pl-store-"));
+    try {
+      const store = new LocalObjectStore(dir);
+      await store.put("orgs/org_1/incoming/a", Buffer.from("12345"));
+      await store.put("orgs/org_1/incoming/b", Buffer.from("1"));
+      const old = new Date(Date.now() - 2 * 86_400_000);
+      await utimes(join(dir, "orgs/org_1/incoming/a"), old, old);
+      expect(await store.size("orgs/org_1/incoming/a")).toBe(5);
+      expect(await store.size("orgs/org_1/incoming/absent")).toBeNull();
+      const cutoff = new Date(Date.now() - 86_400_000);
+      expect(await store.deleteOlderThan("orgs/org_1/incoming/", cutoff)).toBe(1);
+      expect(await store.size("orgs/org_1/incoming/a")).toBeNull();
+      expect(await store.size("orgs/org_1/incoming/b")).toBe(1);
+      expect(await store.deleteOlderThan("orgs/org_2/incoming/", cutoff)).toBe(0);
+      await expect(store.deleteOlderThan("orgs/org_1/", cutoff)).rejects.toThrow(
+        "préfixe d'objet invalide",
+      );
+      await expect(store.deleteOlderThan("orgs/org_1/raw/", cutoff)).rejects.toThrow();
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});

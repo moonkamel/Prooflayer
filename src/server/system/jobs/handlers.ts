@@ -3,6 +3,7 @@
 import { analyticsCaptureJob } from "./analytics";
 import { controlEvaluateJob, controlSweepOrgJob } from "./control-evaluate";
 import { jiraIssueSyncJob, jiraReconcileJob, jiraWebhookEnsureJob } from "./jira";
+import { maintenanceJob } from "./maintenance";
 import { notificationDigestJob, notificationEmailJob } from "./notifications";
 import { orgDeletionNoticeJob, orgPurgeJob } from "./org-deletion";
 import { orgExportJob } from "./org-export";
@@ -30,4 +31,5 @@ export const jobRegistry = new JobRegistry()
   .register(orgExportJob)
   .register(orgDeletionNoticeJob)
   .register(orgPurgeJob)
-  .register(analyticsCaptureJob);
+  .register(analyticsCaptureJob)
+  .register(maintenanceJob);

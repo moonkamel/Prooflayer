@@ -816,6 +816,7 @@ enum ExportStatus {
   BUILDING
   READY
   FAILED
+  EXPIRED
 }
 
 // Export complet d'une organisation (registre, classifications, preuves, packs, journal), demandé par un owner.

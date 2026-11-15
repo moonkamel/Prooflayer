@@ -1932,7 +1932,7 @@
     "ownerOnly": "L'export complet et la suppression de l'organisation sont réservés aux propriétaires.",
     "export": {
       "title": "Exporter toutes les données",
-      "body": "Une archive ZIP rassemble le registre, les classifications, les contrôles, toutes les preuves (pièces jointes et charges brutes déchiffrées), les packs d'audit et le journal d'audit, en JSON. Les packs restent vérifiables avec l'outil open source. Un email vous prévient quand l'archive est prête.",
+      "body": "Une archive ZIP rassemble le registre, les classifications, les contrôles, toutes les preuves (pièces jointes et charges brutes déchiffrées), les packs d'audit et le journal d'audit, en JSON. Les packs restent vérifiables avec l'outil open source. Un email vous prévient quand l'archive est prête ; elle reste téléchargeable 7 jours.",
       "request": "Préparer un export",
       "building": "Export en préparation…",
       "empty": "Aucun export pour l'instant.",
@@ -1942,7 +1942,8 @@
         "QUEUED": "en attente",
         "BUILDING": "en préparation",
         "READY": "prêt",
-        "FAILED": "échec, demandez un nouvel export"
+        "FAILED": "échec, demandez un nouvel export",
+        "EXPIRED": "expiré, demandez un nouvel export"
       }
     },
     "deletion": {

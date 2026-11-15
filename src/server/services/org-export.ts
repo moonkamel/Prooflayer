@@ -8,6 +8,7 @@ import { decrypt, masterKeyFromEnv, type MasterKey } from "@/server/crypto/envel
 import { zipExport } from "@/server/export/contents";
 import { EXTENSIONS } from "@/server/pack/contents";
 import { createObjectStore, type ObjectStore } from "@/server/storage/object-store";
+import { exportAad, openArchive, packAad, sealArchive } from "@/server/storage/sealed";
 import { membersOf } from "@/server/system/identity";
 import { audit, clientIp } from "./audit";
 import { ServiceError } from "./errors";
@@ -109,7 +110,7 @@ export async function listExports(ctx: OrgContext) {
 export async function downloadExport(
   ctx: OrgContext,
   input: { exportId: string },
-  store: ObjectStore = exportStorage.get().store,
+  deps: Pick<ExportDependencies, "store" | "master"> = exportStorage.get(),
 ) {
   const row = await withOrgTransaction(ctx.orgId, (tx) =>
     tx.orgExport.findFirst({ where: { id: input.exportId, orgId: ctx.orgId } }),
@@ -117,8 +118,11 @@ export async function downloadExport(
   if (!row) throw new ServiceError("NOT_FOUND", "export.notFound");
   if (row.status !== "READY" || !row.objectKey)
     throw new ServiceError("CONFLICT", "export.notReady");
-  const bytes = await store.get(row.objectKey);
-  if (!bytes) throw new ServiceError("NOT_FOUND", "export.notFound");
+  const stored = await deps.store.get(row.objectKey);
+  if (!stored) throw new ServiceError("NOT_FOUND", "export.notFound");
+  const bytes = await openArchive(stored, exportAad(ctx.orgId, row.id), () =>
+    withOrgTransaction(ctx.orgId, (tx) => orgDataKey(tx, ctx.orgId, deps.master())),
+  );
   await record(ctx, "org.exportDownload", row.id, { size: bytes.length });
   return { bytes, filename: `prooflayer-export-${row.createdAt.toISOString().slice(0, 10)}.zip` };
 }
@@ -212,12 +216,19 @@ export async function buildExport(
     evidence.push({ row: rest, raw, attachment });
   }
 
+  // Packs chiffrés au repos (revue finale) : ouverts avec la clé de l'organisation, dans cette transaction.
+  const packArchive = async (packId: string, objectKey: string) => {
+    const stored = await deps.store.get(objectKey);
+    return stored
+      ? openArchive(stored, packAad(orgId, packId), () => orgDataKey(tx, orgId, deps.master()))
+      : null;
+  };
   const packs = [];
   for (const p of packRows) {
     const { objectKey, ...meta } = p;
     packs.push({
       meta,
-      zip: p.status === "READY" && objectKey ? await deps.store.get(objectKey) : null,
+      zip: p.status === "READY" && objectKey ? await packArchive(p.id, objectKey) : null,
     });
   }
 
@@ -248,7 +259,9 @@ export async function buildExport(
     evidence,
   });
   const objectKey = exportObjectKey(orgId, exportId);
-  await deps.store.put(objectKey, zip);
+  // L'export contient toutes les preuves déchiffrées : il est lui-même chiffré au repos, et expire (EXPORT_TTL_DAYS).
+  const exportKey = await orgDataKey(tx, orgId, deps.master());
+  await deps.store.put(objectKey, sealArchive(exportKey, zip, exportAad(orgId, exportId)));
   await tx.orgExport.update({
     where: { id: exportId },
     data: { status: "READY", objectKey, sizeBytes: zip.length, counts, completedAt: now },
@@ -262,6 +275,34 @@ export async function buildExport(
     },
   });
   await notify(tx, orgId, notification.id);
+}
+
+/** Un export prêt reste téléchargeable ce nombre de jours, puis son archive est supprimée. */
+export const EXPORT_TTL_DAYS = 7;
+
+/** Ménage quotidien d'une organisation : archives d'export arrivées à expiration. */
+export async function expireExports(
+  tx: OrgTransaction,
+  orgId: string,
+  store: ObjectStore,
+  now: Date,
+) {
+  const expired = await tx.orgExport.findMany({
+    where: {
+      orgId,
+      status: "READY",
+      completedAt: { lt: new Date(now.getTime() - EXPORT_TTL_DAYS * 86_400_000) },
+    },
+    select: { id: true, objectKey: true },
+  });
+  for (const e of expired) {
+    if (e.objectKey) await store.delete(e.objectKey);
+    await tx.orgExport.update({
+      where: { id: e.id },
+      data: { status: "EXPIRED", objectKey: null },
+    });
+  }
+  return expired.length;
 }
 
 /** Dernière tentative épuisée : l'export passe FAILED (le propriétaire peut en relancer un). */

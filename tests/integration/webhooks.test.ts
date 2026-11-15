@@ -234,6 +234,8 @@ describe("traitement", () => {
       get: async () => null,
       delete: async () => {},
       deletePrefix: async () => 0,
+      size: async () => null,
+      deleteOlderThan: async () => 0,
       presignPut: async () => "",
     };
     expect(await handleDelivery(claimed!, { store: broken, master: masterKeyFromEnv() })).toBe(

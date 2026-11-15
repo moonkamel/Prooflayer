@@ -4,6 +4,15 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { prisma } from "@/server/db";
 
+/** Secret de hachage des adresses IP. En production, pas de valeur de repli : une clé connue rendrait l'IP devinable. */
+export function rateSecret(env: Record<string, string | undefined> = process.env): string {
+  if (env.BETTER_AUTH_SECRET) return env.BETTER_AUTH_SECRET;
+  if (env.VERCEL_ENV === "production") {
+    throw new Error("BETTER_AUTH_SECRET absent : limitation de débit impossible");
+  }
+  return "prooflayer-dev-secret";
+}
+
 export interface RateRule {
   /** Requêtes permises par fenêtre. */
   max: number;
@@ -26,10 +35,7 @@ export const RATE_RULES = {
 } as const satisfies Record<string, RateRule>;
 
 /** Empreinte d'une adresse IP pour une clé de limitation : jamais l'adresse en clair en base. */
-export function ipKey(
-  ip: string,
-  secret = process.env.BETTER_AUTH_SECRET ?? "prooflayer-dev-secret",
-) {
+export function ipKey(ip: string, secret = rateSecret()) {
   return createHmac("sha256", secret).update(`rate:${ip}`).digest("hex").slice(0, 32);
 }
 

@@ -1,8 +1,8 @@
 // PL-609 — Relevé d'exploitation et alertes (/api/cron/monitor, toutes les 15 minutes) : file de jobs en retard,
 // livraisons webhook bloquées, ancre manquée, connecteurs en erreur, taux d'échec. Chaque constat part par
-// `raiseOperationalAlert` (Sentry + journal), sans donnée client. Les connecteurs se lisent organisation par
-// organisation (RLS) ; les lots en attente par la fonction pending_batches_for_anchor.
-import { prisma, withOrgTransaction } from "@/server/db";
+// `raiseOperationalAlert` (Sentry + journal), sans donnée client. Les connecteurs en erreur se comptent par la
+// fonction integration_status_counts ; les lots en attente par pending_batches_for_anchor.
+import { prisma } from "@/server/db";
 import { raiseOperationalAlert } from "./alerts";
 import { pendingBatches } from "./anchoring";
 import { LEASE_MS } from "./jobs/queue";
@@ -42,21 +42,12 @@ export async function monitorSnapshot(now: Date = new Date()): Promise<MonitorSn
     prisma.$transaction((tx) => pendingBatches(tx, 1)),
   ]);
 
-  const totals = new Map<string, number>();
-  const orgs = await prisma.organization.findMany({ select: { id: true } });
-  for (const { id } of orgs) {
-    const rows = await withOrgTransaction(id, (tx) =>
-      tx.integration.groupBy({
-        by: ["provider", "status"],
-        where: { orgId: id, status: { in: ["ERROR", "REVOKED"] } },
-        _count: { _all: true },
-      }),
-    );
-    for (const r of rows) {
-      const key = `${r.provider}:${r.status}`;
-      totals.set(key, (totals.get(key) ?? 0) + r._count._all);
-    }
-  }
+  // Revue finale : décomptes par la fonction SQL integration_status_counts (une requête, sans parcourir chaque
+  // organisation toutes les 15 minutes).
+  const integrations = await prisma.$queryRaw<
+    { provider: string; status: string; count: number }[]
+  >`
+    SELECT provider, status, count FROM integration_status_counts()`;
 
   return {
     now,
@@ -72,10 +63,7 @@ export async function monitorSnapshot(now: Date = new Date()): Promise<MonitorSn
       processedLastHour: processed,
     },
     anchor: { oldestPendingSealedAt: pending[0]?.sealedAt ?? null },
-    integrations: [...totals.entries()].map(([key, count]) => {
-      const [provider, status] = key.split(":") as [string, string];
-      return { provider, status, count };
-    }),
+    integrations,
   };
 }
 

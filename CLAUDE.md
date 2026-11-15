@@ -713,3 +713,16 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   sa charge 7 jours, toute livraison terminée est supprimée à 30 jours (`pruneDeliveries`, `/api/cron/daily`).
 - Purge de fin de contrat : abonnements payants terminés seulement (un essai expiré n'est jamais purgé d'office) ;
   une annulation par un owner suspend la reprogrammation 30 jours (`CANCEL_SNOOZE_DAYS`).
+- Archives au repos : packs et exports complets sont chiffrés par la clé de données de l'organisation
+  (`src/server/storage/sealed.ts`, AAD `pack:{orgId}:{id}` / `export:{orgId}:{id}`) ; lecture par `readPackArchive` ou
+  `openArchive` (une archive antérieure en clair se lit telle quelle). Un export expire à 7 jours (`EXPORT_TTL_DAYS`,
+  statut `EXPIRED`).
+- Purge gardée en base (migration 20261115180000) : sous le rôle applicatif, `purge_organization` exige une
+  `OrganizationDeletion` arrivée à échéance, et le trigger `organization_deletion_guard` refuse une échéance à moins de
+  6 jours à l'insertion puis toute modification de l'organisation ou de l'échéance. Les tests reculent l'échéance sous
+  le rôle d'administration (`DIRECT_DATABASE_URL`).
+- Dépôts : taille lue par `ObjectStore.size` avant toute lecture ; zone d'arrivée vidée après 24 h
+  (`deleteOlderThan`). Webhook Jira : `exp` exigé. `rateSecret` : pas de valeur de repli en production.
+- Ménage quotidien : `/api/cron/daily` programme un job `maintenance.daily` par tâche (`MAINTENANCE_TASKS`,
+  `src/server/system/jobs/maintenance.ts`) ; une tâche de ménage nouvelle s'y ajoute, jamais dans la route.
+  Surveillance : connecteurs en erreur comptés par la fonction SQL `integration_status_counts`.
