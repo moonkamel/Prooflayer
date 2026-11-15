@@ -1,11 +1,12 @@
 // Stockage objet (§4.2 : Supabase Storage, API S3, bucket privé) : charges brutes, pièces jointes, packs, toujours
 // chiffrés par organisation avant écriture. Le magasin « local » (fichiers) sert au développement et aux tests ; le
 // magasin S3 de Supabase est branché avec le déploiement (PL-108), et le magasin local y est refusé.
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   ListObjectsV2Command,
   NoSuchKey,
   PutObjectCommand,
@@ -21,6 +22,10 @@ export interface ObjectStore {
   delete(key: string): Promise<void>;
   /** Supprime tous les objets sous un préfixe `orgs/{orgId}/` (purge d'une organisation, PL-607) ; idempotent. */
   deletePrefix(prefix: string): Promise<number>;
+  /** Taille d'un objet en octets, sans le lire ; null s'il est absent (revue finale : dépôt borné avant lecture). */
+  size(key: string): Promise<number | null>;
+  /** Supprime, sous la zone d'arrivée `orgs/{orgId}/incoming/`, les objets plus anciens que `cutoff`. */
+  deleteOlderThan(prefix: string, cutoff: Date): Promise<number>;
   /**
    * Adresse de dépôt direct par le navigateur (PUT), valable `expiresInSeconds` (PL-405). Seule la zone d'arrivée
    * `orgs/{orgId}/incoming/` reçoit ainsi un fichier en clair, relu, vérifié, chiffré puis effacé par le serveur.
@@ -35,6 +40,13 @@ const KEY = /^[a-z0-9_-]+(\/[A-Za-z0-9._-]+)+$/u;
 /** Préfixe d'une organisation seulement : jamais la racine du stockage. */
 function checkPrefix(prefix: string): string {
   if (!/^orgs\/[A-Za-z0-9_-]+\/$/u.test(prefix)) throw new Error("préfixe d'objet invalide");
+  return prefix;
+}
+
+/** Zone d'arrivée d'une organisation seulement. */
+function checkIncomingPrefix(prefix: string): string {
+  if (!/^orgs\/[A-Za-z0-9_-]+\/incoming\/$/u.test(prefix))
+    throw new Error("préfixe d'objet invalide");
   return prefix;
 }
 
@@ -86,6 +98,30 @@ export class LocalObjectStore implements ObjectStore {
     await rm(this.path(key), { force: true });
   }
 
+  async size(key: string) {
+    try {
+      return (await stat(this.path(key))).size;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw error;
+    }
+  }
+
+  async deleteOlderThan(prefix: string, cutoff: Date) {
+    const dir = normalize(join(this.root, checkIncomingPrefix(prefix)));
+    const names = await readdir(dir).catch(() => [] as string[]);
+    let removed = 0;
+    for (const name of names) {
+      const file = join(dir, name);
+      const info = await stat(file).catch(() => null);
+      if (info?.isFile() && info.mtime < cutoff) {
+        await rm(file, { force: true });
+        removed += 1;
+      }
+    }
+    return removed;
+  }
+
   async deletePrefix(prefix: string) {
     const dir = normalize(join(this.root, checkPrefix(prefix)));
     const existed = await readdir(dir, { recursive: true }).then(
@@ -134,6 +170,44 @@ export class S3ObjectStore implements ObjectStore {
 
   async delete(key: string) {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: checkKey(key) }));
+  }
+
+  async size(key: string) {
+    try {
+      const out = await this.client.send(
+        new HeadObjectCommand({ Bucket: this.bucket, Key: checkKey(key) }),
+      );
+      return out.ContentLength ?? null;
+    } catch (error) {
+      const name = (error as { name?: string }).name;
+      if (name === "NotFound" || name === "NoSuchKey") return null;
+      throw error;
+    }
+  }
+
+  async deleteOlderThan(prefix: string, cutoff: Date) {
+    let removed = 0;
+    let token: string | undefined;
+    do {
+      const page = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: checkIncomingPrefix(prefix),
+          ContinuationToken: token,
+        }),
+      );
+      const keys = (page.Contents ?? []).flatMap((o) =>
+        o.Key && o.LastModified && o.LastModified < cutoff ? [{ Key: o.Key }] : [],
+      );
+      if (keys.length) {
+        await this.client.send(
+          new DeleteObjectsCommand({ Bucket: this.bucket, Delete: { Objects: keys, Quiet: true } }),
+        );
+        removed += keys.length;
+      }
+      token = page.IsTruncated ? page.NextContinuationToken : undefined;
+    } while (token);
+    return removed;
   }
 
   async deletePrefix(prefix: string) {

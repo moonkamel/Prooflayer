@@ -1928,7 +1928,7 @@
     "ownerOnly": "Full export and organisation deletion are reserved for owners.",
     "export": {
       "title": "Export all data",
-      "body": "A ZIP archive gathers the register, classifications, controls, all evidence (decrypted attachments and raw payloads), audit packs and the audit log, as JSON. Packs remain verifiable with the open-source tool. An email lets you know when the archive is ready.",
+      "body": "A ZIP archive gathers the register, classifications, controls, all evidence (decrypted attachments and raw payloads), audit packs and the audit log, as JSON. Packs remain verifiable with the open-source tool. An email lets you know when the archive is ready; it remains downloadable for 7 days.",
       "request": "Prepare an export",
       "building": "Export in progress…",
       "empty": "No export yet.",
@@ -1938,7 +1938,8 @@
         "QUEUED": "queued",
         "BUILDING": "in progress",
         "READY": "ready",
-        "FAILED": "failed, request a new export"
+        "FAILED": "failed, request a new export",
+        "EXPIRED": "expired, request a new export"
       }
     },
     "deletion": {

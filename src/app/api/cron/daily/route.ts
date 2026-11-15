@@ -5,11 +5,7 @@ import { scheduleDailySweep } from "@/server/system/evaluation-sweep";
 import { scheduleJiraReconciliation } from "@/server/system/jira-schedule";
 import { scheduleDailyDigests } from "@/server/system/notification-schedule";
 import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
-import { pruneRateLimits } from "@/server/system/rate-limit";
-import { prunePublicLeads } from "@/server/system/public-leads";
-import { scheduleOrgDeletions } from "@/server/system/org-deletion-schedule";
-import { syncAllFunnels } from "@/server/system/funnel";
-import { pruneDeliveries } from "@/server/system/webhooks";
+import { scheduleMaintenance } from "@/server/system/jobs/maintenance";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,25 +22,8 @@ export async function GET(request: Request): Promise<Response> {
   const digests = await scheduleDailyDigests();
   // Veille (PL-603) : entrées publiées ce jour, administrateurs prévenus une fois.
   const watch = await scheduleWatchNotifications();
-  // PL-605 : compteurs de limitation de débit périmés.
-  const rateLimits = await pruneRateLimits();
-  // PL-606 : demandes du classifieur public au-delà de la durée annoncée par la politique de confidentialité.
-  const publicLeads = await prunePublicLeads();
-  // PL-607 : avis de fin de contrat (purge à 90 jours) et purges arrivées à échéance.
-  const deletions = await scheduleOrgDeletions();
-  // PL-608 : étapes de l'entonnoir atteintes (et transmises à PostHog s'il est configuré).
-  const funnel = (await syncAllFunnels()).created;
-  // Revue finale : charges et livraisons de webhooks au-delà de leur durée de conservation.
-  const deliveries = await pruneDeliveries();
-  return Response.json({
-    ...sweep,
-    jira,
-    digests,
-    watch,
-    rateLimits,
-    publicLeads,
-    deletions,
-    funnel,
-    deliveries,
-  });
+  // Revue finale : le ménage (limites de débit, contacts du classifieur, livraisons de webhooks, suppressions
+  // programmées, entonnoir, stockage) part en jobs indépendants, pour tenir dans la durée d'une requête.
+  const maintenance = await scheduleMaintenance();
+  return Response.json({ ...sweep, jira, digests, watch, maintenance });
 }

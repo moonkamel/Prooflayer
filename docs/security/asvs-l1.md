@@ -61,11 +61,12 @@ Légende : ✅ en place · 🔧 corrigé par PL-605 · ⚠ écart consigné (tra
 
 ## V6 Cryptographie stockée
 
-| Exigence                                         | État | Mise en œuvre                                                                                                        |
-| ------------------------------------------------ | ---- | -------------------------------------------------------------------------------------------------------------------- |
-| 6.2.1–6.2.3 modules éprouvés, modes authentifiés | ✅   | AES-256-GCM (Node crypto), Ed25519, SHA-256, WebCrypto                                                               |
-| 6.3.1 aléa cryptographique                       | ✅   | `randomBytes`, `crypto.getRandomValues`                                                                              |
-| 6.4.x gestion des clés                           | ✅   | Clés de données par organisation enveloppées par `PROOFLAYER_MASTER_KEY` ; secrets en variables « sensitive » Vercel |
+| Exigence                                         | État | Mise en œuvre                                                                                                         |
+| ------------------------------------------------ | ---- | --------------------------------------------------------------------------------------------------------------------- |
+| 6.2.1–6.2.3 modules éprouvés, modes authentifiés | ✅   | AES-256-GCM (Node crypto), Ed25519, SHA-256, WebCrypto                                                                |
+| 6.3.1 aléa cryptographique                       | ✅   | `randomBytes`, `crypto.getRandomValues`                                                                               |
+| 6.4.x gestion des clés                           | ✅   | Clés de données par organisation enveloppées par `PROOFLAYER_MASTER_KEY` ; secrets en variables « sensitive » Vercel  |
+| — données au repos                               | 🔧   | Revue finale : packs et exports chiffrés par la clé de l'organisation ; charges de webhooks effacées après traitement |
 
 ## V7 Erreurs et journalisation
 

@@ -2,7 +2,7 @@
 // journal ; jamais de jeton) ; suppression programmée par un owner (slug, mot de passe, abonnement résilié), annulable ;
 // purge à l'échéance : stockage effacé, toute ligne de l'organisation supprimée (catalogue), clé détruite, trace et
 // confirmation par email ; fin de contrat : avis puis purge à 90 jours.
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm, utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -20,6 +20,7 @@ import { exportStorage } from "@/server/services/org-export";
 import { packObjectKey } from "@/server/services/packs";
 import { LocalObjectStore } from "@/server/storage/object-store";
 import { jobRegistry } from "@/server/system/jobs/handlers";
+import { pruneStorage } from "@/server/system/jobs/maintenance";
 import { orgDeletionDependencies } from "@/server/system/jobs/org-deletion";
 import { runJobNow } from "@/server/system/jobs/queue";
 import { contractEndPurgeAt, dueDeletions } from "@/server/system/org-deletion";
@@ -36,6 +37,8 @@ const transport = { send: async (m: EmailMessage) => void sent.push(m) };
 let dir = "";
 let store: LocalObjectStore;
 let clock = new Date();
+let t0 = clock;
+const DAY = 86_400_000;
 let packId = "";
 let evidenceId = "";
 
@@ -174,6 +177,10 @@ describe("export complet", () => {
     expect(row).toMatchObject({ id: exportId, status: "READY" });
     const { bytes, filename } = await as(owner).org.export.download({ exportId });
     expect(filename).toMatch(/^prooflayer-export-\d{4}-\d{2}-\d{2}\.zip$/u);
+    // Revue finale : au repos, l'archive est chiffrée par la clé de l'organisation (pas une archive ZIP lisible).
+    const atRest = await store.get(`orgs/${A}/exports/${exportId}.zip`);
+    expect(atRest![0]).toBe(0x01);
+    expect(atRest!.subarray(0, 2).toString()).not.toBe("PK");
     const files = unzipSync(new Uint8Array(bytes));
     const manifest = JSON.parse(strFromU8(files["manifest.json"]!));
     expect(manifest).toMatchObject({
@@ -219,9 +226,36 @@ describe("export complet", () => {
   });
 });
 
+describe("ménage du stockage (revue finale)", () => {
+  it("export expiré à 7 jours : archive supprimée ; dépôt abandonné effacé à 24 heures", async () => {
+    const [exported] = await as(owner).org.export.list();
+    await forOrg(A).orgExport.update({
+      where: { id: exported!.id },
+      data: { completedAt: new Date(Date.now() - 8 * 86_400_000) },
+    });
+    await store.put(`orgs/${A}/incoming/ancien`, Buffer.from("en clair"));
+    await store.put(`orgs/${A}/incoming/recent`, Buffer.from("en clair"));
+    const old = new Date(Date.now() - 25 * 3_600_000);
+    await utimes(join(dir, "orgs", A, "incoming", "ancien"), old, old);
+
+    const result = await pruneStorage(new Date(), store);
+    expect(result.exports).toBeGreaterThanOrEqual(1);
+    expect(result.uploads).toBeGreaterThanOrEqual(1);
+    expect(await store.get(`orgs/${A}/exports/${exported!.id}.zip`)).toBeNull();
+    expect((await as(owner).org.export.list())[0]).toMatchObject({ status: "EXPIRED" });
+    await expect(as(owner).org.export.download({ exportId: exported!.id })).rejects.toThrow(
+      "export.notReady",
+    );
+    expect(await store.size(`orgs/${A}/incoming/ancien`)).toBeNull();
+    expect(await store.size(`orgs/${A}/incoming/recent`)).toBe(8);
+  });
+});
+
 describe("suppression demandée par un owner", () => {
   it("slug erroné, mot de passe faux, abonnement payant actif : refusée", async () => {
-    clock = new Date("2026-11-15T10:00:00Z");
+    // Heure réelle : la base refuse au rôle applicatif une échéance à moins de 6 jours (revue finale).
+    clock = new Date(Math.floor(Date.now() / 1000) * 1000);
+    t0 = clock;
     await expect(
       requestDeletion(ctx(), { password: "x", confirmation: "autre" }, deps()),
     ).rejects.toThrow("deletion.confirmationMismatch");
@@ -246,7 +280,7 @@ describe("suppression demandée par un owner", () => {
 
   it("programmée à 7 jours, avis aux owners, annulable", async () => {
     const scheduled = await requestDeletion(ctx(), { password: "x", confirmation: A }, deps());
-    expect(scheduled?.scheduledFor).toBe("2026-11-22T10:00:00.000Z");
+    expect(scheduled?.scheduledFor).toBe(new Date(t0.getTime() + 7 * DAY).toISOString());
     await expect(
       requestDeletion(ctx(), { password: "x", confirmation: A }, deps()),
     ).rejects.toThrow("deletion.alreadyScheduled");
@@ -270,8 +304,30 @@ describe("suppression demandée par un owner", () => {
     ]);
 
     // Pas encore échue : rien n'est programmé.
-    expect((await dueDeletions(new Date("2026-11-20T00:00:00Z"))).due).not.toContain(id);
-    clock = new Date("2026-11-22T11:00:00Z");
+    expect((await dueDeletions(new Date(t0.getTime() + 5 * DAY))).due).not.toContain(id);
+    // Revue finale : avant l'échéance, le rôle applicatif ne peut ni purger ni avancer l'échéance.
+    await expect(prisma.$queryRaw`SELECT purge_organization(${A})`).rejects.toThrow();
+    await expect(
+      prisma.organizationDeletion.update({ where: { id }, data: { scheduledFor: new Date() } }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.organizationDeletion.create({
+        data: { orgId: B, reason: "owner_request", scheduledFor: new Date(Date.now() + DAY) },
+      }),
+    ).rejects.toThrow();
+    expect(await prisma.organization.count({ where: { id: A } })).toBe(1);
+    // Le temps passe : l'échéance est reculée sous le rôle d'administration, seul à pouvoir la modifier.
+    const admin = new pg.Client({ connectionString: process.env.DIRECT_DATABASE_URL });
+    await admin.connect();
+    try {
+      await admin.query(
+        `UPDATE "OrganizationDeletion" SET "scheduledFor" = now() - interval '1 minute' WHERE id = $1`,
+        [id],
+      );
+    } finally {
+      await admin.end();
+    }
+    clock = new Date();
     await scheduleOrgDeletions(clock);
     await runJob(`org.purge:${id}`);
 
@@ -320,7 +376,8 @@ describe("suppression demandée par un owner", () => {
 
 describe("fin de contrat", () => {
   it("abonnement terminé : avis à J-7, purge à 90 jours après la fin", async () => {
-    const end = new Date("2026-08-20T00:00:00Z");
+    // Fin d'abonnement telle que la purge tombe dans 7 jours et une heure (heure réelle, voir plus haut).
+    const end = new Date(Math.floor(Date.now() / 1000) * 1000 - 83 * DAY + 3_600_000);
     await forOrg(B).subscription.create({
       data: {
         orgId: B,
@@ -343,7 +400,7 @@ describe("fin de contrat", () => {
   });
 
   it("annulée par un owner : pas reprogrammée avant 30 jours (ni nouvel email), puis de nouveau", async () => {
-    const cancelAt = new Date("2026-11-12T00:00:00Z");
+    const cancelAt = new Date();
     await cancelDeletion(ctx(B), cancelAt);
     const pendingFor = () =>
       prisma.organizationDeletion.count({

@@ -150,7 +150,8 @@ describe("étapes de l'entonnoir", () => {
     expect(rows.find((r) => r.orgId === A)?.funnel.steps.first_pack).not.toBeNull();
     expect(summary.organizations).toBeGreaterThanOrEqual(1);
     expect(await prisma.job.count({ where: { orgId: A, type: "analytics.capture" } })).toBe(5);
-  });
+    // Parcourt toutes les organisations de la base de test : délai élargi (en production, job maintenance.daily).
+  }, 60_000);
 });
 
 describe("PostHog", () => {

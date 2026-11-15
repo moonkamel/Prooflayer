@@ -166,6 +166,13 @@ export async function registerUpload(
   }
   const validUntil = validUntilOf(input.validUntil, now);
   const instances = await assertControls(ctx, claims.controlInstanceIds);
+  // Revue finale : la taille est contrôlée avant toute lecture (l'adresse de dépôt signée ne la borne pas).
+  const stored = await deps.store.size(claims.key);
+  if (stored === null) throw new ServiceError("BAD_REQUEST", "evidence.uploadMissing");
+  if (stored === 0 || stored > MAX_UPLOAD_BYTES) {
+    await deps.store.delete(claims.key);
+    throw new ServiceError("BAD_REQUEST", "evidence.tooLarge");
+  }
   const data = await deps.store.get(claims.key);
   if (!data) throw new ServiceError("BAD_REQUEST", "evidence.uploadMissing");
   if (data.length === 0 || data.length > MAX_UPLOAD_BYTES) {

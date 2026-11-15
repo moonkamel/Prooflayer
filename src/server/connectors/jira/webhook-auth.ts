@@ -1,6 +1,6 @@
 // Authentification des webhooks Jira d'une application OAuth 2.0 (PL-404, §4.5.2). HYPOTHÈSE À VALIDER du cahier : un
 // JWT HS256 signé avec le secret client, dans l'en-tête `Authorization` (« JWT … » ou « Bearer … »). Vérifié en temps
-// constant ; un jeton expiré est refusé. Fonction pure.
+// constant ; un jeton expiré ou sans échéance est refusé. Fonction pure.
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export function verifyJiraWebhookJwt(
@@ -22,7 +22,8 @@ export function verifyJiraWebhookJwt(
       string,
       unknown
     >;
-    if (typeof claims.exp === "number" && claims.exp * 1000 < now.getTime()) return null;
+    // Revue finale : un jeton sans échéance serait rejouable indéfiniment ; `exp` est exigé.
+    if (typeof claims.exp !== "number" || claims.exp * 1000 < now.getTime()) return null;
     return claims;
   } catch {
     return null;

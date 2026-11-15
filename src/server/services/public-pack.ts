@@ -4,7 +4,7 @@
 // l'organisation n'est lisible par cette voie.
 import { withOrgTransaction } from "@/server/db";
 import type { ObjectStore } from "@/server/storage/object-store";
-import { packStorage } from "./packs";
+import { packStorage, readPackArchive } from "./packs";
 
 export interface PublicPackConfig {
   orgId: string;
@@ -61,7 +61,11 @@ export async function publicPackArchive(
   if (!config) return null;
   const pack = await readyPack(config);
   if (!pack?.objectKey) return null;
-  const bytes = await store.get(pack.objectKey);
+  const bytes = await readPackArchive(
+    config.orgId,
+    { id: pack.id, objectKey: pack.objectKey },
+    store,
+  );
   if (!bytes) return null;
   return { bytes, filename: `prooflayer-pack-${pack.system.slug}.zip` };
 }
