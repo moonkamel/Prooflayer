@@ -136,6 +136,13 @@ test("qualifier « Score d'adéquation candidat » : haut risque, 4(a), fourniss
   );
   await expectNoViolations(page, "contrôles");
 
+  // Capture en direct (PL-604, écran 7) : contrôles « en attente » ou évalués, lien vers le dashboard.
+  await page.goto(page.url().replace(/\/controls$/u, "/capture"));
+  await expect(page.getByRole("heading", { name: "Capture en direct" })).toBeVisible();
+  await expect(page.getByTestId("capture-controls").locator("li")).toHaveCount(37);
+  await expectNoViolations(page, "capture en direct");
+  await page.goBack();
+
   // Preuve déclarative (PL-405) : attestation signée sur la revue annuelle des pratiques interdites (AIA-05-01).
   await page.getByRole("link", { name: "Ajouter une preuve · AIA-05-01" }).click();
   await expect(page.getByRole("heading", { name: "Ajouter une preuve" })).toBeVisible();

@@ -37,7 +37,9 @@ export default async function SystemsPage({
       <ExportRegistryButtons />
 
       {systems.length === 0 ? (
-        <p>{t("empty")}</p>
+        <p>
+          {t("empty")} {t("emptyHelp")}
+        </p>
       ) : (
         <Table data-testid="registry">
           <thead>

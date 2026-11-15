@@ -362,7 +362,8 @@
     "archivedError": "This record is archived and can no longer be edited.",
     "forbidden": "Your role does not allow editing the register.",
     "monitoredLimit": "Monitored system limit reached for your plan.",
-    "readOnly": "The workspace is read-only: settle the subscription to resume."
+    "readOnly": "The workspace is read-only: settle the subscription to resume.",
+    "emptyHelp": "Declare a first system below: name, intended purpose and owner are enough. Its classification will open its controls."
   },
   "system": {
     "sections": "Record sections",
@@ -733,7 +734,8 @@
       "MANUAL": "Manual"
     },
     "byReclassification": "Set aside by the last reclassification",
-    "addEvidence": "Add evidence"
+    "addEvidence": "Add evidence",
+    "emptyAction": "Qualify the system"
   },
   "exemption": {
     "title": "Exemption file",
@@ -877,7 +879,8 @@
       "acceptanceField": "Residual risk acceptance field (optional)",
       "acceptanceHelp": "Identifier of the Jira custom field (user picker) naming the person who accepted the residual risk, for example customfield_10050.",
       "invalidField": "Expected a field identifier such as customfield_12345."
-    }
+    },
+    "followCapture": "Follow the live capture"
   },
   "manualEvidence": {
     "title": "Add evidence",
@@ -1188,7 +1191,8 @@
     "copied": "Command copied.",
     "errors": {
       "pack_invalidPeriod": "Invalid period: the end follows the start, is not after today, and the period is at most 400 days."
-    }
+    },
+    "emptyHelp": "A pack gathers the period's sealed evidence, the report and the templates; it is verifiable offline. Choose the period above."
   },
   "packVerify": {
     "body": "# Verifying this audit pack\n\nThis pack is verified without a ProofLayer account and without network access. The command `npx @prooflayer/verify pack.zip` runs the six steps below and exits with code 0 (no tampering) or 1. They can also be redone by hand, with `openssl` and `sha256sum`.\n\n## 1. Manifest signature\n\n`manifest.json` is signed with Ed25519 by key `{kid}`. The signed bytes are the canonical JSON form (RFC 8785) of the manifest without its `signature` field. ProofLayer's public keys are published at {keysUrl} and pinned in the verification tool.\n\n## 2. File integrity\n\nThe manifest lists every file in the pack with its SHA-256 hash (`files`). Example: `sha256sum report.pdf`.\n\n## 3. Disclosed evidence\n\nEach `evidence/<id>.json` file holds the payload, salt and envelope of one item of evidence. Recompute `contentSha256 = SHA-256(JCS(payload))` then `leafHash = SHA-256(0x00 ‖ salt ‖ JCS(envelope))`, the envelope being `{{ v, org, id, kind, sourceRef, occurredAt, capturedAt, contentSha256, attachmentSha256 }}`. Any attachment hashes to `attachmentSha256`.\n\n## 4. Batches\n\nEach `proofs/batches/<seq>.json` file lists ALL the leaves of the batch, disclosed or not: an omitted item remains visible through its `leafHash` alone. The Merkle root (RFC 6962) of the leaves must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `batchHash`. Batches follow each other without gaps and each `prevBatchHash` is the `batchHash` of the previous batch.\n\n## 5. Anchors and timestamps\n\nEach `proofs/anchors/<seq>.json` file lists the anchor's `batchHash` values; their root must equal `header.merkleRoot`, and `SHA-256(JCS(header))` must equal `anchorHash`. The RFC 3161 token timestamps `anchorHash`:\n\n    openssl ts -verify -digest <anchorHash> -in proofs/anchors/<seq>.tst -token_in -CAfile proofs/tsa/<provider>.pem\n\n## 6. Census\n\nThe manifest states the number of leaves in the period, the number of disclosed items and the difference. A batch without an anchor (`anchor: null`) has not yet been timestamped by the provider.\n\n## What sealing proves\n\nThe content of an item of evidence existed no later than the token date and has not changed since; no item has been removed from a batch; the order of batches is intact. It does not prove that the event happened in the source tool: each item carries its source address for cross-checking. Declarative evidence (uploaded document, attestation) dates the upload, not the truth of the document."
@@ -1476,5 +1480,54 @@
     "controls": "Controls concerned",
     "controlsFor": "Controls concerned by \"{title}\"",
     "notInScope": "not yet tracked for your systems"
+  },
+  "onboardingSteps": {
+    "title": "Getting started",
+    "progress": "{done} of {total} steps",
+    "stepNumber": "{number}.",
+    "doneLabel": "done",
+    "todoLabel": "to do",
+    "steps": {
+      "system": {
+        "title": "Declare a first AI system",
+        "help": "Three fields are enough: name, intended purpose, owner.",
+        "action": "Open the register"
+      },
+      "classify": {
+        "title": "Qualify and sign its classification",
+        "help": "The questionnaire infers the category, role and applicable controls.",
+        "action": "Qualify the system"
+      },
+      "connect": {
+        "title": "Connect GitHub or Jira",
+        "help": "Evidence is captured directly at the source, read-only.",
+        "action": "Connect a source"
+      },
+      "evidence": {
+        "title": "Watch the first evidence arrive",
+        "help": "Follow the live capture: controls move from \"pending\" to their status.",
+        "action": "Follow the capture"
+      },
+      "pack": {
+        "title": "Export a first audit pack",
+        "help": "Choose the period and language: the signed pack is verifiable offline.",
+        "action": "Export a pack"
+      }
+    }
+  },
+  "capture": {
+    "title": "Live capture",
+    "intro": "Evidence arrives from your sources and controls are evaluated as it comes. This screen updates by itself.",
+    "dashboard": "View the dashboard",
+    "noSource": "No source is linked to this system yet.",
+    "linkSource": "Link a source",
+    "summary": "{total, plural, =0 {No evidence captured} one {# evidence item captured} other {# evidence items captured}}, {evaluated} of {controls} control(s) evaluated.",
+    "byKind": "Evidence by type",
+    "waiting": "Waiting for the first evidence…",
+    "kind": "Evidence type",
+    "count": "Count",
+    "controls": "Controls",
+    "noControls": "No open control: sign the system's classification.",
+    "pending": "pending"
   }
 }

@@ -8,6 +8,7 @@ import { evidenceRouter } from "./evidence";
 import { exemptionRouter } from "./exemption";
 import { integrationRouter } from "./integration";
 import { notificationRouter } from "./notification";
+import { onboardingRouter } from "./onboarding";
 import { orgRouter } from "./org";
 import { packRouter } from "./pack";
 import { systemRouter } from "./system";
@@ -27,6 +28,7 @@ export const appRouter = router({
   pack: packRouter,
   billing: billingRouter,
   watch: watchRouter,
+  onboarding: onboardingRouter,
 });
 
 export type AppRouter = typeof appRouter;

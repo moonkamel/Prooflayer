@@ -616,3 +616,12 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   et admin, une fois (`notifiedAt` ; `watchAudience` remplaçable par les tests). Lecture : `regulatory-updates.ts`.
 - Écran `/watch` (lien « Veille » de la navigation), routeur `watch.list` (tout membre) : contrôles concernés reliés aux
   contrôles des systèmes de l'organisation avec leur statut.
+
+## Mise en route guidée (conventions établies par PL-604)
+- Pur : `src/server/services/onboarding-data.ts` (`onboardingSteps` : 5 étapes système, classification signée, source
+  connectée, première preuve capturée hors `system.*`, premier pack prêt ; étape en cours = première non faite ;
+  `captureStatus` : « en attente » tant qu'un contrôle n'a jamais été évalué).
+- Service `src/server/services/onboarding.ts`, routeur `onboarding` (`progress`, `capture`, lecture, tout membre).
+- Écrans : liste de mise en route sur `/dashboard` tant qu'elle n'est pas terminée (`OnboardingChecklist`) ; écran 7
+  `/systems/[id]/capture` (relu toutes les 3 s, synthèse en `aria-live` polite, aucune animation), lien depuis l'onglet
+  Sources. États vides du §5.2 : chaque liste vide dit quoi faire ensuite (lien ou explication).

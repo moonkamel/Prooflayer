@@ -73,6 +73,7 @@ const CROSS_ORG: Record<string, () => { input: unknown; code: Refusal }> = {
   "control.listBySystem": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "control.get": () => ({ input: { controlId: a.controlInstanceId }, code: "NOT_FOUND" }),
   "evidence.proof": () => ({ input: { evidenceId: "ev_de_A_inexistante" }, code: "NOT_FOUND" }),
+  "onboarding.capture": () => ({ input: { systemId: a.systemId }, code: "NOT_FOUND" }),
   "evidence.redact": () => ({
     input: { evidenceId: a.evidenceId, reason: "data_subject_request" },
     code: "NOT_FOUND",
@@ -240,6 +241,7 @@ const ORG_SCOPED = [
   "billing.checkout",
   "billing.portal",
   "watch.list",
+  "onboarding.progress",
 ];
 
 const paths = Object.keys(appRouter._def.procedures as unknown as Record<string, unknown>);
