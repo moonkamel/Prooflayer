@@ -7,7 +7,11 @@ export type OperationalAlert =
   | "seal.tsaNotConfigured"
   | "seal.integrityFailure"
   | "billing.orgMissing"
-  | "billing.unknownPrice";
+  | "billing.unknownPrice"
+  | "ops.queueLagging"
+  | "ops.webhookLagging"
+  | "ops.connectorError"
+  | "ops.errorRate";
 
 export function raiseOperationalAlert(
   code: OperationalAlert,
