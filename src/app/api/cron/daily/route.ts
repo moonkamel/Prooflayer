@@ -9,6 +9,7 @@ import { pruneRateLimits } from "@/server/system/rate-limit";
 import { prunePublicLeads } from "@/server/system/public-leads";
 import { scheduleOrgDeletions } from "@/server/system/org-deletion-schedule";
 import { syncAllFunnels } from "@/server/system/funnel";
+import { pruneDeliveries } from "@/server/system/webhooks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,6 +34,8 @@ export async function GET(request: Request): Promise<Response> {
   const deletions = await scheduleOrgDeletions();
   // PL-608 : étapes de l'entonnoir atteintes (et transmises à PostHog s'il est configuré).
   const funnel = (await syncAllFunnels()).created;
+  // Revue finale : charges et livraisons de webhooks au-delà de leur durée de conservation.
+  const deliveries = await pruneDeliveries();
   return Response.json({
     ...sweep,
     jira,
@@ -42,5 +45,6 @@ export async function GET(request: Request): Promise<Response> {
     publicLeads,
     deletions,
     funnel,
+    deliveries,
   });
 }

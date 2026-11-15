@@ -30,6 +30,30 @@ function cookieValue(cookieHeader: string | null | undefined, name: string): str
   return undefined;
 }
 
+/** Routes HTTP d'écriture du plugin organization fermées au navigateur (voir `disabledPaths`). */
+export const CLOSED_ORGANIZATION_PATHS = [
+  "/organization/create",
+  "/organization/update",
+  "/organization/delete",
+  "/organization/invite-member",
+  "/organization/cancel-invitation",
+  "/organization/remove-member",
+  "/organization/update-member-role",
+  "/organization/leave",
+  "/organization/create-role",
+  "/organization/update-role",
+  "/organization/delete-role",
+  "/organization/create-team",
+  "/organization/update-team",
+  "/organization/remove-team",
+  "/organization/add-team-member",
+  "/organization/remove-team-member",
+  "/organization/set-active-team",
+] as const;
+
+/** Organisations qu'un même utilisateur peut créer : chaque création ouvre un essai (§3.2 E11). */
+export const ORGANIZATION_LIMIT = 3;
+
 export const auth = betterAuth({
   appName: "ProofLayer",
   baseURL: process.env.BETTER_AUTH_URL,
@@ -38,6 +62,11 @@ export const auth = betterAuth({
   // PL-605 : limite de débit sur l'authentification, en base (une mémoire par instance serverless ne protège rien).
   // Règles par défaut de Better Auth (plus strictes sur la connexion, l'inscription et le mot de passe).
   rateLimit: { storage: "database" },
+  // Revue finale : les écritures d'organisation ne passent que par les services (rôles, journal d'audit, lecture
+  // seule, suppression programmée de PL-607). Leurs routes HTTP Better Auth sont fermées ; `auth.api.*`, appelé par
+  // les services, n'est pas concerné. Restent ouvertes : acceptation ou refus d'une invitation, organisation active,
+  // lectures.
+  disabledPaths: [...CLOSED_ORGANIZATION_PATHS],
 
   user: {
     additionalFields: {
@@ -105,6 +134,9 @@ export const auth = betterAuth({
       ac,
       roles,
       creatorRole: "owner",
+      // Suppression : uniquement par le parcours de PL-607 (délai, stockage, clé, confirmation).
+      disableOrganizationDeletion: true,
+      organizationLimit: ORGANIZATION_LIMIT,
       invitationExpiresIn: 7 * 24 * 60 * 60, // 7 jours (§3.2 E10)
       cancelPendingInvitationsOnReInvite: true,
       requireEmailVerificationOnInvitation: true,

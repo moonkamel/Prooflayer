@@ -702,3 +702,14 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   payant jamais modifié ; `recordSession`, `recordPackShared`, `markReplaced`, `partnersReport`).
 - CLI du fondateur `pnpm partners add|session|shared|replace|report`. Guide de session :
   `docs/design-partners/onboarding-session.md` (accord exprès avant tout enregistrement, conservé hors ProofLayer).
+
+## Revue finale (conventions établies par la revue de fin de développement)
+- Better Auth : les routes HTTP d'écriture du plugin organization sont fermées (`CLOSED_ORGANIZATION_PATHS`,
+  `disabledPaths` dans `src/server/auth.ts`) ; toute écriture d'organisation passe par un service (`auth.api.*` côté
+  serveur, rôles, journal d'audit). Suppression désactivée (`disableOrganizationDeletion`, seul le parcours de PL-607
+  supprime) ; `ORGANIZATION_LIMIT` organisations par utilisateur. Une route Better Auth nouvelle dont l'interface a
+  besoin se vérifie dans `tests/integration/auth-surface.test.ts`.
+- `WebhookDelivery.payload` est vidé dès qu'une livraison est terminée (`finishDelivery`) ; une livraison FAILED garde
+  sa charge 7 jours, toute livraison terminée est supprimée à 30 jours (`pruneDeliveries`, `/api/cron/daily`).
+- Purge de fin de contrat : abonnements payants terminés seulement (un essai expiré n'est jamais purgé d'office) ;
+  une annulation par un owner suspend la reprogrammation 30 jours (`CANCEL_SNOOZE_DAYS`).

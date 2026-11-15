@@ -1722,7 +1722,7 @@
           "title": "1. Objet et description du traitement",
           "paragraphs": [
             "Finalité : capture, scellement, évaluation et export de preuves de gouvernance des systèmes d'IA du Client. Nature : collecte depuis les outils connectés, stockage chiffré, horodatage, constitution de packs d'audit.",
-            "Données : identifiants de compte et noms d'utilisateur des outils source (GitHub, Jira), métadonnées d'activité (dates, statuts, revues), fichiers déposés par le Client. Les corps de messages, diffs, descriptions et commentaires ne sont pas capturés. Personnes concernées : salariés et prestataires du Client actifs dans ces outils.",
+            "Données : identifiants de compte et noms d'utilisateur des outils source (GitHub, Jira), métadonnées d'activité (dates, statuts, revues), fichiers déposés par le Client. Les preuves normalisées ne contiennent ni corps de message, ni diff, ni description, ni commentaire. L'événement d'origine reçu de l'outil source, qui peut en contenir, est conservé à part, chiffré par la clé de l'organisation, comme élément de preuve ; il n'est lu que pour l'export demandé par le Client. Personnes concernées : salariés et prestataires du Client actifs dans ces outils.",
             "Durée : celle de l'abonnement, puis purge 90 jours après sa fin."
           ]
         },
@@ -1954,7 +1954,7 @@
       "cancel": "Annuler la suppression",
       "scheduled": {
         "owner_request": "Suppression programmée le {date}. Toutes les données seront alors effacées et la clé de chiffrement détruite.",
-        "contract_end": "Abonnement terminé depuis près de 90 jours : suppression programmée le {date}. Souscrivez un abonnement ou annulez pour conserver vos données."
+        "contract_end": "Abonnement terminé depuis près de 90 jours : suppression programmée le {date}. Souscrivez un abonnement pour conserver vos données ; une annulation reporte la suppression de 30 jours."
       }
     },
     "errors": {

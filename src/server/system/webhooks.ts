@@ -83,7 +83,9 @@ export async function finishDelivery(
 ): Promise<boolean> {
   const { count } = await client.webhookDelivery.updateMany({
     where: { id: delivery.id, status: "PROCESSING", nextAttemptAt: delivery.claimedAt },
-    data: { status, processedAt: new Date(), lastError: reason ?? null },
+    // Revue finale : la charge du fournisseur (corps de PR, descriptions…) ne reste pas en base une fois la livraison
+    // terminée ; seules l'empreinte et les métadonnées demeurent (idempotence, diagnostic).
+    data: { status, processedAt: new Date(), lastError: reason ?? null, payload: {} },
   });
   return count === 1;
 }
@@ -110,4 +112,31 @@ export async function resolveIntegration(provider: IntegrationProvider, external
   const rows = await prisma.$queryRaw<{ integrationId: string; orgId: string; status: string }[]>`
     SELECT * FROM resolve_integration(${provider}::"IntegrationProvider", ${externalAccountId})`;
   return rows[0] ?? null;
+}
+
+/** Conservation de la boîte de réception : charge d'une livraison en échec, puis ligne elle-même. */
+export const FAILED_PAYLOAD_DAYS = 7;
+export const DELIVERY_RETENTION_DAYS = 30;
+
+/**
+ * Ménage quotidien : une livraison FAILED garde sa charge 7 jours (rejeu manuel possible), puis la perd ; toute
+ * livraison terminée est supprimée après 30 jours (au-delà de la fenêtre de rejeu des fournisseurs).
+ */
+export async function pruneDeliveries(now = new Date()) {
+  const day = 86_400_000;
+  const blanked = await prisma.webhookDelivery.updateMany({
+    where: {
+      status: "FAILED",
+      receivedAt: { lt: new Date(now.getTime() - FAILED_PAYLOAD_DAYS * day) },
+      NOT: { payload: { equals: {} } },
+    },
+    data: { payload: {} },
+  });
+  const deleted = await prisma.webhookDelivery.deleteMany({
+    where: {
+      status: { in: ["PROCESSED", "IGNORED", "FAILED"] },
+      receivedAt: { lt: new Date(now.getTime() - DELIVERY_RETENTION_DAYS * day) },
+    },
+  });
+  return { blanked: blanked.count, deleted: deleted.count };
 }

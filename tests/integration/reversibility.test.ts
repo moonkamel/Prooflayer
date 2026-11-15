@@ -22,7 +22,7 @@ import { LocalObjectStore } from "@/server/storage/object-store";
 import { jobRegistry } from "@/server/system/jobs/handlers";
 import { orgDeletionDependencies } from "@/server/system/jobs/org-deletion";
 import { runJobNow } from "@/server/system/jobs/queue";
-import { dueDeletions } from "@/server/system/org-deletion";
+import { contractEndPurgeAt, dueDeletions } from "@/server/system/org-deletion";
 import { scheduleOrgDeletions } from "@/server/system/org-deletion-schedule";
 
 const run = randomUUID().slice(0, 8);
@@ -340,5 +340,45 @@ describe("fin de contrat", () => {
     expect(row).toMatchObject({ reason: "contract_end", scheduledFor: purgeAt });
     // Un second passage ne crée pas de doublon.
     expect((await dueDeletions(new Date(purgeAt.getTime() - 6 * 86_400_000))).noticed).toBe(0);
+  });
+
+  it("annulée par un owner : pas reprogrammée avant 30 jours (ni nouvel email), puis de nouveau", async () => {
+    const cancelAt = new Date("2026-11-12T00:00:00Z");
+    await cancelDeletion(ctx(B), cancelAt);
+    const pendingFor = () =>
+      prisma.organizationDeletion.count({
+        where: { orgId: B, cancelledAt: null, completedAt: null },
+      });
+    await dueDeletions(new Date(cancelAt.getTime() + 86_400_000));
+    await dueDeletions(new Date(cancelAt.getTime() + 29 * 86_400_000));
+    expect(await pendingFor()).toBe(0);
+    await dueDeletions(new Date(cancelAt.getTime() + 31 * 86_400_000));
+    expect(await pendingFor()).toBe(1);
+  });
+
+  it("essai expiré jamais converti : jamais purgé d'office", () => {
+    const now = new Date("2027-06-01T00:00:00Z");
+    expect(
+      contractEndPurgeAt(
+        {
+          plan: "TRIAL",
+          status: "trialing",
+          trialEndsAt: new Date("2026-11-01T00:00:00Z"),
+          currentPeriodEnd: null,
+        },
+        now,
+      ),
+    ).toBeNull();
+    expect(
+      contractEndPurgeAt(
+        {
+          plan: "STARTER",
+          status: "canceled",
+          trialEndsAt: null,
+          currentPeriodEnd: new Date("2026-11-01T00:00:00Z"),
+        },
+        now,
+      ),
+    ).toEqual(new Date("2027-01-30T00:00:00Z"));
   });
 });
