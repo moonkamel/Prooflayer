@@ -29,7 +29,7 @@ const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest(
 const hex = (bytes: Uint8Array | null) => (bytes ? Buffer.from(bytes).toString("hex") : null);
 
 /** Extension d'une pièce jointe, d'après son type MIME (liste du dépôt manuel, PL-405). */
-const EXTENSIONS: Record<string, string> = {
+export const EXTENSIONS: Record<string, string> = {
   "application/pdf": "pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
   "image/png": "png",

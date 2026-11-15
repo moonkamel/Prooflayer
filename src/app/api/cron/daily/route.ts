@@ -7,6 +7,7 @@ import { scheduleDailyDigests } from "@/server/system/notification-schedule";
 import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
 import { pruneRateLimits } from "@/server/system/rate-limit";
 import { prunePublicLeads } from "@/server/system/public-leads";
+import { scheduleOrgDeletions } from "@/server/system/org-deletion-schedule";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,5 +28,7 @@ export async function GET(request: Request): Promise<Response> {
   const rateLimits = await pruneRateLimits();
   // PL-606 : demandes du classifieur public au-delà de la durée annoncée par la politique de confidentialité.
   const publicLeads = await prunePublicLeads();
-  return Response.json({ ...sweep, jira, digests, watch, rateLimits, publicLeads });
+  // PL-607 : avis de fin de contrat (purge à 90 jours) et purges arrivées à échéance.
+  const deletions = await scheduleOrgDeletions();
+  return Response.json({ ...sweep, jira, digests, watch, rateLimits, publicLeads, deletions });
 }

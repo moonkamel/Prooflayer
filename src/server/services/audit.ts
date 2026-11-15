@@ -44,6 +44,11 @@ export const AUDIT_ACTIONS = [
   "system.monitor",
   "billing.portal",
   "billing.subscriptionSynced",
+  "org.export",
+  "org.exportDownload",
+  "org.deletionRequest",
+  "org.deletionCancel",
+  "org.deletionRefused",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

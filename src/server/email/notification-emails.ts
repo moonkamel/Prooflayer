@@ -164,6 +164,33 @@ export async function renderPackReadyEmail(data: PackReadyEmail): Promise<EmailM
   };
 }
 
+export interface ExportReadyEmail {
+  to: string;
+  name: string;
+  locale?: unknown;
+  baseUrl: string;
+  organization: string;
+  evidenceCount: number;
+}
+
+/** Export complet prêt (PL-607). */
+export async function renderExportReadyEmail(data: ExportReadyEmail): Promise<EmailMessage> {
+  const locale = localeOf(data.locale);
+  const t = createTranslator({
+    locale,
+    messages: await loadMessages(locale),
+    namespace: "emails.exportReady",
+  });
+  const params = { name: data.name, organization: data.organization, count: data.evidenceCount };
+  return {
+    to: data.to,
+    subject: t("subject", params),
+    text: [t("intro", params), t("open", { url: link(data.baseUrl, "/organization/data") })].join(
+      "\n\n",
+    ),
+  };
+}
+
 export interface WatchPublishedEmail {
   to: string;
   name: string;

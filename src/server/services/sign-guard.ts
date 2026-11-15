@@ -17,6 +17,7 @@ const REFUSAL_ACTIONS = [
   "classification.signRefused",
   "exemption.signRefused",
   "evidence.attestRefused",
+  "org.deletionRefused",
 ] as const;
 
 /**

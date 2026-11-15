@@ -649,3 +649,22 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
   seulement), route `/api/public/pack` (limitée par IP). Procédure : `docs/trust/pack-prooflayer.md`.
 - Conservation du classifieur public : `prunePublicLeads` (`/api/cron/daily`) : 30 jours sans accord, 3 ans avec.
 - Un nouveau sous-traitant : `SUBPROCESSORS`, `legal.subprocessors.items` (fr, en) et préavis de 30 jours aux owners.
+
+## Réversibilité (conventions établies par PL-607)
+- Export complet : format pur `src/server/export/contents.ts` (`zipExport` : `manifest.json` avec l'empreinte SHA-256 de
+  chaque fichier et les décomptes ; JSON avec octets en hexadécimal et dates ISO ; preuves avec charge brute et pièce
+  jointe déchiffrées ; packs prêts tels quels ; jamais de jeton d'intégration ni de clé). Service
+  `src/server/services/org-export.ts` (`requestExport` : un export à la fois, `buildExport` dans le job `org.export`,
+  `orgs/{orgId}/exports/{id}.zip`, notification `export.ready` + email ; `exportStorage` remplaçable par les tests).
+  Table `OrgExport` (RLS). Route `/api/org/exports/[id]/download`.
+- Suppression : `src/server/services/org-deletion.ts` (`requestDeletion` : slug + mot de passe à essais limités,
+  abonnement payant résilié d'abord ; purge à `DELETION_GRACE_DAYS` = 7 jours, annulable). Table système
+  `OrganizationDeletion` (sans RLS, exception de `isolation.test.ts`), `src/server/system/org-deletion.ts`. Fin de contrat
+  (§4.7) : avis à J-7, purge 90 jours après la fin de l'abonnement (`contractEndPurgeAt`). Cron quotidien
+  `scheduleOrgDeletions`. Jobs `org.deletionNotice` et `org.purge` (`orgDeletionDependencies` remplaçable).
+- Purge : stockage `deletePrefix("orgs/{orgId}/")` d'abord (idempotent), puis la fonction SQL `purge_organization`
+  (SECURITY DEFINER, seule à poser app.purge_org hors tests) : toutes les lignes de l'organisation, `OrgEncryptionKey`
+  comprise (sauvegardes illisibles). Une nouvelle table avec `orgId` sans clé étrangère en cascade vers `Organization`
+  s'ajoute à cette fonction (le test de purge parcourt le catalogue). Les ancres partagées restent.
+- Routeur `org.export` (`list`, `request`, `download`) et `org.deletion` (`get`, `request`, `cancel`) : owner seul,
+  ouverts en lecture seule. Écran `/organization/data` (lien depuis `/organization`).

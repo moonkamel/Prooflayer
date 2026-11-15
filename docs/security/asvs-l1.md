@@ -135,7 +135,7 @@ Légende : ✅ en place · 🔧 corrigé par PL-605 · ⚠ écart consigné (tra
 1. **2.1.7** — vérification des mots de passe compromis : décision du fondateur requise (appel sortant vers un tiers).
 2. **2.1.12** — bouton « afficher le mot de passe » à ajouter aux écrans d'authentification.
 3. **2.2.3** — email de sécurité à l'activation ou au retrait de la 2FA et au changement de mot de passe.
-4. **8.3.2** — export et suppression : PL-607.
+4. ~~**8.3.2** — export et suppression~~ : livrés par PL-607.
 5. **Protection à l'envoi** — l'analyse de secrets de GitHub (_push protection_) s'active dans les réglages du dépôt
    par son propriétaire ; secretlint en CI ne bloque qu'après l'envoi.
 6. **Dépendance modérée** — `minimatch` < 11.0.1 (GHSA-g3hv-75wg-m249, déni de service par motif), outillage ESLint

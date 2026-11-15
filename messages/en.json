@@ -148,6 +148,21 @@
       "controls": "Controls concerned: {controls}.",
       "open": "Read the entry and see your controls concerned: {url}",
       "footer": "You receive this email as an administrator. Your alerts: {url}"
+    },
+    "exportReady": {
+      "subject": "[ProofLayer] Export ready · {organization}",
+      "intro": "Hello {name},\n\nThe full export of the organisation {organization} is ready: {count, plural, one {# evidence item} other {# evidence items}}, with the register, classifications, packs and log.",
+      "open": "Download it:\n{url}"
+    },
+    "orgDeletion": {
+      "scheduledSubject": "[ProofLayer] Deletion scheduled · {organization}",
+      "scheduledOwnerRequest": "Hello {name},\n\nDeletion of the organisation {organization} has been requested. It will take place on {date}.",
+      "scheduledContractEnd": "Hello {name},\n\nThe subscription of the organisation {organization} ended almost 90 days ago. Its data will be deleted on {date}, as provided by the terms.",
+      "scheduledWhat": "The register, classifications, evidence, attachments, packs, exports and log will be erased. The organisation's encryption key will be destroyed: backups will become unreadable. Export your data before that date.",
+      "scheduledCancel": "To export your data or cancel the deletion:\n{url}",
+      "deletedSubject": "[ProofLayer] Organisation deleted · {organization}",
+      "deletedIntro": "Hello {name},\n\nThe organisation {organization} was deleted on {date}: its data has been erased and its encryption key destroyed.",
+      "deletedBackups": "Hosting backups that may still contain encrypted data can no longer be read and disappear at the end of their rotation cycle."
     }
   },
   "roles": {
@@ -199,7 +214,8 @@
         "error": "The Jira connection failed. Try again."
       }
     },
-    "billingLink": "Subscription and billing"
+    "billingLink": "Subscription and billing",
+    "dataLink": "Data export and deletion"
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -270,7 +286,12 @@
     "billing_checkout": "Subscription started",
     "billing_portal": "Billing portal opened",
     "billing_subscriptionSynced": "Subscription updated",
-    "system_monitor": "System monitoring changed"
+    "system_monitor": "System monitoring changed",
+    "org_export": "Full export requested",
+    "org_exportDownload": "Full export downloaded",
+    "org_deletionRequest": "Organisation deletion scheduled",
+    "org_deletionCancel": "Organisation deletion cancelled",
+    "org_deletionRefused": "Deletion refused: incorrect password"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1116,7 +1137,9 @@
     "packReady": "Audit pack ready: {system}",
     "openPacks": "View packs",
     "watchPublished": "Regulatory watch: {title}",
-    "openWatch": "Read the watch entry"
+    "openWatch": "Read the watch entry",
+    "exportReady": "Full export ready: {count, plural, one {# evidence item} other {# evidence items}}",
+    "openExports": "View exports"
   },
   "packReport": {
     "documentTitle": "Audit pack · {system}",
@@ -1652,7 +1675,7 @@
           "title": "8. Reversibility",
           "paragraphs": [
             "During the subscription and the read-only period, the Customer may export its register, classifications, evidence and packs at any time, in open formats (JSON, CSV, PDF, ZIP). Packs can be verified with the open-source verification tool published by the Publisher, independently of the service.",
-            "At the end of the read-only period, or at an owner's request, the organisation's data is purged and its encryption key destroyed; a confirmation is sent by email."
+            "90 days after the subscription ends, or 7 days after an owner's request (which can be cancelled until then), the organisation's data is purged and its encryption key destroyed, which makes encrypted backup copies unreadable. Owners are notified 7 days beforehand, then receive a confirmation by email."
           ]
         },
         {
@@ -1698,7 +1721,7 @@
           "paragraphs": [
             "Purpose: capture, sealing, evaluation and export of governance evidence for the Customer's AI systems. Nature: collection from connected tools, encrypted storage, timestamping, audit pack generation.",
             "Data: account identifiers and user names from source tools (GitHub, Jira), activity metadata (dates, statuses, reviews), files uploaded by the Customer. Message bodies, diffs, descriptions and comments are not captured. Data subjects: the Customer's employees and contractors active in those tools.",
-            "Duration: that of the subscription and the read-only period, followed by purge."
+            "Duration: that of the subscription, followed by purge 90 days after it ends."
           ]
         },
         {
@@ -1753,7 +1776,7 @@
         {
           "title": "10. End of processing",
           "paragraphs": [
-            "When the contract ends, the Publisher makes the data available for export during the read-only period, then deletes it and destroys the organisation's encryption key, unless a legal retention obligation applies (article 28(3)(g)). Backups are erased at the end of their rotation cycle."
+            "When the contract ends, the Publisher makes the data available for export, then deletes it 90 days after the subscription ends and destroys the organisation's encryption key, unless a legal retention obligation applies (article 28(3)(g)). Destroying the key makes encrypted backup data unreadable; backups are erased at the end of their rotation cycle."
           ]
         },
         {
@@ -1898,5 +1921,47 @@
       "unavailable": "The public pack has not been published yet."
     },
     "keys": "Pack signing public keys"
+  },
+  "orgData": {
+    "title": "Organisation data",
+    "back": "Back to organisation",
+    "ownerOnly": "Full export and organisation deletion are reserved for owners.",
+    "export": {
+      "title": "Export all data",
+      "body": "A ZIP archive gathers the register, classifications, controls, all evidence (decrypted attachments and raw payloads), audit packs and the audit log, as JSON. Packs remain verifiable with the open-source tool. An email lets you know when the archive is ready.",
+      "request": "Prepare an export",
+      "building": "Export in progress…",
+      "empty": "No export yet.",
+      "item": "Export of {date}",
+      "download": "Download ({count, plural, one {# evidence item} other {# evidence items}})",
+      "status": {
+        "QUEUED": "queued",
+        "BUILDING": "in progress",
+        "READY": "ready",
+        "FAILED": "failed, request a new export"
+      }
+    },
+    "deletion": {
+      "title": "Delete the organisation",
+      "body": "Deletion erases the register, evidence, packs, exports and log, destroys the organisation's encryption key (backups become unreadable) and removes all members. It takes place 7 days after the request; you can cancel it until then. Export your data first. To confirm, enter the identifier “{slug}” and your password.",
+      "confirmLabel": "Organisation identifier ({slug})",
+      "passwordLabel": "Password",
+      "request": "Schedule deletion",
+      "cancel": "Cancel deletion",
+      "scheduled": {
+        "owner_request": "Deletion scheduled on {date}. All data will then be erased and the encryption key destroyed.",
+        "contract_end": "Subscription ended almost 90 days ago: deletion scheduled on {date}. Subscribe or cancel to keep your data."
+      }
+    },
+    "errors": {
+      "export_inProgress": "An export is already in progress.",
+      "deletion_alreadyScheduled": "A deletion is already scheduled.",
+      "deletion_confirmationMismatch": "The identifier entered does not match the organisation's.",
+      "deletion_activeSubscription": "First cancel the current subscription from the Billing page.",
+      "deletion_notScheduled": "No deletion is scheduled.",
+      "classification_invalidPassword": "Incorrect password.",
+      "classification_tooManyAttempts": "Too many attempts: try again in fifteen minutes.",
+      "generic": "The operation failed. Please try again."
+    }
   }
 }

@@ -115,6 +115,7 @@ model Organization {
   auditPacks              AuditPack[]
   apiKeys                 ApiKey[]
   notificationPreferences NotificationPreference[]
+  exports                 OrgExport[]
   subscription            Subscription?
   encryptionKey           OrgEncryptionKey?
 }
@@ -805,3 +806,46 @@ model RateLimit {
   lastRequest BigInt
 }
 
+
+// ───────────── Réversibilité (PL-607) ─────────────
+
+enum ExportStatus {
+  QUEUED
+  BUILDING
+  READY
+  FAILED
+}
+
+// Export complet d'une organisation (registre, classifications, preuves, packs, journal), demandé par un owner.
+model OrgExport {
+  id                String       @id @default(cuid())
+  orgId             String
+  requestedByUserId String
+  status            ExportStatus @default(QUEUED)
+  objectKey         String?
+  sizeBytes         Int?
+  counts            Json?
+  createdAt         DateTime     @default(now())
+  completedAt       DateTime?
+  org               Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt(sort: Desc)])
+}
+
+// Suppression programmée d'une organisation (table système, sans RLS ni clé étrangère) : elle survit à la purge et
+// en garde la trace (date, motif), jamais le contenu. `notifyEmails` n'existe que le temps d'envoyer la confirmation.
+model OrganizationDeletion {
+  id                String    @id @default(cuid())
+  orgId             String
+  reason            String // "owner_request" | "contract_end"
+  requestedByUserId String?
+  requestedAt       DateTime  @default(now())
+  scheduledFor      DateTime
+  cancelledAt       DateTime?
+  completedAt       DateTime?
+  notifyEmails      Json?
+  confirmedAt       DateTime?
+
+  @@index([scheduledFor])
+  @@index([orgId])
+}
