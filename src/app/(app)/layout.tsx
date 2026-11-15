@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/shell/language-switcher";
 import { NavLink } from "@/components/shell/nav-link";
+import { LegalFooter } from "@/components/shell/legal-footer";
 import { MAIN_ID, SkipLink } from "@/components/shell/skip-link";
 import { listOwnMemberships } from "@/server/services/organization";
 import { ADMIN_ROLES } from "@/server/services/role-policy";
@@ -67,6 +68,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         )}
         {children}
       </main>
+      <LegalFooter width="max-w-6xl" />
     </>
   );
 }

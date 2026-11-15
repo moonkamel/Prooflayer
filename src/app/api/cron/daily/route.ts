@@ -6,6 +6,7 @@ import { scheduleJiraReconciliation } from "@/server/system/jira-schedule";
 import { scheduleDailyDigests } from "@/server/system/notification-schedule";
 import { scheduleWatchNotifications } from "@/server/system/regulatory-watch";
 import { pruneRateLimits } from "@/server/system/rate-limit";
+import { prunePublicLeads } from "@/server/system/public-leads";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,5 +25,7 @@ export async function GET(request: Request): Promise<Response> {
   const watch = await scheduleWatchNotifications();
   // PL-605 : compteurs de limitation de débit périmés.
   const rateLimits = await pruneRateLimits();
-  return Response.json({ ...sweep, jira, digests, watch, rateLimits });
+  // PL-606 : demandes du classifieur public au-delà de la durée annoncée par la politique de confidentialité.
+  const publicLeads = await prunePublicLeads();
+  return Response.json({ ...sweep, jira, digests, watch, rateLimits, publicLeads });
 }

@@ -1529,5 +1529,374 @@
     "controls": "Controls",
     "noControls": "No open control: sign the system's classification.",
     "pending": "pending"
+  },
+  "legal": {
+    "placeholder": "[to be completed]",
+    "version": "Version of {date}",
+    "incomplete": "Incomplete document: the publisher's identity is not fully provided ({fields}).",
+    "fields": {
+      "company": "company name",
+      "form": "legal form",
+      "capital": "share capital",
+      "registration": "trade register number",
+      "vat": "VAT number",
+      "address": "registered office",
+      "director": "publication director",
+      "contact": "contact address",
+      "security": "security address",
+      "privacy": "data protection address",
+      "court": "competent court",
+      "hostAddress": "hosting provider address"
+    },
+    "footer": {
+      "label": "Legal information",
+      "terms": "Terms",
+      "dpa": "Data processing agreement",
+      "privacy": "Privacy",
+      "notice": "Legal notice",
+      "trust": "Trust center",
+      "verify": "Verify a pack"
+    },
+    "subprocessors": {
+      "caption": "Sub-processors",
+      "name": "Provider",
+      "role": "Role",
+      "data": "Data",
+      "location": "Location",
+      "items": {
+        "supabase": {
+          "role": "Database, object storage, backups",
+          "data": "All evidence and account data",
+          "location": "Frankfurt (Germany)"
+        },
+        "vercel": {
+          "role": "Code execution",
+          "data": "Transit only, no evidence storage",
+          "location": "Frankfurt (fra1 region)"
+        },
+        "stripe": {
+          "role": "Payment and invoicing",
+          "data": "Billing contact, payment method",
+          "location": "European Union and United States"
+        },
+        "brevo": {
+          "role": "Transactional email",
+          "data": "Email address, notification content (never evidence payloads)",
+          "location": "European Union"
+        },
+        "sentry": {
+          "role": "Error tracking",
+          "data": "Technical traces scrubbed of personal data",
+          "location": "EU region"
+        },
+        "posthog": {
+          "role": "Cookieless usage measurement (once in service)",
+          "data": "Pseudonymised interface events",
+          "location": "EU region"
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of use and sale",
+      "intro": "These terms govern access to the ProofLayer service, published by {company}, a {form} with a share capital of {capital}, registered under number {registration}, whose registered office is at {address} (the “Publisher”), by any professional organisation (the “Customer”).",
+      "sections": [
+        {
+          "title": "1. Purpose and acceptance",
+          "paragraphs": [
+            "ProofLayer is an online service for professionals. It helps the Customer keep a register of its AI systems, qualify them under Regulation (EU) 2024/1689, capture evidence from its tools (GitHub, Jira, manual uploads), seal it and export a verifiable pack.",
+            "Creating an organisation or subscribing constitutes acceptance of these terms by the person acting on behalf of the Customer, who represents having authority to do so. The service is not intended for consumers."
+          ]
+        },
+        {
+          "title": "2. No legal advice",
+          "paragraphs": [
+            "ProofLayer is a tool. It provides no legal advice and does not replace a lawyer or a notified body. Classifications, control statuses and prefilled documents only reflect the answers given and the evidence available; they do not certify that the Customer meets its obligations.",
+            "The Customer alone is responsible for qualifying its systems, for its decisions and for meeting its legal and regulatory obligations. Signatures made in ProofLayer bind their signatories."
+          ]
+        },
+        {
+          "title": "3. Accounts, roles and security",
+          "paragraphs": [
+            "The Customer appoints at least one owner of its organisation. The owner and admin roles require two-factor authentication. Each user protects their credentials and reports any unauthorised access without delay to {security}.",
+            "The Customer is responsible for the access it grants, the integrations it connects and the data it uploads."
+          ]
+        },
+        {
+          "title": "4. Trial, subscription and payment",
+          "paragraphs": [
+            "A free 14-day trial, without a payment method, lets the Customer monitor one system. Plans, limits and prices are presented at subscription and exclude taxes. Payment is processed by Stripe, by card or SEPA direct debit, in advance, for the chosen period (monthly or yearly).",
+            "At the end of the trial, in case of non-payment or cancellation, the organisation becomes read-only for 30 days: capture of new evidence is suspended; viewing, export and pack downloads remain available."
+          ]
+        },
+        {
+          "title": "5. Availability and support",
+          "paragraphs": [
+            "The Publisher targets a monthly availability of 99.5%, excluding scheduled maintenance announced at least 48 hours in advance. This is a best-efforts obligation. Service status and incidents are communicated to owners and admins by email.",
+            "Support is provided by email at {contact}, in French and English, on business days."
+          ]
+        },
+        {
+          "title": "6. Customer data",
+          "paragraphs": [
+            "The Customer remains the owner of its data and evidence. It grants the Publisher only the right to process them to provide the service. The Publisher uses them for no other purpose, does not sell them and does not use them to train any AI model.",
+            "Personal data contained in evidence is processed by the Publisher as a processor, under the data processing agreement, which forms an integral part of these terms."
+          ]
+        },
+        {
+          "title": "7. Confidentiality",
+          "paragraphs": [
+            "Each party keeps confidential the non-public information received from the other and uses it only to perform the contract, during its term and for five years after it ends."
+          ]
+        },
+        {
+          "title": "8. Reversibility",
+          "paragraphs": [
+            "During the subscription and the read-only period, the Customer may export its register, classifications, evidence and packs at any time, in open formats (JSON, CSV, PDF, ZIP). Packs can be verified with the open-source verification tool published by the Publisher, independently of the service.",
+            "At the end of the read-only period, or at an owner's request, the organisation's data is purged and its encryption key destroyed; a confirmation is sent by email."
+          ]
+        },
+        {
+          "title": "9. Intellectual property",
+          "paragraphs": [
+            "The service, its code and documentation remain the property of the Publisher, except for the verification tool published under the MIT licence. The Customer has a personal, non-exclusive and non-transferable right of use for the duration of the subscription."
+          ]
+        },
+        {
+          "title": "10. Liability",
+          "paragraphs": [
+            "Each party's liability is limited to direct and foreseeable damage. The total amount the Publisher may owe, for all causes combined, is capped at the sums actually paid by the Customer for the twelve months preceding the event giving rise to the claim.",
+            "These limits do not apply in case of gross negligence or wilful misconduct (article 1231-3 of the French Civil Code), to bodily injury, or to breaches of confidentiality or data protection attributable to a party."
+          ]
+        },
+        {
+          "title": "11. Term and termination",
+          "paragraphs": [
+            "The subscription is concluded for the chosen period and renews automatically. An owner may cancel it at any time from the billing area, effective at the end of the current period.",
+            "In case of a material breach by a party not remedied 30 days after formal notice, the other party may terminate the contract in writing."
+          ]
+        },
+        {
+          "title": "12. Changes to the terms",
+          "paragraphs": [
+            "The Publisher informs owners by email of any change to these terms at least 30 days before it takes effect. A Customer who refuses it may cancel before that date."
+          ]
+        },
+        {
+          "title": "13. Governing law and jurisdiction",
+          "paragraphs": [
+            "These terms are governed by French law. Failing an amicable settlement, any dispute falls under the exclusive jurisdiction of the {court}, including in case of multiple defendants or third-party claims."
+          ]
+        }
+      ]
+    },
+    "dpa": {
+      "title": "Data processing agreement",
+      "intro": "This agreement, made under article 28 of Regulation (EU) 2016/679 (GDPR), forms part of the terms. It binds the Customer, as controller, and {company} (the “Publisher”), as processor, for the personal data contained in the evidence captured by ProofLayer.",
+      "sections": [
+        {
+          "title": "1. Subject matter and description of processing",
+          "paragraphs": [
+            "Purpose: capture, sealing, evaluation and export of governance evidence for the Customer's AI systems. Nature: collection from connected tools, encrypted storage, timestamping, audit pack generation.",
+            "Data: account identifiers and user names from source tools (GitHub, Jira), activity metadata (dates, statuses, reviews), files uploaded by the Customer. Message bodies, diffs, descriptions and comments are not captured. Data subjects: the Customer's employees and contractors active in those tools.",
+            "Duration: that of the subscription and the read-only period, followed by purge."
+          ]
+        },
+        {
+          "title": "2. Documented instructions",
+          "paragraphs": [
+            "The Publisher processes data only on the Customer's documented instructions, consisting of these terms, the service configuration and its users' actions (article 28(3)(a)). It informs the Customer if an instruction appears to infringe applicable law."
+          ]
+        },
+        {
+          "title": "3. Confidentiality",
+          "paragraphs": [
+            "Persons authorised to process the data are bound by confidentiality (article 28(3)(b)). No member of the Publisher accesses a Customer's evidence except on an explicit support request or legal obligation."
+          ]
+        },
+        {
+          "title": "4. Security",
+          "paragraphs": [
+            "The Publisher implements the measures of article 32 described in the annex: organisation isolation in the database, encryption of payloads and attachments under a key specific to each organisation, two-factor authentication for administrators, append-only audit log, encrypted communications."
+          ]
+        },
+        {
+          "title": "5. Sub-processors",
+          "paragraphs": [
+            "The Customer gives general authorisation for the sub-processors listed below (article 28(2) and (4)). The Publisher informs owners by email of any addition or replacement at least 30 days in advance; the Customer may object and, failing a solution, terminate without penalty. The Publisher imposes on each of them obligations equivalent to those of this agreement.",
+            "The timestamping authority only receives 32-byte hashes: it processes no personal data."
+          ]
+        },
+        {
+          "title": "6. Transfers outside the European Union",
+          "paragraphs": [
+            "Evidence data is stored in the European Union (Frankfurt). Where a sub-processor is subject to a third country, the transfer relies on an adequacy decision (EU–US Data Privacy Framework) or on the European Commission's standard contractual clauses (Chapter V GDPR)."
+          ]
+        },
+        {
+          "title": "7. Data subject rights",
+          "paragraphs": [
+            "The Publisher assists the Customer, through appropriate technical and organisational measures, in responding to requests to exercise rights (article 28(3)(e)). Any request received directly is forwarded to the Customer without delay. Erasing an evidence item keeps its sealed hash, without content, so that the chain remains verifiable."
+          ]
+        },
+        {
+          "title": "8. Personal data breach",
+          "paragraphs": [
+            "The Publisher notifies the Customer of any personal data breach without undue delay after becoming aware of it (article 33(2)), with the information of article 33(3) available, so that the Customer can meet its own 72-hour deadline."
+          ]
+        },
+        {
+          "title": "9. Assistance",
+          "paragraphs": [
+            "The Publisher assists the Customer in ensuring compliance with articles 32 to 36 (security, notification, impact assessment, prior consultation), taking into account the nature of processing and the information available to it (article 28(3)(f))."
+          ]
+        },
+        {
+          "title": "10. End of processing",
+          "paragraphs": [
+            "When the contract ends, the Publisher makes the data available for export during the read-only period, then deletes it and destroys the organisation's encryption key, unless a legal retention obligation applies (article 28(3)(g)). Backups are erased at the end of their rotation cycle."
+          ]
+        },
+        {
+          "title": "11. Audit",
+          "paragraphs": [
+            "The Publisher makes available the information needed to demonstrate adherence to this agreement: trust center, security review, ProofLayer's own audit pack. It allows an audit by the Customer or an appointed auditor bound by confidentiality, once a year with 30 days' notice (article 28(3)(h))."
+          ]
+        },
+        {
+          "title": "Annex — Technical and organisational measures",
+          "paragraphs": [
+            "Isolation: row-level security (RLS) enforced on every business table, checked by automated tests for each procedure.",
+            "Encryption: AES-256-GCM for raw payloads, attachments and integration tokens, under a data key specific to each organisation, itself wrapped by a master key; TLS 1.2 or higher and HSTS for all traffic.",
+            "Access: owner, admin, contributor and auditor roles; two-factor authentication mandatory for owner and admin; rate limiting on authentication, API and webhooks.",
+            "Integrity: append-only evidence, sealed by Merkle tree and RFC 3161 timestamping, re-verified daily.",
+            "Traceability: append-only audit log; technical logs free of secrets, tokens and evidence payloads.",
+            "Development: OWASP ASVS level 1 review, dependency audit and secret detection blocking in continuous integration."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "intro": "This policy describes the processing for which {company} is the controller: user accounts, billing, prospecting and service security. Data contained in customers' evidence is covered by the data processing agreement.",
+      "sections": [
+        {
+          "title": "1. Controller",
+          "paragraphs": ["{company}, {address}. Data protection contact: {privacy}."]
+        },
+        {
+          "title": "2. Data, purposes and legal bases",
+          "paragraphs": [
+            "Account: name, work email address, language, hashed password, two-factor settings. Purpose: provide the service. Basis: performance of the contract (article 6(1)(b) GDPR).",
+            "Billing: billing contact and address, VAT number, payment history; payment methods are held by Stripe. Basis: contract and legal obligation (article 6(1)(c)).",
+            "Security: IP address as a hash (HMAC), audit log, error traces scrubbed of personal data. Basis: legitimate interest in protecting the service (article 6(1)(f)).",
+            "Public classifier: work email address entered to receive the note, and optional agreement to be contacted. Basis: the person's request and, for prospecting, their consent (article 6(1)(a)).",
+            "Usage measurement: pseudonymised interface events, without cookies or advertising identifiers. Basis: legitimate interest in improving the service."
+          ]
+        },
+        {
+          "title": "3. Cookies",
+          "paragraphs": [
+            "ProofLayer only uses strictly necessary cookies: the session cookie, set at sign-in, and the language cookie (NEXT_LOCALE). No audience measurement or advertising cookie is set, so no consent banner is required (article 82 of the French Data Protection Act)."
+          ]
+        },
+        {
+          "title": "4. Retention periods",
+          "paragraphs": [
+            "Account: for the duration of the relationship, then deleted with the organisation. Billing: ten years (article L123-22 of the French Commercial Code). Public classifier: 30 days without agreement to be contacted, three years after the request with that agreement. Rate-limiting IP hashes: one day. Audit log: kept with the organisation, deleted with it."
+          ]
+        },
+        {
+          "title": "5. Recipients",
+          "paragraphs": [
+            "Data is accessible only to the Publisher's staff who need it and to the sub-processors listed below. It is neither sold nor rented."
+          ]
+        },
+        {
+          "title": "6. Your rights",
+          "paragraphs": [
+            "You have the rights of access, rectification, erasure, restriction, objection and portability (articles 15 to 21 GDPR), and the right to withdraw consent at any time. Write to {privacy}. You may lodge a complaint with the CNIL (www.cnil.fr)."
+          ]
+        }
+      ]
+    },
+    "notice": {
+      "title": "Legal notice",
+      "intro": "Information required by article 6-III of French law no. 2004-575 of 21 June 2004 on confidence in the digital economy.",
+      "sections": [
+        {
+          "title": "Publisher",
+          "paragraphs": [
+            "{company}, {form} with a share capital of {capital}.",
+            "Registration: {registration}. EU VAT number: {vat}.",
+            "Registered office: {address}.",
+            "Contact: {contact}."
+          ]
+        },
+        {
+          "title": "Publication director",
+          "paragraphs": ["{director}."]
+        },
+        {
+          "title": "Hosting",
+          "paragraphs": [
+            "Vercel Inc., {hostAddress}. Functions run in the Frankfurt region (fra1).",
+            "Data is stored by Supabase, Frankfurt region (Germany)."
+          ]
+        },
+        {
+          "title": "Intellectual property",
+          "paragraphs": [
+            "Site content is protected. The pack verification tool is published under the MIT licence. References to Regulation (EU) 2024/1689 point to the text published on EUR-Lex; ProofLayer is not affiliated with any institution of the European Union."
+          ]
+        }
+      ]
+    }
+  },
+  "trust": {
+    "title": "Trust center",
+    "intro": "How ProofLayer protects your evidence, and how to check what we claim without taking our word for it.",
+    "architecture": {
+      "title": "Architecture and hosting",
+      "body": "Next.js application run by Vercel in Frankfurt; Postgres database and object storage at Supabase in Frankfurt. No evidence data is stored outside the European Union. Organisations are isolated in the database by row-level security, checked by automated tests for every API procedure."
+    },
+    "encryption": {
+      "title": "Encryption",
+      "body": "Each organisation has its own data key, wrapped by a master key. Raw payloads, attachments and integration tokens are encrypted with AES-256-GCM. All traffic uses TLS with preloaded HSTS."
+    },
+    "integrity": {
+      "title": "Evidence integrity",
+      "body": "Each evidence item gets a SHA-256 hash, then joins a batch sealed by Merkle tree (RFC 6962), itself timestamped by an RFC 3161 authority. The chain is re-verified every day. An audit pack can be verified outside ProofLayer with the open-source tool, or in your browser."
+    },
+    "access": {
+      "title": "Access and authentication",
+      "body": "Two-factor authentication mandatory for owners and admins, separate roles for contributors and auditors, rate limiting on authentication, API and webhooks, append-only audit log."
+    },
+    "backups": {
+      "title": "Backups",
+      "body": "Daily database backups managed by Supabase in the Frankfurt region. Since sealed evidence is append-only, a restore is checked by re-verifying the sealing chain."
+    },
+    "development": {
+      "title": "Secure development",
+      "body": "OWASP ASVS level 1 review, dependency audit and secret detection blocking in continuous integration, logs and error tracking free of secrets, tokens and evidence content."
+    },
+    "subprocessors": {
+      "title": "Sub-processors",
+      "body": "Kept up to date; any change is announced to owners 30 days in advance."
+    },
+    "disclosure": {
+      "title": "Report a vulnerability",
+      "body": "Write to {security}. We acknowledge receipt within three business days, do not pursue research conducted in good faith, and publish the fix once deployed. Please do not access other people's data or degrade the service.",
+      "securityTxt": "security.txt file"
+    },
+    "pack": {
+      "title": "ProofLayer's own audit pack",
+      "body": "ProofLayer is entered in its own register, classified by its own engine, and publishes its own audit pack.",
+      "summary": "{system} — period from {start} to {end}, {count} evidence items, generated on {created}.",
+      "fingerprint": "Manifest hash (SHA-256): {hash}",
+      "download": "Download the pack",
+      "verify": "Verify it in your browser",
+      "unavailable": "The public pack has not been published yet."
+    },
+    "keys": "Pack signing public keys"
   }
 }

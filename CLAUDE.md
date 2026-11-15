@@ -636,3 +636,16 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - CI (job `checks`) : `pnpm secrets:scan` (secretlint, `.secretlintrc.json`, `.secretlintignore` ; un faux positif se
   neutralise par `secretlint-disable-next-line <règle>` sur la ligne précédente) et `pnpm deps:audit` (seuil `high`).
 - Revue ASVS niveau 1 : `docs/security/asvs-l1.md` (écarts consignés en fin de document, à tenir à jour).
+
+## Pages légales et centre de confiance (conventions établies par PL-606)
+- Pur : `src/lib/legal.ts` (`LEGAL_VERSION`, `LEGAL_DOCUMENTS`, `legalEntity(env)` : identité de l'éditeur lue dans les
+  variables `LEGAL_*`, jamais inventée, champs absents listés ; `fillLegal` remplace `{champ}` ou affiche
+  « [à compléter] » ; `SUBPROCESSORS` du §8.2 ; `securityTxt` RFC 9116, 180 jours).
+- Pages publiques : `/legal/[document]` (terms, dpa, privacy, notice), textes en sections dans `legal.<document>` de
+  messages/{fr,en}.json (lus par `t.raw`, mêmes sections et marqueurs dans les deux langues : `tests/unit/legal.test.ts`),
+  alerte si l'identité est incomplète ; `/trust` (centre de confiance §8.3) ; `/.well-known/security.txt` (404 sans
+  contact). Pied de page `LegalFooter` dans les trois coques. Une modification de fond publie un nouveau `LEGAL_VERSION`.
+- Pack public de ProofLayer : `PUBLIC_PACK_ORG_ID` + `PUBLIC_PACK_ID` → `src/server/services/public-pack.ts` (pack prêt
+  seulement), route `/api/public/pack` (limitée par IP). Procédure : `docs/trust/pack-prooflayer.md`.
+- Conservation du classifieur public : `prunePublicLeads` (`/api/cron/daily`) : 30 jours sans accord, 3 ans avec.
+- Un nouveau sous-traitant : `SUBPROCESSORS`, `legal.subprocessors.items` (fr, en) et préavis de 30 jours aux owners.
