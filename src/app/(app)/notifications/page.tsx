@@ -60,18 +60,20 @@ export default async function NotificationsPage() {
                     ? t("controlFailed", { key: str(n.payload.controlKey) })
                     : n.type === "pack.ready"
                       ? t("packReady", { system: str(n.payload.systemName) })
-                      : n.type === "watch.published"
-                        ? t("watchPublished", {
-                            title: str(
-                              (n.payload.title as Record<string, unknown> | undefined)?.[locale],
-                            ),
-                          })
-                        : t("digestDaily", {
-                            day: str(n.payload.day),
-                            expiring: num(n.payload.expiring),
-                            integrations: num(n.payload.integrations),
-                            stale: num(n.payload.staleClassifications),
-                          })}
+                      : n.type === "export.ready"
+                        ? t("exportReady", { count: num(n.payload.evidence) })
+                        : n.type === "watch.published"
+                          ? t("watchPublished", {
+                              title: str(
+                                (n.payload.title as Record<string, unknown> | undefined)?.[locale],
+                              ),
+                            })
+                          : t("digestDaily", {
+                              day: str(n.payload.day),
+                              expiring: num(n.payload.expiring),
+                              integrations: num(n.payload.integrations),
+                              stale: num(n.payload.staleClassifications),
+                            })}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("when", {
@@ -86,6 +88,11 @@ export default async function NotificationsPage() {
                 {n.type === "watch.published" && (
                   <p className="mt-1 text-sm">
                     <Link href={`/watch#${str(n.payload.entryId)}`}>{t("openWatch")}</Link>
+                  </p>
+                )}
+                {n.type === "export.ready" && (
+                  <p className="mt-1 text-sm">
+                    <Link href="/organization/data">{t("openExports")}</Link>
                   </p>
                 )}
                 {n.type === "pack.ready" && (

@@ -3,6 +3,8 @@
 import { controlEvaluateJob, controlSweepOrgJob } from "./control-evaluate";
 import { jiraIssueSyncJob, jiraReconcileJob, jiraWebhookEnsureJob } from "./jira";
 import { notificationDigestJob, notificationEmailJob } from "./notifications";
+import { orgDeletionNoticeJob, orgPurgeJob } from "./org-deletion";
+import { orgExportJob } from "./org-export";
 import { packBuildJob } from "./pack";
 import { publicClassifierNoteJob } from "./public-classifier-note";
 import { sealAnchorJob, sealOrgJob, sealVerifyAnchorsJob, sealVerifyOrgJob } from "./seal";
@@ -23,4 +25,7 @@ export const jobRegistry = new JobRegistry()
   .register(sealVerifyOrgJob)
   .register(sealVerifyAnchorsJob)
   .register(packBuildJob)
-  .register(watchNotifyJob);
+  .register(watchNotifyJob)
+  .register(orgExportJob)
+  .register(orgDeletionNoticeJob)
+  .register(orgPurgeJob);

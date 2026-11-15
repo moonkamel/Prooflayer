@@ -45,6 +45,11 @@ export default async function OrganizationPage({
       <p>
         <Link href="/organization/billing">{t("billingLink")}</Link>
       </p>
+      {org.role === "owner" && (
+        <p>
+          <Link href="/organization/data">{t("dataLink")}</Link>
+        </p>
+      )}
       {isAdmin ? <RenameForm name={org.name} /> : <p data-testid="org-name">{org.name}</p>}
 
       <section aria-labelledby="members-title">

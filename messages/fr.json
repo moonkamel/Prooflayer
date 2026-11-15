@@ -148,6 +148,21 @@
       "controls": "Contrôles concernés : {controls}.",
       "open": "Lire l'entrée et voir vos contrôles concernés : {url}",
       "footer": "Vous recevez cet email en tant qu'administrateur. Vos alertes : {url}"
+    },
+    "exportReady": {
+      "subject": "[ProofLayer] Export prêt · {organization}",
+      "intro": "Bonjour {name},\n\nL'export complet de l'organisation {organization} est prêt : {count, plural, one {# preuve} other {# preuves}}, avec le registre, les classifications, les packs et le journal.",
+      "open": "Le télécharger :\n{url}"
+    },
+    "orgDeletion": {
+      "scheduledSubject": "[ProofLayer] Suppression programmée · {organization}",
+      "scheduledOwnerRequest": "Bonjour {name},\n\nLa suppression de l'organisation {organization} a été demandée. Elle aura lieu le {date}.",
+      "scheduledContractEnd": "Bonjour {name},\n\nL'abonnement de l'organisation {organization} a pris fin il y a près de 90 jours. Ses données seront supprimées le {date}, comme le prévoient les conditions générales.",
+      "scheduledWhat": "Seront effacés : registre, classifications, preuves, pièces jointes, packs, exports et journal. La clé de chiffrement de l'organisation sera détruite : les sauvegardes deviendront illisibles. Exportez vos données avant cette date.",
+      "scheduledCancel": "Pour exporter vos données ou annuler la suppression :\n{url}",
+      "deletedSubject": "[ProofLayer] Organisation supprimée · {organization}",
+      "deletedIntro": "Bonjour {name},\n\nL'organisation {organization} a été supprimée le {date} : ses données ont été effacées et sa clé de chiffrement détruite.",
+      "deletedBackups": "Les sauvegardes de l'hébergeur qui contiendraient encore des données chiffrées ne peuvent plus être lues et disparaissent à la fin de leur cycle de rotation."
     }
   },
   "roles": {
@@ -199,7 +214,8 @@
         "error": "La connexion à Jira a échoué. Recommencez."
       }
     },
-    "billingLink": "Abonnement et facturation"
+    "billingLink": "Abonnement et facturation",
+    "dataLink": "Export et suppression des données"
   },
   "acceptInvitation": {
     "title": "Invitation",
@@ -270,7 +286,12 @@
     "billing_checkout": "Souscription lancée",
     "billing_portal": "Ouverture du portail de facturation",
     "billing_subscriptionSynced": "Abonnement mis à jour",
-    "system_monitor": "Surveillance d'un système"
+    "system_monitor": "Surveillance d'un système",
+    "org_export": "Export complet demandé",
+    "org_exportDownload": "Téléchargement d'un export complet",
+    "org_deletionRequest": "Suppression de l'organisation programmée",
+    "org_deletionCancel": "Suppression de l'organisation annulée",
+    "org_deletionRefused": "Suppression refusée : mot de passe incorrect"
   },
   "controlStatus": {
     "PASS": "OK",
@@ -1116,7 +1137,9 @@
     "packReady": "Pack d'audit prêt : {system}",
     "openPacks": "Voir les packs",
     "watchPublished": "Veille réglementaire : {title}",
-    "openWatch": "Lire l'entrée de veille"
+    "openWatch": "Lire l'entrée de veille",
+    "exportReady": "Export complet prêt : {count, plural, one {# preuve} other {# preuves}}",
+    "openExports": "Voir les exports"
   },
   "packReport": {
     "documentTitle": "Pack d'audit · {system}",
@@ -1654,7 +1677,7 @@
           "title": "8. Réversibilité",
           "paragraphs": [
             "Pendant l'abonnement et la période de lecture seule, le Client peut exporter à tout moment son registre, ses classifications, ses preuves et ses packs, dans des formats ouverts (JSON, CSV, PDF, ZIP). Les packs se vérifient avec l'outil de vérification open source publié par l'Éditeur, sans dépendre du service.",
-            "À l'issue de la période de lecture seule, ou sur demande d'un propriétaire, les données de l'organisation sont purgées et sa clé de chiffrement est détruite ; une confirmation est envoyée par email."
+            "90 jours après la fin de l'abonnement, ou 7 jours après la demande d'un propriétaire (annulable d'ici là), les données de l'organisation sont purgées et sa clé de chiffrement est détruite, ce qui rend illisibles les copies chiffrées des sauvegardes. Les propriétaires sont prévenus 7 jours avant, puis reçoivent une confirmation par email."
           ]
         },
         {
@@ -1700,7 +1723,7 @@
           "paragraphs": [
             "Finalité : capture, scellement, évaluation et export de preuves de gouvernance des systèmes d'IA du Client. Nature : collecte depuis les outils connectés, stockage chiffré, horodatage, constitution de packs d'audit.",
             "Données : identifiants de compte et noms d'utilisateur des outils source (GitHub, Jira), métadonnées d'activité (dates, statuts, revues), fichiers déposés par le Client. Les corps de messages, diffs, descriptions et commentaires ne sont pas capturés. Personnes concernées : salariés et prestataires du Client actifs dans ces outils.",
-            "Durée : celle de l'abonnement et de la période de lecture seule, puis purge."
+            "Durée : celle de l'abonnement, puis purge 90 jours après sa fin."
           ]
         },
         {
@@ -1755,7 +1778,7 @@
         {
           "title": "10. Fin du traitement",
           "paragraphs": [
-            "Au terme du contrat, l'Éditeur met les données à disposition pour export pendant la période de lecture seule, puis les supprime et détruit la clé de chiffrement de l'organisation, sauf obligation légale de conservation (article 28(3)(g)). Les sauvegardes sont effacées à l'expiration de leur cycle de rotation."
+            "Au terme du contrat, l'Éditeur met les données à disposition pour export, puis les supprime 90 jours après la fin de l'abonnement et détruit la clé de chiffrement de l'organisation, sauf obligation légale de conservation (article 28(3)(g)). La destruction de la clé rend illisibles les données chiffrées des sauvegardes, effacées à l'expiration de leur cycle de rotation."
           ]
         },
         {
@@ -1902,5 +1925,47 @@
       "unavailable": "Le pack public n'est pas encore publié."
     },
     "keys": "Clés publiques de signature des packs"
+  },
+  "orgData": {
+    "title": "Données de l'organisation",
+    "back": "Retour à l'organisation",
+    "ownerOnly": "L'export complet et la suppression de l'organisation sont réservés aux propriétaires.",
+    "export": {
+      "title": "Exporter toutes les données",
+      "body": "Une archive ZIP rassemble le registre, les classifications, les contrôles, toutes les preuves (pièces jointes et charges brutes déchiffrées), les packs d'audit et le journal d'audit, en JSON. Les packs restent vérifiables avec l'outil open source. Un email vous prévient quand l'archive est prête.",
+      "request": "Préparer un export",
+      "building": "Export en préparation…",
+      "empty": "Aucun export pour l'instant.",
+      "item": "Export du {date}",
+      "download": "Télécharger ({count, plural, one {# preuve} other {# preuves}})",
+      "status": {
+        "QUEUED": "en attente",
+        "BUILDING": "en préparation",
+        "READY": "prêt",
+        "FAILED": "échec, demandez un nouvel export"
+      }
+    },
+    "deletion": {
+      "title": "Supprimer l'organisation",
+      "body": "La suppression efface le registre, les preuves, les packs, les exports et le journal, détruit la clé de chiffrement de l'organisation (les sauvegardes deviennent illisibles) et retire tous les membres. Elle a lieu 7 jours après la demande ; vous pouvez l'annuler d'ici là. Exportez d'abord vos données. Pour confirmer, saisissez l'identifiant « {slug} » et votre mot de passe.",
+      "confirmLabel": "Identifiant de l'organisation ({slug})",
+      "passwordLabel": "Mot de passe",
+      "request": "Programmer la suppression",
+      "cancel": "Annuler la suppression",
+      "scheduled": {
+        "owner_request": "Suppression programmée le {date}. Toutes les données seront alors effacées et la clé de chiffrement détruite.",
+        "contract_end": "Abonnement terminé depuis près de 90 jours : suppression programmée le {date}. Souscrivez un abonnement ou annulez pour conserver vos données."
+      }
+    },
+    "errors": {
+      "export_inProgress": "Un export est déjà en préparation.",
+      "deletion_alreadyScheduled": "Une suppression est déjà programmée.",
+      "deletion_confirmationMismatch": "L'identifiant saisi ne correspond pas à celui de l'organisation.",
+      "deletion_activeSubscription": "Résiliez d'abord l'abonnement en cours depuis la page Facturation.",
+      "deletion_notScheduled": "Aucune suppression n'est programmée.",
+      "classification_invalidPassword": "Mot de passe incorrect.",
+      "classification_tooManyAttempts": "Trop d'essais : réessayez dans un quart d'heure.",
+      "generic": "L'opération a échoué. Réessayez."
+    }
   }
 }

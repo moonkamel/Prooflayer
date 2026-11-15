@@ -54,3 +54,45 @@ describe("S3ObjectStore", () => {
     expect(await store.get("orgs/org_1/raw/ev_1.bin")).toBeNull();
   });
 });
+
+describe("suppression d'un préfixe d'organisation (PL-607)", () => {
+  it("S3 : pages de liste suivies jusqu'au bout, objets supprimés par lots", async () => {
+    const { DeleteObjectsCommand, ListObjectsV2Command } = await import("@aws-sdk/client-s3");
+    const deleted: string[] = [];
+    const pages = [
+      {
+        Contents: [{ Key: "orgs/org_1/raw/a.bin" }, { Key: "orgs/org_1/packs/p.zip" }],
+        IsTruncated: true,
+        NextContinuationToken: "t2",
+      },
+      { Contents: [{ Key: "orgs/org_1/exports/e.zip" }], IsTruncated: false },
+    ];
+    const client = {
+      send: async (command: unknown) => {
+        if (command instanceof ListObjectsV2Command) {
+          expect(command.input.Prefix).toBe("orgs/org_1/");
+          return pages[command.input.ContinuationToken === "t2" ? 1 : 0];
+        }
+        if (command instanceof DeleteObjectsCommand) {
+          deleted.push(...command.input.Delete!.Objects!.map((o) => o.Key!));
+          return {};
+        }
+        throw new Error("commande inattendue");
+      },
+    };
+    const store = new S3ObjectStore(client as never, "prooflayer");
+    expect(await store.deletePrefix("orgs/org_1/")).toBe(3);
+    expect(deleted).toEqual([
+      "orgs/org_1/raw/a.bin",
+      "orgs/org_1/packs/p.zip",
+      "orgs/org_1/exports/e.zip",
+    ]);
+  });
+
+  it("jamais la racine ni un autre préfixe", async () => {
+    const store = new S3ObjectStore({ send: async () => ({}) } as never, "prooflayer");
+    for (const prefix of ["", "orgs/", "orgs/org_1", "orgs/../", "autre/org_1/"]) {
+      await expect(store.deletePrefix(prefix), prefix).rejects.toThrow("préfixe d'objet invalide");
+    }
+  });
+});

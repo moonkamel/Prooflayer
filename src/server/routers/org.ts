@@ -4,8 +4,14 @@
 // Aucune logique métier ici (règle 3 de CLAUDE.md) : tout est dans src/server/services/organization.ts.
 import { z } from "zod";
 import * as org from "@/server/services/organization";
+import * as orgExport from "@/server/services/org-export";
+import * as deletion from "@/server/services/org-deletion";
+import { passwordVerifier } from "@/server/services/session";
+import { scheduleExportBuild } from "@/server/system/jobs/org-export";
 import { ORG_ROLES } from "@/server/services/role-policy";
-import { adminProcedure, orgProcedure, router } from "@/server/trpc";
+import { adminProcedure, orgProcedure, router, withRole } from "@/server/trpc";
+
+const ownerProcedure = withRole("owner");
 
 const role = z.enum(ORG_ROLES as [(typeof ORG_ROLES)[number], ...(typeof ORG_ROLES)[number][]]);
 const id = z.string().min(1).max(128);
@@ -30,5 +36,28 @@ export const orgRouter = router({
     revokeInvitation: adminProcedure
       .input(z.object({ invitationId: id }))
       .mutation(({ ctx, input }) => org.revokeInvitation(ctx, input)),
+  }),
+  // PL-607 : réversibilité, réservée aux owners.
+  export: router({
+    list: ownerProcedure.query(({ ctx }) => orgExport.listExports(ctx)),
+    request: ownerProcedure.mutation(({ ctx }) =>
+      orgExport.requestExport(ctx, scheduleExportBuild),
+    ),
+    download: ownerProcedure
+      .input(z.object({ exportId: id }))
+      .query(({ ctx, input }) => orgExport.downloadExport(ctx, input)),
+  }),
+  deletion: router({
+    get: ownerProcedure.query(({ ctx }) => deletion.getDeletion(ctx)),
+    request: ownerProcedure
+      .input(z.object({ password: z.string().min(1).max(256), confirmation: z.string().max(128) }))
+      .mutation(({ ctx, input }) =>
+        deletion.requestDeletion(ctx, input, {
+          verifyPassword: passwordVerifier(ctx.headers),
+          notify: deletion.defaultDeletionNotify,
+          now: () => new Date(),
+        }),
+      ),
+    cancel: ownerProcedure.mutation(({ ctx }) => deletion.cancelDeletion(ctx)),
   }),
 });

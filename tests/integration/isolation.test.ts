@@ -7,7 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { forOrg, prisma } from "@/server/db";
 
 /** Tables système sans RLS (prompt-type de PL-105) qui portent pourtant une colonne orgId. */
-const SYSTEM_TABLES_WITH_ORG_ID = ["Job"];
+// OrganizationDeletion (PL-607) : trace de suppression qui doit survivre à la purge de l'organisation.
+const SYSTEM_TABLES_WITH_ORG_ID = ["Job", "OrganizationDeletion"];
 
 const run = randomUUID().slice(0, 8);
 const A = `org_iso_a_${run}`;
@@ -210,6 +211,11 @@ const fixtures: [model: string, table: string, build: (org: string, tag?: string
     "notificationPreference",
     "NotificationPreference",
     (o, t = "") => ({ id: id(o, "npf", t), orgId: o, userId: `u${t}` }),
+  ],
+  [
+    "orgExport",
+    "OrgExport",
+    (o, t = "") => ({ id: id(o, "exp", t), orgId: o, requestedByUserId: "u" }),
   ],
   ["subscription", "Subscription", (o, t = "") => ({ id: id(o, "sub", t), orgId: `${o}${t}` })],
   [

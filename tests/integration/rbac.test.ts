@@ -94,9 +94,10 @@ describe("inventaire des procédures", () => {
     expect(undeclared.map((p) => p.path)).toEqual([]);
   });
 
-  it("les écritures du routeur org exigent au moins admin (§4.4.2)", () => {
+  it("les écritures du routeur org exigent au moins admin (§4.4.2) ; réversibilité : owner seul (PL-607)", () => {
     for (const p of procedures.filter((p) => p.path.startsWith("org.") && p.type === "mutation")) {
-      expect([...p.allowed].sort(), p.path).toEqual(["admin", "owner"]);
+      const expected = /^org\.(export|deletion)\./u.test(p.path) ? ["owner"] : ["admin", "owner"];
+      expect([...p.allowed].sort(), p.path).toEqual(expected);
     }
   });
 });

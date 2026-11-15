@@ -12,6 +12,7 @@ import {
   renderControlFailedEmail,
   renderDigestEmail,
   renderPackReadyEmail,
+  renderExportReadyEmail,
   renderWatchPublishedEmail,
 } from "@/server/email/notification-emails";
 import { membershipsOfUser, userContact } from "@/server/system/identity";
@@ -136,6 +137,7 @@ export async function sendNotificationEmail(
   const notification = await tx.notification.findUnique({ where: { id: notificationId } });
   if (!notification || notification.orgId !== orgId || notification.emailedAt) return "skipped";
   if (notification.type === "pack.ready") return sendPackReadyEmail(tx, notification, deps);
+  if (notification.type === "export.ready") return sendExportReadyEmail(tx, notification, deps);
   if (notification.type === "watch.published") return sendWatchEmail(tx, notification, deps);
   if (notification.type !== "control.failed") return "skipped";
   const memberships = await membershipsOfUser(notification.userId);
@@ -243,6 +245,31 @@ async function sendPackReadyEmail(
       organization: organization.name,
       system: { id: payload.systemId, name: payload.systemName },
       evidenceCount: payload.evidenceCount,
+    }),
+  );
+  await tx.notification.update({ where: { id: notification.id }, data: { emailedAt: deps.now() } });
+  return "sent";
+}
+
+/** Export complet prêt (PL-607) : au demandeur, s'il est encore owner de l'organisation. */
+async function sendExportReadyEmail(
+  tx: OrgTransaction,
+  notification: { id: string; orgId: string; userId: string; payload: unknown },
+  deps: NotificationDependencies,
+): Promise<"sent" | "skipped"> {
+  const memberships = await membershipsOfUser(notification.userId);
+  const organization = memberships.find((m) => m.id === notification.orgId);
+  const user = await userContact(notification.userId);
+  if (!organization || !user || organization.role !== "owner") return "skipped";
+  const payload = notification.payload as { evidence?: number };
+  await deps.transport.send(
+    await renderExportReadyEmail({
+      to: user.email,
+      name: user.name,
+      locale: user.locale,
+      baseUrl: deps.baseUrl,
+      organization: organization.name,
+      evidenceCount: payload.evidence ?? 0,
     }),
   );
   await tx.notification.update({ where: { id: notification.id }, data: { emailedAt: deps.now() } });

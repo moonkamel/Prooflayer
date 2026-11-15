@@ -46,6 +46,7 @@ test("espace connecté et écrans d'étape : aucune violation WCAG 2.2 AA", asyn
     "/account",
     "/organization",
     "/organization/billing",
+    "/organization/data",
     "/watch",
     "/audit",
     "/systems",
