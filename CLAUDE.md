@@ -681,3 +681,14 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - PostHog (facultatif, `POSTHOG_API_KEY`, hôte UE par défaut) : job `analytics.capture` (`src/server/system/jobs/
   analytics.ts`), organisation en HMAC, `uuid` = identifiant de l'étape (pas de doublon), aucun cookie, aucune donnée
   de preuve ; erreur sans corps de réponse. `analyticsDependencies` remplaçable par les tests.
+
+## Exploitation (conventions établies par PL-609)
+- Surveillance : constats purs `src/server/system/monitoring-data.ts` (`monitorFindings`, seuils `MONITOR_THRESHOLDS` :
+  file due depuis > 10 min ou bail expiré, livraison bloquée > 10 min, ancre > 8 h, connecteur ERROR/REVOKED, taux
+  d'échec > 10 % sur ≥ 20 opérations) ; relevé `src/server/system/monitoring.ts` (`monitorSnapshot`, `runMonitoring`),
+  cron `/api/cron/monitor` toutes les 15 minutes. Alertes `ops.*` par `raiseOperationalAlert` : codes et décomptes
+  seulement. Une alerte nouvelle s'ajoute à `OperationalAlert` et au tableau du runbook.
+- `/api/health` : 503 si la base ne répond pas ou si un job est dû depuis plus de 10 minutes (crons arrêtés vus de
+  l'extérieur par Better Stack).
+- Restauration : `pnpm restore:drill` (pg_dump → base vierge → décomptes → `pnpm chain:verify` identique sur source et
+  cible), `pnpm chain:verify` (JSON, anomalies par type). Runbook : `docs/operations/runbook.md` (journal des exercices).

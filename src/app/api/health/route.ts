@@ -1,4 +1,5 @@
-// Point de santé (PL-108) pour la surveillance de disponibilité : 200 si la base répond, 503 sinon. Sans détail.
+// Point de santé (PL-108, PL-609) pour la surveillance de disponibilité : 200 si la base répond et la file de jobs
+// est drainée, 503 sinon. Sans détail métier.
 import { healthCheck } from "@/server/system/health";
 
 export const runtime = "nodejs";
