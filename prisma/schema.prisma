@@ -794,3 +794,14 @@ model OrgEncryptionKey {
   rotatedAt  DateTime?
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
+
+/// PL-605 : limitation de débit (table système, sans organisation). Format de Better Auth (`rateLimit`, stockage
+/// « database » : fenêtre glissante), partagé avec le limiteur de ProofLayer (clés `pl:…`, fenêtre fixe dont
+/// `lastRequest` porte le début, src/server/system/rate-limit.ts). Une base commune vaut pour toutes les instances.
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+

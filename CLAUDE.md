@@ -625,3 +625,14 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Écrans : liste de mise en route sur `/dashboard` tant qu'elle n'est pas terminée (`OnboardingChecklist`) ; écran 7
   `/systems/[id]/capture` (relu toutes les 3 s, synthèse en `aria-live` polite, aucune animation), lien depuis l'onglet
   Sources. États vides du §5.2 : chaque liste vide dit quoi faire ensuite (lien ou explication).
+
+## Durcissement (conventions établies par PL-605)
+- Limitation de débit : `src/server/system/rate-limit.ts` (`consume(clé, règle)`, compteur atomique en base dans la table
+  `RateLimit`, partagée avec Better Auth `rateLimit: { storage: "database" }`). IP toujours en HMAC (`ipKey`). Règles
+  `RATE_RULES` : API tRPC 600/min/IP, webhooks 1 200/min/IP par fournisseur (avant la vérification de signature) ;
+  429 avec `Retry-After` (`tooManyRequests`). Clés `pl:` purgées chaque jour (`pruneRateLimits`, `/api/cron/daily`).
+- Erreurs tRPC : `safeErrorShape` (`src/server/error-shape.ts`) : erreur interne → `internal_error`, pile jamais renvoyée ;
+  une erreur métier se lève en `ServiceError` avec une clé stable.
+- CI (job `checks`) : `pnpm secrets:scan` (secretlint, `.secretlintrc.json`, `.secretlintignore` ; un faux positif se
+  neutralise par `secretlint-disable-next-line <règle>` sur la ligne précédente) et `pnpm deps:audit` (seuil `high`).
+- Revue ASVS niveau 1 : `docs/security/asvs-l1.md` (écarts consignés en fin de document, à tenir à jour).

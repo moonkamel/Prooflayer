@@ -8,10 +8,17 @@ import { waitUntil } from "@vercel/functions";
 import { processDelivery } from "@/server/ingest/process-delivery";
 import { TRACKED_EVENTS } from "@/server/services/billing-data";
 import { recordDelivery } from "@/server/system/webhooks";
+import { consume, ipKey, RATE_RULES, requestIp, tooManyRequests } from "@/server/system/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request): Promise<Response> {
+  // PL-605 : limitation de débit par fournisseur et adresse IP, avant la vérification de signature.
+  const limit = await consume(
+    `webhook:stripe:${ipKey(requestIp(req.headers))}`,
+    RATE_RULES.webhook,
+  );
+  if (!limit.allowed) return tooManyRequests(limit);
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return new Response("webhook non configuré", { status: 503 });
   const raw = Buffer.from(await req.arrayBuffer());

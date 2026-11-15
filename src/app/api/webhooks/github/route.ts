@@ -6,10 +6,17 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { waitUntil } from "@vercel/functions";
 import { processDelivery } from "@/server/ingest/process-delivery";
 import { recordDelivery } from "@/server/system/webhooks";
+import { consume, ipKey, RATE_RULES, requestIp, tooManyRequests } from "@/server/system/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request): Promise<Response> {
+  // PL-605 : limitation de débit par fournisseur et adresse IP, avant la vérification de signature.
+  const limit = await consume(
+    `webhook:github:${ipKey(requestIp(req.headers))}`,
+    RATE_RULES.webhook,
+  );
+  if (!limit.allowed) return tooManyRequests(limit);
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!secret) return new Response("webhook non configuré", { status: 503 });
 
