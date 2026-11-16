@@ -10,6 +10,17 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (locales as readonly string[]).includes(value);
 }
 
+/**
+ * Pages du site public toujours rendues en anglais (marché européen, une seule adresse canonique par page pour les
+ * moteurs de recherche) : la langue n'y dépend ni du cookie ni du navigateur. Le proxy pose `SITE_LOCALE_HEADER`.
+ */
+export const ENGLISH_ONLY_PATHS: readonly string[] = ["/"];
+export const SITE_LOCALE_HEADER = "x-prooflayer-site-locale";
+
+export function forcedLocaleFor(pathname: string): Locale | null {
+  return ENGLISH_ONLY_PATHS.includes(pathname) ? "en" : null;
+}
+
 /** Choisit la langue à partir du cookie, puis de l'en-tête Accept-Language, puis la langue par défaut. */
 export function resolveLocale(
   cookieValue: string | undefined,

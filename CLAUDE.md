@@ -726,3 +726,15 @@ Fichier : docs/cahier-des-charges.md. **Pour un ticket, ne relire que les sectio
 - Ménage quotidien : `/api/cron/daily` programme un job `maintenance.daily` par tâche (`MAINTENANCE_TASKS`,
   `src/server/system/jobs/maintenance.ts`) ; une tâche de ménage nouvelle s'y ajoute, jamais dans la route.
   Surveillance : connecteurs en erreur comptés par la fonction SQL `integration_status_counts`.
+
+## Site public et SEO (conventions établies avec la page d'accueil)
+- Page d'accueil `/` (`src/app/page.tsx`) toujours en anglais : `ENGLISH_ONLY_PATHS` et `forcedLocaleFor`
+  (`src/i18n/config.ts`) ; le proxy écarte l'en-tête `x-prooflayer-site-locale` reçu du client et le pose lui-même pour
+  ces adresses. Textes dans `landing` de messages/{fr,en}.json (le français garde la parité des clés). Depuis ces pages,
+  les liens vers le reste de l'application sont des `<a>` (rechargement complet, la langue de l'utilisateur reprend).
+- Requête principale visée : « EU AI Act compliance software » (§7.4). Jamais « compliant » ni « conforme » (règle 7).
+- SEO technique : `generateMetadata` (titre absolu, description, canonique, Open Graph, X), `opengraph-image.tsx`,
+  données structurées (`src/components/landing/structured-data.tsx` : Organization, WebSite, SoftwareApplication,
+  FAQPage, JSON échappé, nonce CSP), `robots.ts` et `sitemap.ts` (`src/lib/site.ts` : `PUBLIC_PAGES`,
+  `PRIVATE_PREFIXES` ; indexation seulement si `VERCEL_ENV=production`). Une page publique nouvelle s'ajoute à
+  `PUBLIC_PAGES` ; une page anglaise seule, à `ENGLISH_ONLY_PATHS`.

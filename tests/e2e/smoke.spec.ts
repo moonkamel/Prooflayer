@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 test("la page d'accueil répond", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ProofLayer");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Prove your AI Act readiness with evidence your team already produces",
+  );
 });
 
 test("en-têtes de sécurité : CSP à nonce propre à chaque requête, HSTS, intégration interdite (PL-108)", async ({
