@@ -1,12 +1,17 @@
 // next-intl sans préfixe de langue dans l'URL : la langue vient du cookie NEXT_LOCALE ou d'Accept-Language.
 import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { LOCALE_COOKIE, loadMessages, resolveLocale } from "./config";
+import { isLocale, LOCALE_COOKIE, loadMessages, resolveLocale, SITE_LOCALE_HEADER } from "./config";
 
 export default getRequestConfig(async () => {
-  const locale = resolveLocale(
-    (await cookies()).get(LOCALE_COOKIE)?.value,
-    (await headers()).get("accept-language"),
-  );
+  const requestHeaders = await headers();
+  // Site public en anglais (pages de `ENGLISH_ONLY_PATHS`) : en-tête posé par le proxy, jamais par le client.
+  const forced = requestHeaders.get(SITE_LOCALE_HEADER);
+  const locale = isLocale(forced)
+    ? forced
+    : resolveLocale(
+        (await cookies()).get(LOCALE_COOKIE)?.value,
+        requestHeaders.get("accept-language"),
+      );
   return { locale, messages: await loadMessages(locale) };
 });

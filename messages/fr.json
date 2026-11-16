@@ -321,13 +321,6 @@
     "readOnlyLink": "Voir l'abonnement",
     "watch": "Veille"
   },
-  "home": {
-    "title": "ProofLayer",
-    "tagline": "Les preuves exigées par l'AI Act, capturées là où le travail se fait, horodatées et vérifiables sans nous.",
-    "signUp": "Créer mon espace",
-    "signIn": "Se connecter",
-    "classifier": "Classifier un système sans compte"
-  },
   "aiActRole": {
     "PROVIDER": "Fournisseur",
     "DEPLOYER": "Déployeur",
@@ -1967,6 +1960,316 @@
       "classification_invalidPassword": "Mot de passe incorrect.",
       "classification_tooManyAttempts": "Trop d'essais : réessayez dans un quart d'heure.",
       "generic": "L'opération a échoué. Réessayez."
+    }
+  },
+  "landing": {
+    "meta": {
+      "title": "Logiciel de conformité à l'AI Act pour éditeurs SaaS",
+      "description": "Classez vos systèmes d'IA au regard de l'AI Act, capturez automatiquement les preuves depuis GitHub et Jira, et exportez un pack d'audit horodaté vérifiable hors ligne.",
+      "ogAlt": "ProofLayer : preuves AI Act capturées depuis GitHub et Jira, vérifiables hors ligne"
+    },
+    "nav": {
+      "label": "Principale",
+      "how": "Fonctionnement",
+      "coverage": "Couverture",
+      "verify": "Vérification",
+      "pricing": "Tarifs",
+      "faq": "Questions",
+      "signIn": "Connexion",
+      "start": "Essai gratuit"
+    },
+    "hero": {
+      "eyebrow": "Logiciel de conformité à l'AI Act pour éditeurs SaaS B2B",
+      "title": "Démontrez votre préparation à l'AI Act avec les preuves que votre équipe produit déjà",
+      "lead": "ProofLayer se connecte à GitHub et Jira, capture les preuves demandées par l'AI Act au fil du travail, les scelle par un horodatage tiers et produit un pack d'audit que vos clients vérifient sans nous.",
+      "primary": "Classer votre système d'IA gratuitement",
+      "primaryHint": "Sans compte. 10 questions, 5 minutes.",
+      "secondary": "Essai de 14 jours",
+      "proof1": "Hébergé à Francfort",
+      "proof2": "Horodatage RFC 3161",
+      "proof3": "Vérificateur open source",
+      "proof4": "Accès GitHub en lecture seule"
+    },
+    "card": {
+      "label": "Exemple : un contrôle évalué à partir de preuves GitHub",
+      "system": "Score d'adéquation candidat · Haut risque, Annexe III point 4(a)",
+      "control": "AIA-15-02 · Toute modification fusionnée est relue par une autre personne que son auteur",
+      "article": "Art. 15, Art. 17(1)(d)",
+      "evidence1": "214 pull requests fusionnées sur 90 jours",
+      "evidence2": "100 % relues par un second ingénieur",
+      "evidence3": "Scellé dans le lot n° 41 · horodaté le 07/03 à 09:12 UTC",
+      "next": "AIA-15-05 · Vulnérabilités critiques corrigées sous 30 jours",
+      "nextReason": "2 alertes critiques ouvertes depuis plus de 30 jours"
+    },
+    "jobs": {
+      "title": "Conçu pour les trois questions que posent clients, investisseurs et auditeurs",
+      "items": [
+        {
+          "title": "Sommes-nous concernés par l'AI Act ?",
+          "body": "Un questionnaire guidé fondé sur l'article 6 et l'Annexe III. Une classification argumentée, la catégorie de risque et le rôle (fournisseur ou déployeur), signés par votre CTO, en moins d'une heure au lieu de six semaines d'analyse juridique."
+        },
+        {
+          "title": "Pouvez-vous prouver ce que vous affirmez ?",
+          "body": "Revues de code, vérifications obligatoires, alertes de sécurité, registre des risques et tickets d'incident deviennent des preuves automatiquement, horodatées par un tiers. Ni capture d'écran, ni dossier rempli la veille de l'audit."
+        },
+        {
+          "title": "Est-ce encore vrai après la dernière release ?",
+          "body": "Chaque release est revérifiée. Vous êtes alerté quand un contrôle échoue, qu'une preuve se périme ou qu'une modification de conception peut changer votre classification."
+        }
+      ]
+    },
+    "how": {
+      "title": "Comment fonctionne ProofLayer",
+      "lead": "De l'inscription au premier pack d'audit vérifiable, en un après-midi.",
+      "steps": [
+        {
+          "title": "Inscrire et classer",
+          "body": "Recensez vos systèmes d'IA, répondez au questionnaire de classification et signez le résultat. Exempté au titre de l'article 6(3) ? ProofLayer prépare le dossier d'exemption et les champs d'enregistrement de l'Annexe VIII."
+        },
+        {
+          "title": "Connecter GitHub et Jira",
+          "body": "Installez la GitHub App en lecture seule sur les dépôts utiles et reliez vos projets Jira de risques, d'incidents et de surveillance après commercialisation. Un rattrapage de 90 jours démarre aussitôt."
+        },
+        {
+          "title": "Les preuves sont capturées et scellées",
+          "body": "Chaque preuve est minimisée, hachée, scellée chaque heure dans un lot de Merkle et ancrée par un horodatage RFC 3161. Les contrôles sont réévalués en quelques secondes."
+        },
+        {
+          "title": "Exporter un pack d'audit vérifiable",
+          "body": "Un clic produit une archive signée : rapport PDF, chaque contrôle et ses preuves, preuves d'inclusion, gabarits Annexe IV et déclaration UE, prêts pour un questionnaire client ou une due diligence."
+        }
+      ]
+    },
+    "coverage": {
+      "title": "La couverture de l'AI Act, article par article",
+      "lead": "37 contrôles établis d'après le texte du règlement (UE) 2024/1689, dont 19 évalués automatiquement à partir de vos outils.",
+      "caption": "Articles couverts et origine des preuves",
+      "colArticle": "Article",
+      "colObligation": "Obligation",
+      "colSource": "Source des preuves",
+      "rows": [
+        {
+          "article": "Art. 6 et Annexe III",
+          "obligation": "Classification et dossier d'exemption de l'article 6(3)",
+          "source": "Questionnaire guidé, signé"
+        },
+        {
+          "article": "Art. 9",
+          "obligation": "Système de gestion des risques",
+          "source": "Jira"
+        },
+        {
+          "article": "Art. 10",
+          "obligation": "Données et gouvernance des données",
+          "source": "GitHub, dépôts de documents"
+        },
+        {
+          "article": "Art. 11 et Annexe IV",
+          "obligation": "Documentation technique",
+          "source": "Gabarit prérempli, GitHub"
+        },
+        {
+          "article": "Art. 12",
+          "obligation": "Enregistrement et journalisation",
+          "source": "GitHub"
+        },
+        {
+          "article": "Art. 13 et 14",
+          "obligation": "Transparence envers les déployeurs, contrôle humain",
+          "source": "GitHub, dépôts de documents"
+        },
+        {
+          "article": "Art. 15",
+          "obligation": "Exactitude, robustesse et cybersécurité",
+          "source": "GitHub : revues, vérifications, alertes de sécurité"
+        },
+        {
+          "article": "Art. 17",
+          "obligation": "Système de gestion de la qualité",
+          "source": "GitHub, dépôts de documents"
+        },
+        {
+          "article": "Art. 72 et 73",
+          "obligation": "Surveillance après commercialisation, signalement des incidents graves",
+          "source": "Jira"
+        },
+        {
+          "article": "Art. 4 et 50",
+          "obligation": "Maîtrise de l'IA, obligations de transparence",
+          "source": "Attestations, GitHub"
+        }
+      ]
+    },
+    "verify": {
+      "title": "Vérifiable sans nous faire confiance",
+      "lead": "Un pack d'audit n'a de valeur que si son destinataire peut le vérifier. Les packs ProofLayer se vérifient hors ligne, par n'importe qui.",
+      "points": [
+        {
+          "title": "Manifeste signé",
+          "body": "Chaque fichier du pack figure avec son empreinte SHA-256 dans un manifeste signé en Ed25519. Nos clés publiques sont publiées."
+        },
+        {
+          "title": "Preuves d'inclusion de Merkle",
+          "body": "Chaque preuve démontre sa place dans un lot scellé : un élément manquant ou modifié se voit."
+        },
+        {
+          "title": "Horodatage par un tiers",
+          "body": "Les lots sont ancrés par des jetons RFC 3161 émis par un prestataire d'horodatage indépendant : rien ne peut être antidaté."
+        },
+        {
+          "title": "Vérificateur open source",
+          "body": "Vérifiez un pack dans votre navigateur sur notre page publique, sans que le fichier quitte votre poste, ou en ligne de commande avec le vérificateur sous licence MIT."
+        }
+      ],
+      "cta": "Essayer le vérificateur public",
+      "command": "npx @prooflayer/verify pack.zip",
+      "commandLabel": "En ligne de commande"
+    },
+    "audience": {
+      "title": "Pour les éditeurs de logiciels qui ont de l'IA en production",
+      "lead": "Équipes SaaS B2B de 50 à 250 personnes, sur GitHub et Jira, qui vendent à de grands comptes désormais attentifs à l'AI Act.",
+      "items": [
+        {
+          "title": "HR-tech",
+          "body": "Suivi des candidatures, appariement, évaluation et gestion des effectifs : Annexe III point 4."
+        },
+        {
+          "title": "Fintech",
+          "body": "Évaluation de la solvabilité et score de crédit : Annexe III point 5(b)."
+        },
+        {
+          "title": "Edtech",
+          "body": "Admission, évaluation et surveillance d'examens : Annexe III point 3."
+        },
+        {
+          "title": "Assurtech",
+          "body": "Évaluation des risques et tarification en assurance vie et santé : Annexe III point 5(c)."
+        }
+      ]
+    },
+    "timeline": {
+      "title": "Les dates clés de l'AI Act",
+      "lead": "Les dates qui comptent pour un éditeur de logiciel, après le règlement (UE) 2026/1744.",
+      "items": [
+        {
+          "date": "2 février 2025",
+          "body": "Pratiques interdites (art. 5) et maîtrise de l'IA (art. 4) applicables."
+        },
+        {
+          "date": "2 août 2026",
+          "body": "Obligations de transparence (art. 50) applicables."
+        },
+        {
+          "date": "2 décembre 2027",
+          "body": "Obligations des systèmes à haut risque de l'Annexe III applicables."
+        },
+        {
+          "date": "2 août 2028",
+          "body": "Obligations des systèmes à haut risque relevant de l'Annexe I applicables."
+        }
+      ],
+      "note": "Un système à haut risque déjà mis sur le marché avant sa date d'application relève du règlement dès que sa conception change de façon importante (art. 111(2)). En déploiement continu, cela arrive vite : ProofLayer tient le journal des modifications de conception de chaque système."
+    },
+    "pricing": {
+      "title": "Tarifs",
+      "lead": "Facturé par système d'IA surveillé, jamais par utilisateur. Chaque formule commence par un essai gratuit de 14 jours, sans carte.",
+      "perYear": "par an, HT",
+      "monthly": "ou {price} par mois sans engagement",
+      "noMonthly": "Facturation annuelle uniquement",
+      "cta": "Essai gratuit",
+      "featured": "Le plus choisi",
+      "plans": [
+        {
+          "name": "Starter",
+          "price": "3 480 €",
+          "monthly": "349 €",
+          "summary": "Pour un premier système à haut risque.",
+          "features": [
+            "1 système d'IA surveillé",
+            "Connecteurs GitHub et Jira",
+            "Jusqu'à 10 dépôts",
+            "Utilisateurs, registre et packs d'audit illimités",
+            "Support par email sous 48 h ouvrées"
+          ]
+        },
+        {
+          "name": "Growth",
+          "price": "8 280 €",
+          "monthly": "829 €",
+          "summary": "Pour une gamme de produits avec plusieurs fonctions d'IA.",
+          "features": [
+            "5 systèmes d'IA surveillés",
+            "Dépôts illimités",
+            "Tous les connecteurs",
+            "Utilisateurs, registre et packs d'audit illimités",
+            "Support par email sous 24 h ouvrées, 1 h de mise en route"
+          ]
+        },
+        {
+          "name": "Scale",
+          "price": "17 880 €",
+          "summary": "Pour un portefeuille de systèmes d'IA.",
+          "features": [
+            "20 systèmes d'IA surveillés",
+            "Dépôts illimités",
+            "Tous les connecteurs",
+            "Canal dédié et revue trimestrielle",
+            "Système supplémentaire : 75 € par mois"
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "items": [
+        {
+          "q": "Qu'est-ce qu'un logiciel de conformité à l'AI Act ?",
+          "a": "Un logiciel qui aide une entreprise à déterminer quelles obligations du règlement (UE) 2024/1689 s'appliquent à ses systèmes d'IA et à conserver les preuves qu'elle les respecte. ProofLayer se concentre sur les preuves : il les capture dans les outils de votre équipe, les scelle et les assemble pour un audit ou un questionnaire client."
+        },
+        {
+          "q": "ProofLayer est-il un conseil juridique ?",
+          "a": "Non. La classification est une aide à la décision produite par des règles déterministes et signée par une personne de votre entreprise, qui en reste responsable. ProofLayer ne certifie rien et n'est pas un organisme notifié. Pour les systèmes à haut risque de l'Annexe III points 2 à 8, l'évaluation repose sur le contrôle interne (art. 43(2), Annexe VI) : ProofLayer vous aide à détenir les preuves que cette auto-évaluation exige."
+        },
+        {
+          "q": "Comment savoir si mon système d'IA est à haut risque ?",
+          "a": "Un système est à haut risque s'il est un composant de sécurité relevant de l'Annexe I, ou s'il entre dans un cas d'usage de l'Annexe III (recrutement, score de crédit, éducation par exemple), sauf exemption de l'article 6(3). Notre classifieur gratuit vous guide à travers ces questions et explique chaque étape."
+        },
+        {
+          "q": "Qu'est-ce que l'exemption de l'article 6(3) ?",
+          "a": "Un système de l'Annexe III n'est pas à haut risque s'il ne présente pas de risque important de préjudice, par exemple parce qu'il n'accomplit qu'une tâche procédurale étroite, et s'il ne fait pas de profilage. L'exemption se documente avant la mise sur le marché et s'enregistre dans la base de données de l'UE. ProofLayer prépare ce dossier et les champs de l'Annexe VIII."
+        },
+        {
+          "q": "Quand les obligations de haut risque s'appliquent-elles ?",
+          "a": "Le 2 décembre 2027 pour les systèmes de l'Annexe III et le 2 août 2028 pour ceux relevant de l'Annexe I, après le règlement (UE) 2026/1744. Un système déjà sur le marché avant cette date est concerné dès que sa conception change de façon importante (art. 111(2))."
+        },
+        {
+          "q": "Quel accès ProofLayer demande-t-il à notre code ?",
+          "a": "La GitHub App demande des permissions en lecture seule, jamais en écriture. ProofLayer conserve des preuves minimisées (identifiants, dates, statuts, revues), jamais votre code source, et ne lit que les fichiers que vous déclarez, comme docs/ai/** ou CODEOWNERS."
+        },
+        {
+          "q": "Où nos données sont-elles hébergées ?",
+          "a": "Dans l'Union européenne, à Francfort. Chaque organisation a sa propre clé de chiffrement ; la suppression d'une organisation détruit cette clé, ce qui rend illisible toute sauvegarde restante."
+        },
+        {
+          "q": "Pouvons-nous partir avec nos données ?",
+          "a": "Oui. Les owners exportent tout à tout moment dans des formats ouverts (JSON, PDF, ZIP), et les packs d'audit restent vérifiables avec l'outil open source, sans ProofLayer."
+        }
+      ]
+    },
+    "final": {
+      "title": "Sachez en cinq minutes où en est votre système d'IA",
+      "lead": "Lancez le classifieur gratuit. Vous obtenez le raisonnement derrière chaque réponse et, si vous le souhaitez, une note PDF à partager avec votre équipe.",
+      "primary": "Classer votre système d'IA gratuitement",
+      "secondary": "Essai de 14 jours"
+    },
+    "footer": {
+      "tagline": "Les preuves de l'AI Act, capturées là où le travail se fait.",
+      "disclaimer": "ProofLayer n'est affilié ni à l'Union européenne ni à aucune de ses institutions. Rien sur ce site ne constitue un conseil juridique."
+    },
+    "og": {
+      "brand": "ProofLayer",
+      "title": "Logiciel de conformité à l'AI Act",
+      "subtitle": "Preuves capturées depuis GitHub et Jira, horodatées, vérifiables hors ligne."
     }
   }
 }

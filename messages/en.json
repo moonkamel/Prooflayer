@@ -321,13 +321,6 @@
     "readOnlyLink": "View subscription",
     "watch": "Watch"
   },
-  "home": {
-    "title": "ProofLayer",
-    "tagline": "The evidence the AI Act requires, captured where the work happens, timestamped and verifiable without us.",
-    "signUp": "Create my workspace",
-    "signIn": "Sign in",
-    "classifier": "Classify a system without an account"
-  },
   "aiActRole": {
     "PROVIDER": "Provider",
     "DEPLOYER": "Deployer",
@@ -1963,6 +1956,316 @@
       "classification_invalidPassword": "Incorrect password.",
       "classification_tooManyAttempts": "Too many attempts: try again in fifteen minutes.",
       "generic": "The operation failed. Please try again."
+    }
+  },
+  "landing": {
+    "meta": {
+      "title": "EU AI Act Compliance Software for SaaS Teams",
+      "description": "Classify your AI systems under the EU AI Act, capture evidence from GitHub and Jira automatically, and export a timestamped audit pack anyone can verify offline.",
+      "ogAlt": "ProofLayer: EU AI Act evidence, captured from GitHub and Jira and verifiable offline"
+    },
+    "nav": {
+      "label": "Main",
+      "how": "How it works",
+      "coverage": "Coverage",
+      "verify": "Verification",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "start": "Start free trial"
+    },
+    "hero": {
+      "eyebrow": "EU AI Act compliance software for B2B SaaS",
+      "title": "Prove your AI Act readiness with evidence your team already produces",
+      "lead": "ProofLayer connects to GitHub and Jira, captures the evidence the EU AI Act asks for as your team works, seals it with a third-party timestamp and exports an audit pack your customers can verify without us.",
+      "primary": "Classify your AI system for free",
+      "primaryHint": "No account needed. 10 questions, 5 minutes.",
+      "secondary": "Start a 14-day trial",
+      "proof1": "Hosted in Frankfurt",
+      "proof2": "RFC 3161 timestamps",
+      "proof3": "Open-source verifier",
+      "proof4": "Read-only access to GitHub"
+    },
+    "card": {
+      "label": "Example: a control evaluated from GitHub evidence",
+      "system": "Candidate matching score · High-risk, Annex III point 4(a)",
+      "control": "AIA-15-02 · Every merged change is reviewed by someone other than its author",
+      "article": "Art. 15, Art. 17(1)(d)",
+      "evidence1": "214 merged pull requests over 90 days",
+      "evidence2": "100 % reviewed by a second engineer",
+      "evidence3": "Sealed in batch #41 · timestamped 07/03 09:12 UTC",
+      "next": "AIA-15-05 · Critical vulnerabilities fixed within 30 days",
+      "nextReason": "2 critical alerts open for more than 30 days"
+    },
+    "jobs": {
+      "title": "Built for the three questions buyers, investors and auditors will ask",
+      "items": [
+        {
+          "title": "Does the AI Act apply to us?",
+          "body": "Answer a guided questionnaire built on Article 6 and Annex III. Get a reasoned classification, risk tier and role (provider or deployer), signed by your CTO, in under an hour instead of a six-week legal review."
+        },
+        {
+          "title": "Can you prove what you say?",
+          "body": "Code review, required checks, security alerts, risk register and incident tickets become evidence automatically, timestamped by a third party. No screenshots, no folder filled the week before the audit."
+        },
+        {
+          "title": "Is it still true after the last release?",
+          "body": "Every release is checked again. You are alerted when a control fails, a piece of evidence goes stale or a design change could alter your classification."
+        }
+      ]
+    },
+    "how": {
+      "title": "How ProofLayer works",
+      "lead": "From sign-up to a first verifiable audit pack, in one afternoon.",
+      "steps": [
+        {
+          "title": "Register and classify",
+          "body": "List your AI systems, answer the classification questionnaire and sign the result. Exempt under Article 6(3)? ProofLayer prepares the exemption dossier and the Annex VIII registration fields."
+        },
+        {
+          "title": "Connect GitHub and Jira",
+          "body": "Install the read-only GitHub App on the repositories that matter and map your Jira projects for risks, incidents and post-market monitoring. A 90-day backfill runs immediately."
+        },
+        {
+          "title": "Evidence is captured and sealed",
+          "body": "Each piece of evidence is minimised, hashed, sealed into a Merkle batch every hour and anchored with an RFC 3161 timestamp. Controls are re-evaluated within seconds."
+        },
+        {
+          "title": "Export a verifiable audit pack",
+          "body": "One click produces a signed ZIP: PDF report, every control and its evidence, inclusion proofs and Annex IV and EU declaration templates, ready for a customer questionnaire or a due diligence."
+        }
+      ]
+    },
+    "coverage": {
+      "title": "EU AI Act coverage, article by article",
+      "lead": "37 controls mapped to the text of Regulation (EU) 2024/1689, 19 of them evaluated automatically from your tools.",
+      "caption": "Articles covered and where the evidence comes from",
+      "colArticle": "Article",
+      "colObligation": "Obligation",
+      "colSource": "Evidence source",
+      "rows": [
+        {
+          "article": "Art. 6 and Annex III",
+          "obligation": "Classification and Article 6(3) exemption dossier",
+          "source": "Guided questionnaire, signed"
+        },
+        {
+          "article": "Art. 9",
+          "obligation": "Risk management system",
+          "source": "Jira"
+        },
+        {
+          "article": "Art. 10",
+          "obligation": "Data and data governance",
+          "source": "GitHub, uploads"
+        },
+        {
+          "article": "Art. 11 and Annex IV",
+          "obligation": "Technical documentation",
+          "source": "Prefilled template, GitHub"
+        },
+        {
+          "article": "Art. 12",
+          "obligation": "Record-keeping and logging",
+          "source": "GitHub"
+        },
+        {
+          "article": "Art. 13 and 14",
+          "obligation": "Transparency to deployers, human oversight",
+          "source": "GitHub, uploads"
+        },
+        {
+          "article": "Art. 15",
+          "obligation": "Accuracy, robustness and cybersecurity",
+          "source": "GitHub: reviews, checks, security alerts"
+        },
+        {
+          "article": "Art. 17",
+          "obligation": "Quality management system",
+          "source": "GitHub, uploads"
+        },
+        {
+          "article": "Art. 72 and 73",
+          "obligation": "Post-market monitoring, serious incident reporting",
+          "source": "Jira"
+        },
+        {
+          "article": "Art. 4 and 50",
+          "obligation": "AI literacy, transparency obligations",
+          "source": "Attestations, GitHub"
+        }
+      ]
+    },
+    "verify": {
+      "title": "Verifiable without trusting us",
+      "lead": "An audit pack is only useful if the person receiving it can check it. ProofLayer packs are designed to be verified offline, by anyone.",
+      "points": [
+        {
+          "title": "Signed manifest",
+          "body": "Every file in the pack is listed with its SHA-256 hash in a manifest signed with Ed25519. Our public keys are published."
+        },
+        {
+          "title": "Merkle inclusion proofs",
+          "body": "Each piece of evidence proves its place in a sealed batch, so a missing or altered item is visible."
+        },
+        {
+          "title": "Third-party timestamps",
+          "body": "Batches are anchored with RFC 3161 timestamps issued by an independent timestamping authority: nothing can be backdated."
+        },
+        {
+          "title": "Open-source verifier",
+          "body": "Check a pack in your browser on our public page, where the file never leaves your computer, or from the command line with the MIT-licensed verifier."
+        }
+      ],
+      "cta": "Try the public verifier",
+      "command": "npx @prooflayer/verify pack.zip",
+      "commandLabel": "Command line"
+    },
+    "audience": {
+      "title": "Made for software companies with AI in production",
+      "lead": "B2B SaaS teams of 50 to 250 people, with GitHub and Jira, selling to large customers who now ask about the AI Act.",
+      "items": [
+        {
+          "title": "HR tech",
+          "body": "Applicant tracking, candidate matching, assessment and workforce tools: Annex III point 4."
+        },
+        {
+          "title": "Fintech",
+          "body": "Creditworthiness assessment and credit scoring: Annex III point 5(b)."
+        },
+        {
+          "title": "Edtech",
+          "body": "Admission, assessment and exam proctoring: Annex III point 3."
+        },
+        {
+          "title": "Insurtech",
+          "body": "Risk assessment and pricing for life and health insurance: Annex III point 5(c)."
+        }
+      ]
+    },
+    "timeline": {
+      "title": "EU AI Act key dates",
+      "lead": "The dates that matter for a software company, after Regulation (EU) 2026/1744.",
+      "items": [
+        {
+          "date": "2 February 2025",
+          "body": "Prohibited practices (Art. 5) and AI literacy (Art. 4) apply."
+        },
+        {
+          "date": "2 August 2026",
+          "body": "Transparency obligations (Art. 50) apply."
+        },
+        {
+          "date": "2 December 2027",
+          "body": "Obligations for high-risk systems listed in Annex III apply."
+        },
+        {
+          "date": "2 August 2028",
+          "body": "Obligations for high-risk systems covered by Annex I apply."
+        }
+      ],
+      "note": "A high-risk system already on the market before its application date falls under the regulation once its design changes significantly (Art. 111(2)). In continuous delivery, that happens quickly: ProofLayer keeps a log of design changes for each system."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "lead": "Priced per monitored AI system, never per user. Every plan starts with a 14-day free trial, no card required.",
+      "perYear": "per year, excl. VAT",
+      "monthly": "or {price} per month without commitment",
+      "noMonthly": "Annual billing only",
+      "cta": "Start free trial",
+      "featured": "Most popular",
+      "plans": [
+        {
+          "name": "Starter",
+          "price": "€3,480",
+          "monthly": "€349",
+          "summary": "For a first high-risk system.",
+          "features": [
+            "1 monitored AI system",
+            "GitHub and Jira connectors",
+            "Up to 10 repositories",
+            "Unlimited users, registry and audit packs",
+            "Email support within 48 business hours"
+          ]
+        },
+        {
+          "name": "Growth",
+          "price": "€8,280",
+          "monthly": "€829",
+          "summary": "For a product line with several AI features.",
+          "features": [
+            "5 monitored AI systems",
+            "Unlimited repositories",
+            "All connectors",
+            "Unlimited users, registry and audit packs",
+            "Email support within 24 business hours, 1-hour onboarding session"
+          ]
+        },
+        {
+          "name": "Scale",
+          "price": "€17,880",
+          "summary": "For a portfolio of AI systems.",
+          "features": [
+            "20 monitored AI systems",
+            "Unlimited repositories",
+            "All connectors",
+            "Dedicated channel and quarterly review",
+            "Additional system: €75 per month"
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "What is EU AI Act compliance software?",
+          "a": "Software that helps a company work out which obligations of Regulation (EU) 2024/1689 apply to its AI systems and keep the evidence that it meets them. ProofLayer focuses on the evidence: it captures it from the tools your team already uses, seals it and packages it for an audit or a customer questionnaire."
+        },
+        {
+          "q": "Is ProofLayer legal advice?",
+          "a": "No. The classification is a decision aid produced by deterministic rules and signed by someone in your company, who remains responsible for it. ProofLayer does not certify anything and is not a notified body. For high-risk systems in Annex III points 2 to 8, conformity assessment is based on internal control (Art. 43(2), Annex VI): ProofLayer helps you hold the evidence that this self-assessment requires."
+        },
+        {
+          "q": "How do I know if my AI system is high-risk?",
+          "a": "A system is high-risk if it is a safety component covered by Annex I, or if it falls into one of the use cases of Annex III (for example recruitment, credit scoring or education), unless the Article 6(3) exemption applies. Our free classifier walks you through these questions and explains each step."
+        },
+        {
+          "q": "What is the Article 6(3) exemption?",
+          "a": "A system listed in Annex III is not high-risk if it does not pose a significant risk of harm, for example because it only performs a narrow procedural task, and if it does not profile individuals. The exemption must be documented before the system is placed on the market and registered in the EU database. ProofLayer prepares that dossier and the Annex VIII registration fields."
+        },
+        {
+          "q": "When do the high-risk obligations apply?",
+          "a": "On 2 December 2027 for systems listed in Annex III and on 2 August 2028 for those covered by Annex I, following Regulation (EU) 2026/1744. A system already on the market before that date is covered once its design changes significantly (Art. 111(2))."
+        },
+        {
+          "q": "What access does ProofLayer need to our code?",
+          "a": "The GitHub App asks for read-only permissions and never for write access. ProofLayer stores minimised evidence (identifiers, dates, statuses, reviews), never your source code, and reads only the files you declare, such as docs/ai/** or CODEOWNERS."
+        },
+        {
+          "q": "Where is our data hosted?",
+          "a": "In the European Union, in Frankfurt. Each organisation has its own encryption key; deleting an organisation destroys that key, which makes any remaining backup unreadable."
+        },
+        {
+          "q": "Can we leave with our data?",
+          "a": "Yes. Owners can export everything at any time in open formats (JSON, PDF, ZIP), and audit packs remain verifiable with the open-source tool, without ProofLayer."
+        }
+      ]
+    },
+    "final": {
+      "title": "Find out where your AI system stands in five minutes",
+      "lead": "Run the free classifier. You get the reasoning behind each answer and, if you want, a PDF note to share with your team.",
+      "primary": "Classify your AI system for free",
+      "secondary": "Start a 14-day trial"
+    },
+    "footer": {
+      "tagline": "EU AI Act evidence, captured where the work happens.",
+      "disclaimer": "ProofLayer is not affiliated with the European Union or any of its institutions. Nothing on this site is legal advice."
+    },
+    "og": {
+      "brand": "ProofLayer",
+      "title": "EU AI Act compliance software",
+      "subtitle": "Evidence captured from GitHub and Jira, timestamped, verifiable offline."
     }
   }
 }

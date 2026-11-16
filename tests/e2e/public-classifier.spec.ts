@@ -18,7 +18,7 @@ async function answer(page: Page, label: string, next = true) {
 test("classer sans compte, partager le lien, recevoir la note", async ({ page, browser }) => {
   await withFreshClientIp(page);
   await page.goto("/");
-  await page.getByRole("link", { name: "Classifier un système sans compte" }).click();
+  await page.getByRole("link", { name: "Classify your AI system for free" }).first().click();
   await expect(page).toHaveURL(/\/classifier$/u);
   await expect(page).toHaveTitle("Classifier un système d'IA · ProofLayer");
 
